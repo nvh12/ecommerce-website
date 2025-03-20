@@ -1,5 +1,5 @@
 const getHomeMessage = (req, res) => {
-    res.send('Hello there');
+    res.send('Hello there!');
 };
 
 module.exports = {
