@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
 async function getUserById(id) {
-    return await User.getUserById({ user_id: id });
+    return await User.findOne({ user_id: id });
 }
 
 async function createUser(info) {
