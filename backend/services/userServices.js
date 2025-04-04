@@ -1,9 +1,5 @@
 const User = require('../models/user');
 
-async function getUserById(id) {
-    return await User.findOne({ user_id: id });
-}
-
 async function createUser(info) {
     let user = new User({ ...info });
     await user.save;
