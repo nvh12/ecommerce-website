@@ -5,6 +5,7 @@ const {
     deleteProduct,
     updateProduct
 } = require("../services/productServices")
+const mongoose = require('mongoose')
 
 // CRUD product
 const createProductControl = async (req, res) =>{
@@ -25,9 +26,14 @@ const createProductControl = async (req, res) =>{
 
 const findProductControl = async (req, res) => {
     try{
-        const data_1 = req.params;
-        const data_2 = req.query;
-        const product = await findProduct({...data_1, ...data_2});
+        const { id, ...rest } = { ...req.params, ...req.query }
+        const filters = { ...rest }
+        if (id) {
+            filters._id = new mongoose.Types.ObjectId(`${id}`);
+        } else {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        const product = await findProduct(filters)
         if(!product){
             res.status(404).json({message:"Can not find product"})
         }
