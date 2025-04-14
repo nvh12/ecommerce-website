@@ -29,9 +29,7 @@ const findProductControl = async (req, res) => {
         const { id, ...rest } = { ...req.params, ...req.query }
         const filters = { ...rest }
         if (id) {
-            filters._id = new mongoose.Types.ObjectId(`${id}`);
-        } else {
-            return res.status(400).json({ message: 'Invalid ID format' });
+            filters._id = new mongoose.Types.ObjectId(`${id}`)
         }
         const product = await findProduct(filters)
         if(!product){
