@@ -1,0 +1,15 @@
+{
+  "productName":"Điện thoại iPhone 16 Plus 128GB" ,
+    "category": [
+        "iphone", "apple"
+    ],
+    "brand":"Apple",
+    "images":[
+        
+    ],
+    
+    "description":"iPhone 16 Plus 128GB là lựa chọn lý tưởng dành cho người dùng yêu thích màn hình lớn và trải nghiệm mượt mà trong một mức giá hợp lý. Với thiết kế sang trọng, khung nhôm chắc chắn cùng mặt lưng kính bóng bẩy, sản phẩm mang đến cảm giác cao cấp ngay từ cái nhìn đầu tiên.",
+    "price":27750000,
+    "currency":"₫",
+    "color":["Hồng", "Xanh Mòng Két", "Đen", "Trắng", "Xanh Lưu Ly"]
+}
