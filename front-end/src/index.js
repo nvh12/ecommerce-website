@@ -1,26 +1,16 @@
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom'
 
-//redux
-import { Provider } from 'react-redux'
+// //redux
+// import { Provider } from 'react-redux'
 
-// Stripe
-import { Elements } from '@stripe/react-stripe-js'
+// // Stripe
+// import { Elements } from '@stripe/react-stripe-js'
 
 
 //App
-import App from './app'
+import App from './App'
 
 
 
-
-ReactDOM.render(
-    <Provider store={store}>
-      <Elements stripe={stripePromise}>
-        <Suspense fallback="...">
-          <App />
-        </Suspense>
-      </Elements>
-    </Provider>,
-    document.getElementById('root'),
-)
+ReactDOM.render(<App />, document.getElementById('root'))
