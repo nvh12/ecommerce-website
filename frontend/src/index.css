@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.hover-style:hover {
+  background-color: #FFE14C !important;
+}
+.dangGiao {
+  color: #1CAc53;
+}
+.daGiao {
+
+}

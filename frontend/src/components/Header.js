@@ -1,6 +1,11 @@
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+    const navigate = useNavigate()
+    const goToLogin = () => {
+        navigate('/login')
+    }
   return (
     <div>
         <div className='container-fluid row d-flex shadow p-3 rounded' style={{backgroundColor: '#FFD400'}}>
@@ -15,11 +20,13 @@ const Header = () => {
                     </div>
             </div>
             <div className='col-auto d-flex'>
-                <button className='bg-transparent btn rounded-pill hover-style'>
+                <button className='bg-transparent btn rounded-pill hover-style'
+                onClick={goToLogin}>
                     <i class="bi bi-person-circle me-1"></i>
                     <span className='d-none d-sm-inline'>Đăng nhập</span>
                 </button>
-                <button className='bg-transparent btn rounded-pill hover-style'>
+                <button className='bg-transparent btn rounded-pill hover-style'
+                >
                     <i class="bi bi-cart3 me-1"></i>
                     <span className='d-none d-sm-inline'>Giỏ hàng </span>
                 </button>

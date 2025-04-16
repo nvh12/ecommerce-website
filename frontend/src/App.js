@@ -4,6 +4,11 @@ import React from 'react';
 import './App.css';
 import {Route, Routes} from 'react-router-dom'
 import Home from './pages/Home.js'
+import Login from './pages/Login.js';
+import Register from './pages/Register.js';
+import UserProfile from './pages/UserProfile.js';
+import UserListPage from './pages/Admin/UserListPage.js';
+     
 
 function App() {
   return (
@@ -21,6 +26,10 @@ function App() {
       /> */}
       <Routes>
           <Route path='/' element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path='/user' element={<UserProfile />} />
+          <Route path='/admin/userlist' element={<UserListPage/>} />
       </Routes>
     </div>
   );
