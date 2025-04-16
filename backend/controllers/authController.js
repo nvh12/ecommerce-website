@@ -11,7 +11,7 @@ function generateAccessToken(id) {
 }
 
 function generateRefreshToken(id) {
-    return jwt.sign({ id }, REFRESH_SECRET, { expiresIn: '1h' })
+    return jwt.sign({ id }, REFRESH_SECRET, { expiresIn: '3h' })
 }
 
 async function register(req, res) {
