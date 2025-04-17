@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.use(verifyUser);
 
-router.get('/', user);
-router.get('/order', userOrders);
-router.get('/order/:id', singleOrder);
+router.get('/', user); // Lấy thông tin profile người dùng 
+router.get('/order', userOrders); // Lấy các đơn của người dùng 
+router.get('/order/:id', singleOrder); // Lấy thông tin 1 đơn cụ thể 
 
 module.exports = router;

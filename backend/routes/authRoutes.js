@@ -3,9 +3,9 @@ const { register, login, refresh, logout } = require('../controllers/authControl
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.post('/refresh', refresh);
-router.post('/logout', logout);
+router.post('/register', register); // Đăng ký
+router.post('/login', login); // Đăng nhập
+router.post('/refresh', refresh); // Làm mới token 
+router.post('/logout', logout); // Đăng xuất 
 
 module.exports = router;

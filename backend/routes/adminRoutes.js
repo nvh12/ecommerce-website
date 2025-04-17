@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(verifyUser);
 router.use(verifyRole('admin'));
 
-router.get('/order', getOrders);
-router.put('/order', updateOrder);
+router.get('/order', getOrders); // Lấy các đơn hànghàng
+router.put('/order', updateOrder); // CCập nhật đơn hànghàng
 
 module.exports = router;
