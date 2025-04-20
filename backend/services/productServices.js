@@ -7,7 +7,7 @@ const createProduct = async (info) =>{
 const findProduct = async (info)=>{
     const {_id, search,  category, features, brand, dir,order, priceMax, priceMin} = info
     filter = {}
-    if (_id) filter._id = _id
+    if (_id) filter._id = new mongoose.Types.ObjectId(`${_id}`)
     if (search) filter.productName = {$regex:search, $options: 'i'}
     if (category) filter.category = category
     if (features){
@@ -29,12 +29,12 @@ const findProduct = async (info)=>{
 
 const deleteProduct = async (info)=>{
     const {_id} = info
-    return await Product.findByIdAndDelete(_id)
+    return await Product.findByIdAndDelete(new mongoose.Types.ObjectId(`${_id}`))
 }
 
 const updateProduct = async (info, updateData)=>{
     const {_id} = info
-    return await Product.findByIdAndUpdate(_id,updateData, { new: true, runValidators: true } )
+    return await Product.findByIdAndUpdate(new mongoose.Types.ObjectId(`${_id}`),updateData, { new: true, runValidators: true } )
 }
 module.exports ={
     createProduct,

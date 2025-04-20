@@ -5,6 +5,7 @@ const {
     deleteProduct,
     updateProduct
 } = require("../services/productServices")
+const mongoose = require('mongoose')
 
 // CRUD product
 const createProductControl = async (req, res) =>{
@@ -25,9 +26,9 @@ const createProductControl = async (req, res) =>{
 
 const findProductControl = async (req, res) => {
     try{
-        
-        const data = req.query;
-        const product = await findProduct(data);
+        const data = req.query
+
+        const product = await findProduct(data)
         if(!product){
             res.status(404).json({message:"Can not find product"})
         }
@@ -39,11 +40,10 @@ const findProductControl = async (req, res) => {
         res.status(500).json({message:err.message, err});
     }
 }
-const findOneProductControl = async (res,req) => {
+const findOneProductControl = async (req, res) => {
     try{
-        
-        const data = req.params; // _id cua product
-        const product = await findProduct(data);
+        const data = req.params
+        const product = await findProduct(data)
         if(!product){
             res.status(404).json({message:"Can not find product"})
         }
