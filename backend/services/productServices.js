@@ -29,12 +29,12 @@ const findProduct = async (info)=>{
 
 const deleteProduct = async (info)=>{
     const {_id} = info
-    return await Product.findByIdAndDelete(new mongoose.Types.ObjectId(`${_id}`))
+    return await Product.findByIdAndDelete(mongoose.Types.ObjectId(`${_id}`))
 }
 
 const updateProduct = async (info, updateData)=>{
     const {_id} = info
-    return await Product.findByIdAndUpdate(new mongoose.Types.ObjectId(`${_id}`),updateData, { new: true, runValidators: true } )
+    return await Product.findByIdAndUpdate(mongoose.Types.ObjectId(`${_id}`),updateData, { new: true, runValidators: true } )
 }
 module.exports ={
     createProduct,
