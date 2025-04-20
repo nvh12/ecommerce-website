@@ -25,9 +25,25 @@ const createProductControl = async (req, res) =>{
 
 const findProductControl = async (req, res) => {
     try{
-        const data_1 = req.params;
-        const data_2 = req.query;
-        const product = await findProduct({...data_1, ...data_2});
+        
+        const data = req.query;
+        const product = await findProduct(data);
+        if(!product){
+            res.status(404).json({message:"Can not find product"})
+        }
+        else{
+            res.status(200).json({message:"Success", product})
+        }
+    }
+    catch(err){
+        res.status(500).json({message:err.message, err});
+    }
+}
+const findOneProductControl = async (res,req) => {
+    try{
+        
+        const data = req.params; // _id cua product
+        const product = await findProduct(data);
         if(!product){
             res.status(404).json({message:"Can not find product"})
         }
@@ -78,5 +94,6 @@ module.exports = {
     createProductControl,
     findProductControl,
     deleteProductControl,
-    updateProductControl
+    updateProductControl,
+    findOneProductControl
 }

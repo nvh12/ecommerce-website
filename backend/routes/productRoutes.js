@@ -3,13 +3,15 @@ const {
     createProductControl,
     findProductControl,
     deleteProductControl,
-    updateProductControl
+    updateProductControl,
+    findOneProductControl
 } = require("../controllers/productController");
 const router = express.Router();
 
 router.post('/', createProductControl);
-router.get('/:id?', findProductControl);  // tùy query hay id
-router.delete('/:id', deleteProductControl);
-router.put('/:id', updateProductControl);
+router.get('/', findProductControl);  
+router.get("/:_id", findOneProductControl)
+router.delete('/:_id', deleteProductControl);
+router.put('/:_id', updateProductControl);
 
 module.exports = router
