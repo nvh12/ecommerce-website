@@ -35,12 +35,12 @@ const productSchema = new mongoose.Schema({
     }],
     discount:{type:Number, default:0},
     color:[{type:String}],
-    reviews_count:{type:Number, default:0},
-    ratings_count:{
+    reviewsCount:{type:Number, default:0},
+    ratingsCount:{
         type:Number,
         default:0
     },
-    rating_avg:{
+    ratingsAvg:{
         type:Number,
         default: 0
     }
