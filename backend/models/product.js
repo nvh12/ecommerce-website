@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
     productName: { type: String, required: true, unique: true },
+    stocks:{type:Number, default:0},
     category: [{ 
         type: String, 
         required: true, 
@@ -15,9 +16,9 @@ const productSchema = new mongoose.Schema({
         default:'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg'
         }
     ],
-    // features:[{
-    //     type:String,
-    // }],
+    features:[{
+        type:String,
+    }],
     description:{
         type:String, required: true,
     },
