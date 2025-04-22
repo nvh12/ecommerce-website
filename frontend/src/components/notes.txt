@@ -1,0 +1,10 @@
+-------- Product grid ---------------------
+Có thể không cần product grid nữa vì đã làm riêng cho home 2 grid là sale carousel và recommnedation grid.
+Nhưng vẫn chưa xóa Product grid vì có thể còn cần đến
+
+----------- Product Card ---------------
+Chưa có fetch để lấy dữ liệu từ backend 
+Chưa có thao tác click để đến product detail
+
+------------ Advertise carousel ----------
+Chưa chuẩn format

@@ -10,4 +10,36 @@
 .product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sales-section {
+  background: #fff;
+}
+
+.sales-header {
+  border-bottom: 1px solid #eee;
+}
+
+.time-box {
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-weight: bold;
+}
+
+.sales-carousel .carousel-control-prev,
+.sales-carousel .carousel-control-next {
+  width: 5%;
+  background: rgba(0,0,0,0.2);
+  height: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.recommendation-section {
+  background: #fff;
+  margin-top: 2rem;
+}
+
+.section-header {
+  border-bottom: 1px solid #eee;
 } 
