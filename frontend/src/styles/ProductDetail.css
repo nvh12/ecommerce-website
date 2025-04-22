@@ -26,4 +26,39 @@
   background-color: #fff;
   padding: 15px 0;
   border-top: 1px solid #dee2e6;
+}
+
+.product-images .main-image-container {
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.thumbnail-container {
+    transition: all 0.2s ease;
+}
+
+.thumbnail-container:hover {
+    border-color: #0d6efd !important;
+}
+
+.color-option {
+    transition: all 0.2s ease;
+}
+
+.color-option:hover {
+    border-color: #0d6efd !important;
+}
+
+.price-section {
+    background-color: #f8f9fa;
+}
+
+.features-section, .description-section {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
 } 

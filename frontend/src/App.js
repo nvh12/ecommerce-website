@@ -15,6 +15,8 @@ import Header from './components/Header.js';
 import ProductCard from './components/ProductCard.js';
 import ProductDetail from './pages/ProductDetail.js';
 import Footer from './components/Footer.js';
+import PhonePage from './components/PhonePage.js';
+import LaptopPage from './components/LaptopPage.js';
 
 const product = {
   name: "Lenovo Ideapad Slim 3 15IAH8 i5 12450H",
@@ -31,16 +33,18 @@ function App() {
   return (
     <div>
       <ToastContainer />
-      <Header />
+      {/* <Header /> */}
       <Routes>
           <Route path='/' element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path='/user' element={<UserProfile />} />
+          <Route path='/phone' element={<PhonePage />} />
+          <Route path='/laptop' element={<LaptopPage />} />
           <Route path='/admin/userlist' element={<UserListPage/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
-      <Footer />
+      {/* <Footer /> */}
       {/* <Header />
       <NavbarComponent />
       <ProductCard product={product} /> */}
