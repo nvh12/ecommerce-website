@@ -1,5 +1,3 @@
-import EditProfileNavbar from './components/EditProfileNavbar.js';
-import CardComponent from './components/ProductCard.js';
 import React from 'react';
 import './App.css';
 import {Route, Routes} from 'react-router-dom'
@@ -15,6 +13,8 @@ import { AppContext } from './context/AppContext.js';
 import NavbarComponent from './components/Navbar.js';
 import Header from './components/Header.js';
 import ProductCard from './components/ProductCard.js';
+import ProductDetail from './pages/ProductDetail.js';
+import Footer from './components/Footer.js';
 
 const product = {
   name: "Lenovo Ideapad Slim 3 15IAH8 i5 12450H",
@@ -31,13 +31,16 @@ function App() {
   return (
     <div>
       <ToastContainer />
+      <Header />
       <Routes>
           <Route path='/' element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path='/user' element={<UserProfile />} />
           <Route path='/admin/userlist' element={<UserListPage/>} />
+          <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
+      <Footer />
       {/* <Header />
       <NavbarComponent />
       <ProductCard product={product} /> */}
