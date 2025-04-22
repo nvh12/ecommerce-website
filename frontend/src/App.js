@@ -31,7 +31,7 @@ function App() {
   return (
     <div>
       <ToastContainer />
-      <Header />
+      {/* <Header /> */}
       <Routes>
           <Route path='/' element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -40,7 +40,7 @@ function App() {
           <Route path='/admin/userlist' element={<UserListPage/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
-      <Footer />
+      {/* <Footer /> */}
       {/* <Header />
       <NavbarComponent />
       <ProductCard product={product} /> */}

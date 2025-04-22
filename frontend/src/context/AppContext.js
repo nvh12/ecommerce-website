@@ -27,20 +27,17 @@ const AppContextProvider = (props) => {
     const fetchProductData = async () => {
         try {
             const {data} = await axios.get(backendUrl + "/product")
-            if(data.success) {
-                setProductItems(data.product)
-            } else {
-                toast.error("Lỗi lấy sản phẩm")
-            }
             setProductItems(data.product)
+            console.log(data.product)
+            toast.success("Lấy sản phẩm thành công")
         } catch (error) {
             toast.error(error.message)
         }
     }
 
-    // useEffect(()=> {
-    //     fetchUserData()
-    // }, [])
+    useEffect(()=> {
+        fetchProductData()
+    }, [])
 
 
     const value = {

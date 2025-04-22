@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Carousel } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { AppContext } from '../context/AppContext';
 
 const AdvertisementCarousel = () => {
+  const {productItems} = useContext(AppContext)
   const advertisements = [
     {
       id: 1,
@@ -28,12 +30,12 @@ const AdvertisementCarousel = () => {
         nextIcon={<FaChevronRight className="carousel-control-icon" />}
         prevIcon={<FaChevronLeft className="carousel-control-icon" />}
       >
-        {advertisements.map((ad) => (
-          <Carousel.Item key={ad.id}>
+        {productItems.map((ad) => (
+          <Carousel.Item key={ad._id}>
             <a href={ad.link} className="d-block w-100">
               <img
                 className="d-block w-100"
-                src={ad.image}
+                src={ad.images[0]}
                 alt={ad.title}
                 style={{ 
                   height: '300px',

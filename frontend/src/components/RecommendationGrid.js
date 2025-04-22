@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
-import ProductCard from './ProductCard';
+import ProductCard from './ProductCard.js';
 import { Container, Row, Col } from 'react-bootstrap';
 
 const RecommendationGrid = () => {
   const { productItems } = useContext(AppContext);
-
+  console.log("Product items:", productItems);
   return (
     <div className="recommendation-section mb-4">
       <div className="section-header p-3">
@@ -17,18 +17,7 @@ const RecommendationGrid = () => {
           {productItems.map((product) => (
             <Col key={product._id}>
               <ProductCard 
-                product={{
-                  name: product.name,
-                  image: product.image,
-                  ram: product.specifications?.ram,
-                  ssd: product.specifications?.storage,
-                  price: product.price,
-                  originalPrice: product.originalPrice,
-                  installmentAmount: product.installmentAmount,
-                  rating: product.rating,
-                  soldCount: product.soldCount,
-                  specs: product.specs // Additional specs like "TFT LCD 8.7""
-                }}
+                product={product}
                 showProgress={false}
               />
             </Col>

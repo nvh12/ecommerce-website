@@ -7,7 +7,7 @@ const ProductCard = ({ product, showProgress }) => {
     name,
     image,
     ram,
-    ssd,
+    ssd, 
     price,
     originalPrice,
     installmentAmount,
@@ -17,10 +17,12 @@ const ProductCard = ({ product, showProgress }) => {
     remainingStock,
     totalStock
   } = product;
+  console.log("Product:", product);
   //random discount percentage
-  const discountPercentage = originalPrice ? 
-    Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  // const discountPercentage = originalPrice ? 
+  //   Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
+    const discountPercentage = 10;
   return (
     <Card className="product-card h-100 border-0">
       <div className="position-relative">
@@ -34,39 +36,39 @@ const ProductCard = ({ product, showProgress }) => {
         </div>
         <Card.Img 
           variant="top" 
-          src={image} 
+          src={product.images[0]} 
           className="p-3"
           style={{ objectFit: 'contain', height: '200px' }}
         />
       </div>
       <Card.Body className="d-flex flex-column p-2">
-        <Card.Title className="fs-6 mb-2">{name}</Card.Title>
-        {(ram || ssd) && (
+        <Card.Title className="fs-6 mb-2">{product.productName}</Card.Title>
+        {/* {(ram || ssd) && (
           <div className="specs text-muted small mb-2">
             {ram && <span className="me-3">RAM {ram}</span>}
             {ssd && <span>SSD {ssd}</span>}
           </div>
-        )}
-        {specs && (
+        )} */}
+        {/* {specs && (
           <div className="additional-specs text-muted small mb-2">
             {specs}
           </div>
-        )}
+        )} */}
         <div className="price-section mb-2">
           <div className="current-price text-danger fw-bold">
             {price.toLocaleString()}₫
           </div>
-          {originalPrice && (
+          {/* {originalPrice && (
             <div className="original-price text-muted text-decoration-line-through small">
               {originalPrice.toLocaleString()}₫
             </div>
-          )}
+          )} */}
         </div>
-        {installmentAmount && (
+        {/* {installmentAmount && (
           <div className="installment text-warning small mb-2">
             Quà {installmentAmount.toLocaleString()}₫
           </div>
-        )}
+        )} */}
         {showProgress && remainingStock && totalStock && (
           <div className="stock-progress mb-2">
             <ProgressBar 
