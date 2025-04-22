@@ -1,33 +1,55 @@
-import React, { useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import ProductCard from './ProductCard';
-import { Container, Row, Col } from 'react-bootstrap';
 
-const ProductGrid = () => {
-  const { productItems, fetchProductData } = useContext(AppContext);
+const ProductGrid = ({ category, brand, priceRange }) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProductData();
-  }, []);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        let url = `${process.env.REACT_APP_BACKEND_URL}/product/?`;
+        
+        if (category) url += `category=${category}&`;
+        if (brand) url += `brand=${brand}&`;
+        if (priceRange) {
+          if (priceRange.min) url += `priceMin=${priceRange.min}&`;
+          if (priceRange.max) url += `priceMax=${priceRange.max}&`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.message === "Success") {
+          setProducts(data.product);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, [category, brand, priceRange]);
+
+  if (loading) {
+    return (
+      <Container className="text-center py-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
 
   return (
-    <Container className="py-4">
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {productItems && productItems.map((product, idx) => (
-          <Col key={product._id || idx}>
-            <ProductCard 
-              product={{
-                name: product.name,
-                image: product.image,
-                ram: product.specifications?.ram || 'N/A',
-                ssd: product.specifications?.storage || 'N/A',
-                price: product.price,
-                originalPrice: product.originalPrice,
-                installmentAmount: product.installmentAmount,
-                rating: product.rating || 4.5,
-                soldCount: product.soldCount || 0
-              }} 
-            />
+    <Container fluid>
+      <Row xs={2} md={3} lg={6} className="g-3">
+        {products.map((product) => (
+          <Col key={product._id}>
+            <ProductCard product={product} />
           </Col>
         ))}
       </Row>

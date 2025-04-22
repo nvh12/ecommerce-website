@@ -1,44 +1,64 @@
-import React, { useContext, useState } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import React, { useState, useEffect, useContext } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import ProductImageGallery from '../components/ProductImageGallery';
 import ProductInfo from '../components/ProductInfo';
 import ProductSpecifications from '../components/ProductSpecifications';
 
 const ProductDetail = () => {
-  const product = {
-    name: "Xiaomi Redmi Note 14 8GB-128GB",
-    price: 5990000,
-    originalPrice: 6490000,
-    images: [
-      "/images/redmi-note-14-black.jpg",
-      "/images/redmi-note-14-blue.jpg",
-      "/images/redmi-note-14-white.jpg"
-    ],
-    colors: [
-      { name: "Đen", code: "#000000" },
-      { name: "Xanh dương", code: "#0077BE" },
-      { name: "Trắng", code: "#FFFFFF" }
-    ],
-    specifications: {
-      screen: "AMOLED 6.67 inch, Full HD+",
-      os: "Android 13",
-      camera: "Camera sau: 108MP + 8MP + 2MP\nCamera trước: 16MP",
-      chip: "MediaTek Dimensity 6080",
-      ram: "8 GB",
-      storage: "128 GB",
-      battery: "5000 mAh, Sạc nhanh 33W"
-    },
-    highlights: [
-      "Màn hình AMOLED 6.67 inch sắc nét",
-      "Chip MediaTek Dimensity 6080 mạnh mẽ",
-      "RAM 8 GB cho đa nhiệm mượt mà",
-      "Camera chính 108MP chụp ảnh sắc nét",
-      "Pin 5000 mAh, sạc nhanh 33W"
-    ]
-  };
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { fetchProductDetail } = useContext(AppContext);
+  
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedColor, setSelectedColor] = useState(null);
 
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  useEffect(() => {
+    const loadProduct = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/product/${id}`);
+        const data = await response.json();
+        
+        if (data.message === "Success") {
+          setProduct(data.product);
+          if (data.product.color && data.product.color.length > 0) {
+            setSelectedColor(data.product.color[0]);
+          }
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        navigate('/');
+      }
+      setLoading(false);
+    };
+
+    if (id) {
+      loadProduct();
+    }
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <Container className="py-5 text-center">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
+
+  if (!product) {
+    return (
+      <Container className="py-5 text-center">
+        <h2>Không tìm thấy sản phẩm</h2>
+      </Container>
+    );
+  }
 
   return (
     <Container className="py-4">
@@ -48,17 +68,39 @@ const ProductDetail = () => {
         </Col>
         <Col md={6}>
           <ProductInfo 
-            product={product}
+            product={{
+              name: product.productName,
+              price: product.price,
+              currency: product.currency,
+              discount: product.discount,
+              colors: product.color.map(color => ({ name: color, code: color })),
+              description: product.description,
+              features: product.features,
+              ratingsAvg: product.ratingsAvg,
+              ratingsCount: product.ratingsCount,
+              reviewsCount: product.reviewsCount
+            }}
             selectedColor={selectedColor}
             onColorChange={setSelectedColor}
           />
         </Col>
       </Row>
-      <Row className="mt-4">
-        <Col>
-          <ProductSpecifications specifications={product.specifications} />
-        </Col>
-      </Row>
+      {product.features && product.features.length > 0 && (
+        <Row className="mt-4">
+          <Col>
+            <div className="specifications-section bg-light p-4 rounded">
+              <h3 className="h5 mb-3">Đặc điểm nổi bật</h3>
+              <ul className="list-unstyled">
+                {product.features.map((feature, index) => (
+                  <li key={index} className="mb-2">
+                    • {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 };
