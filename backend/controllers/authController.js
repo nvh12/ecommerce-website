@@ -56,7 +56,7 @@ function refresh(req, res) {
     if (!refreshToken) return res.status(401).json({ message: 'No refresh token provided' });
     try {
         const user = jwt.verify(refreshToken, REFRESH_SECRET);
-        const accessToken = generateAccessToken(user.id);
+        const accessToken = generateAccessToken(user.id); 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: false, 

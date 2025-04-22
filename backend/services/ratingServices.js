@@ -4,6 +4,10 @@ const mongoose = require("mongoose")
 
 const createRating = async (userId, productID, rating) => {
     try{
+        await Rating.findOneAndDelete({
+            user: mongoose.Types.ObjectId(userId),
+            product: mongoose.Types.ObjectId(productID)
+        })
         const newRating = await Rating.create({
             user: mongoose.Types.ObjectId(userId),
             product: mongoose.Types.ObjectId(productID),

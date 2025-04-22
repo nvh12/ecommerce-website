@@ -24,15 +24,6 @@ const productSchema = new mongoose.Schema({
     },
     price:{type:Number, required:true},
     currency:{type:String, required:true},
-
-    ratings:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Rating"
-    }],
-    reviews:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref: "Comment"
-    }],
     discount:{type:Number, default:0},
     color:[{type:String}],
     reviewsCount:{type:Number, default:0},
