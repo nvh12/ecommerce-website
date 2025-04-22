@@ -1,6 +1,6 @@
 import React from 'react';
-import PlacedOrderCard from '../components/PlacedOrderCard';
-import AccountDetails from '../components/AccountDetails';
+import PlacedOrderCard from './PlacedOrderCard';
+import AccountDetails from './AccountDetails';
 
 const UserProfileComponent = ({ activeSection, userOrders, userCart }) => {
     switch (activeSection) {

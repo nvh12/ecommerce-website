@@ -3,7 +3,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
-import UserProfileComponent from '../actions/UserProfileComponent'
+import UserProfileComponent from '../components/UserProfileComponent'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 
