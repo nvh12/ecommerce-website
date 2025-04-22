@@ -2,7 +2,10 @@ const { default: mongoose } = require("mongoose");
 const Product = require("../models/product");
 const Rating = require("../models/rating");
 const Comment = require("../models/comment");
-
+const {
+    deleteRating
+} = require("../services/ratingServices")
+const {deleteComment} = require("../services/commentServices")
 const createProduct = async (info) => {
     try {
         return await Product.create({ ...info });
@@ -46,11 +49,15 @@ const deleteProduct = async (info) => {
         const { _id } = info;
         const objectId = mongoose.Types.ObjectId(`${_id}`);
 
-        await Product.findByIdAndDelete(objectId);
-        await Rating.deleteMany({ product: objectId });
-        await Comment.deleteMany({ product: objectId });
-
-        return { success: true };
+        const productFound = await Product.findByIdAndDelete(objectId)
+        if(productFound){
+            await deleteRating(objectId, "product")
+            await deleteComment(objectId, "product")
+        }
+        else{
+            throw new Error("Khong tim hoac khong xoa duoc san pham")
+        }
+        return productFound;
     } catch (err) {
         throw err;
     }
