@@ -26,6 +26,9 @@ async function deleteUser(id) {
             deleteRating(id, "user")
             deleteComment(id, "user")
         }
+        else{
+            throw new Error("Chua tim duoc user hoac khong the xoa user")
+        }
     } catch (error) {
         throw error;
     }
