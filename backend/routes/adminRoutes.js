@@ -8,6 +8,6 @@ router.use(verifyUser);
 router.use(verifyRole('admin'));
 
 router.get('/order', getOrders); // Lấy các đơn hànghàng
-router.put('/order', updateOrder); // CCập nhật đơn hànghàng
+router.put('/order', updateOrder); // Cập nhật đơn hàng
 
 module.exports = router;

@@ -7,6 +7,9 @@ require('dotenv').config();
 const homeRoutes = require('./routes/homeRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -23,5 +26,8 @@ connectDB();
 app.use('/', homeRoutes);
 app.use('/auth', authRoutes);
 app.use('/product', productRoutes);
+app.use('/user', userRoutes);
+app.use('/admin', adminRoutes);
+app.use('/cart', cartRoutes);
 
 module.exports = app;

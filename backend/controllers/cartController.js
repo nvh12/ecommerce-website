@@ -68,7 +68,7 @@ async function rollback(updatedProducts) {
 async function checkout(req, res) {
     try {
         const { userId, payment, delivery, address } = req.body;
-        const cart = await cartServices.getCart(userId).populate('items.product');
+        const cart = await cartServices.getCart(userId);
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Empty cart' });
         }

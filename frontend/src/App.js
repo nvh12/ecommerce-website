@@ -8,22 +8,16 @@ import Login from './pages/Login.js';
 import Register from './pages/Register.js';
 import UserProfile from './pages/UserProfile.js';
 import UserListPage from './pages/Admin/UserListPage.js';
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { useContext, useEffect } from 'react';
+import { AppContext } from './context/AppContext.js';
      
 
 function App() {
   return (
     <div>
-      {/* <CardComponent 
-        title="Card Title"
-        description="This is a card description."
-        image="https://urbox.vn/_next/image?url=https%3A%2F%2Fupload.urbox.vn%2Fstrapi%2Fsatrafoods_feature_image_98f77d5d6d_93fa2f031f.png&w=2048&q=75"
-        button="Click Me"
-      />
-      <EditProfileNavbar
-        key="edit-profile-navbar"
-        className="edit-profile-navbar"
-        style={{ marginBottom: '20px' }}
-      /> */}
+      <ToastContainer />
       <Routes>
           <Route path='/' element={<Home />} />
           <Route path="/login" element={<Login />} />
