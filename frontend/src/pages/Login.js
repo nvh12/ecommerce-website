@@ -20,7 +20,7 @@ const Login = () => {
         {withCredentials: true})
       console.log("Login successfully")
       toast.success("Đăng nhập thành công")
-      await fetchUserData()
+      fetchUserData()
       navigate('/user')
     } catch (error) {
       if (error.response && error.response.status === 400) {

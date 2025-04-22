@@ -3,23 +3,27 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
-import UserProfileComponent from '../actions/UserProfileComponent'
+import UserProfileComponent from '../components/UserProfileComponent'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const UserProfile = () => {
-  const { productItems, backendUrl, userData, setIsLoggedIn } = useContext(AppContext)
+  const {backendUrl, userData, setIsLoggedIn } = useContext(AppContext)
 
   const [activeSection, setActiveSection] = useState("account")
+  const [userOrders, setUserOrders] = useState([])
+  const [userCart, setUserCart] = useState([])
+
   const navigate = useNavigate()
   
   const handleMenuClick = (section) => {
     setActiveSection(section)
   }
 
-  const onLogOutHandler = async () => {
+  const onLogOutHandler = async (e) => {
+    e.preventDefault()
     try {
-      await axios.post(backendUrl + "/auth/logout", {withCredentials: true})
+      await axios.post(backendUrl + "/auth/logout", {}, {withCredentials: true})
       console.log("Logout successfully")
       toast.success("Đăng xuất thành công")
       navigate('/')
@@ -28,6 +32,32 @@ const UserProfile = () => {
       toast.error("Lỗi đăng xuất")
     }
   }
+
+  const fetchUserOrders = async () => {
+    try {
+      const res = await axios.get(backendUrl + "/user/order", {withCredentials: true})
+      console.log("Đã lấy đơn hàng người dùng !")
+      console.log(res.data.data)
+      setUserOrders(res.data.data)
+    } catch (error) {
+      toast.error("Lỗi lấy đơn hàng")
+    }
+  }
+
+  const fetchUserCart = async () => {
+    try {
+      const res = await axios.get(backendUrl + "/cart", {withCredentials: true})
+      console.log("Đã lấy giỏ hàng người dùng !")
+      console.log(res.data.data)
+      setUserCart(res.data.data)
+    } catch (error) {
+      toast.error("Lỗi lấy giỏ hàng")
+    }
+  }
+  useEffect(() => { 
+    fetchUserOrders()
+    fetchUserCart()
+    }, [userData])
   
   return (
     <div>
@@ -73,7 +103,7 @@ const UserProfile = () => {
                     </div>
                 </div>
                 <div className='col-9 d-flex flex-column  p-3 border rounded'>
-                      <UserProfileComponent activeSection={activeSection} productItems={productItems}/>
+                      <UserProfileComponent activeSection={activeSection} userOrders={userOrders} userCart={userCart}/>
                 </div>
             </div>
         </div>

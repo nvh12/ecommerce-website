@@ -23,6 +23,7 @@ const AppContextProvider = (props) => {
         }
     }
 
+    //lấy tất cả product 
     const fetchProductData = async () => {
         try {
             const {data} = await axios.get(backendUrl + "/product")
@@ -46,6 +47,7 @@ const AppContextProvider = (props) => {
         productItems, userData,
         backendUrl, fetchUserData,
         setIsLoggedIn, isLoggedIn,
+        fetchProductData,
     }
     return (
         <AppContext.Provider value={value}>
