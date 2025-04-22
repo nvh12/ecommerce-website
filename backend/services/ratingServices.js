@@ -32,7 +32,7 @@ const createRating = async (userId, productID, rating) => {
     }
 }
 
-const getRating = async (productId, userId= null) => {
+const getRatingProduct = async (productId, userId= null) => {
     try{
         const ratingFound = await Rating.find({
             product: mongoose.Types.ObjectId(productId)
@@ -89,7 +89,7 @@ const deleteRating = async (objectId, objectType = "rating") => {
                     
                     const productFound = await Product.findById(mongoose.Types.ObjectId(rating.product));
 
-                    
+                    // Xu ly hang hoa bi anh huonghuong
                     if (productFound) {
                         const newRatingsCount = productFound.ratingsCount - 1; 
                         const newRatingsAvg = newRatingsCount > 0 
@@ -134,10 +134,19 @@ const updateRating = async (ratingId, newRating) => {
         throw err
     }
 }
+const getRatingById = async (ratingId) =>{
+    try{
+        return await Rating.findById(ratingId)
+    }
+    catch(err){
+        throw err
+    }
+}
 
 module.exports = {
     createRating,
-    getRating,
+    getRatingProduct,
     deleteRating,
-    updateRating
+    updateRating,
+    getRatingById
 }
