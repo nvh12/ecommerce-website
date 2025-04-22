@@ -1,5 +1,5 @@
 import EditProfileNavbar from './components/EditProfileNavbar.js';
-import CardComponent from './components/CardComponent.js';
+import CardComponent from './components/ProductCard.js';
 import React from 'react';
 import './App.css';
 import {Route, Routes} from 'react-router-dom'
@@ -12,8 +12,21 @@ import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useContext, useEffect } from 'react';
 import { AppContext } from './context/AppContext.js';
-     
+import NavbarComponent from './components/Navbar.js';
+import Header from './components/Header.js';
+import ProductCard from './components/ProductCard.js';
 
+const product = {
+  name: "Lenovo Ideapad Slim 3 15IAH8 i5 12450H",
+  image: "/path/to/laptop-image.jpg",
+  ram: "16 GB",
+  ssd: "512 GB",
+  price: 14690000,
+  originalPrice: 15990000,
+  installmentAmount: 2190000,
+  rating: 4.9,
+  soldCount: 8000
+};
 function App() {
   return (
     <div>
@@ -25,6 +38,9 @@ function App() {
           <Route path='/user' element={<UserProfile />} />
           <Route path='/admin/userlist' element={<UserListPage/>} />
       </Routes>
+      {/* <Header />
+      <NavbarComponent />
+      <ProductCard product={product} /> */}
     </div>
   );
 }

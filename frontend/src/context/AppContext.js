@@ -47,6 +47,7 @@ const AppContextProvider = (props) => {
         productItems, userData,
         backendUrl, fetchUserData,
         setIsLoggedIn, isLoggedIn,
+        fetchProductData,
     }
     return (
         <AppContext.Provider value={value}>
