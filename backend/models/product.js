@@ -28,8 +28,13 @@ const productSchema = new mongoose.Schema({
     color:[{type:String}],
     reviewsCount:{type:Number, default:0},
     ratingsCount:{
-        type:Number,
-        default:0
+        1: { type: Number, default: 0 },
+        2: { type: Number, default: 0 },
+        3: { type: Number, default: 0 },
+        4: { type: Number, default: 0 },
+        5: { type: Number, default: 0 },
+        total: {type:Number, default:0}
+
     },
     ratingsAvg:{
         type:Number,

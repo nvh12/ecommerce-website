@@ -6,9 +6,16 @@ const ACCESS_SECRET = process.env.JWT_SECRET;
 
 const createRatingControl = async (req, res) =>{
     try{
-        //Yeu cau phai co userId, productId, rate
-        const {userId, productId, rate} = req.body
-
+       
+        const { productId, rate} = req.body
+        if(req.cookies.accessToken){
+            const accessToken = req.cookies.accessToken
+            const decode = jwt.verify(accessToken, ACCESS_SECRET)
+            userId = decode.id;
+        }
+        else{
+            userId = 1
+        }
         if (!userId || !productId || !rate) {
             return res.status(400).json({ message: "Thiếu thông tin userId, productId hoặc rate" });
         }
@@ -28,10 +35,16 @@ const createRatingControl = async (req, res) =>{
 const findRatingControl = async (req, res) => {
     try{
         const {productId} = req.params
-        const accessToken = req.cookies.accessToken
-        const decode = jwt.verify(accessToken, ACCESS_SECRET)
-        const userId = decode.id;
-        const ratings = await ratingServices.getRatingProduct(productId, userId);
+        let userId
+        if(req.cookies.accessToken){
+            const accessToken = req.cookies.accessToken
+            const decode = jwt.verify(accessToken, ACCESS_SECRET)
+            userId = decode.id;
+        }
+        else{
+            userId = 1
+        }
+        const ratings = await ratingServices.getRatingProduct(productId, userId, false);
         if (!ratings || ratings.length === 0) {
             res.status(404).json({ message: "Không tìm thấy đánh giá nào cho sản phẩm này" });
         } else {
