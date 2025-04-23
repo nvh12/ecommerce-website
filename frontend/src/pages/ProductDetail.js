@@ -37,7 +37,7 @@ const ProductDetail = () => {
 
         try {
             await axios.post(`${backendUrl}/cart/add`, {
-                productId: product._id,
+                id: product._id,
                 price: product.price
             }, { withCredentials: true });
             

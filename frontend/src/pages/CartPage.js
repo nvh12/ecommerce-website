@@ -21,9 +21,10 @@ const CartPage = () => {
     const fetchCart = async () => {
         try {
             const { data } = await axios.get(`${backendUrl}/cart`, { withCredentials: true });
-            if (data.success) {
-                setCartItems(data.items || []);
-            }
+            console.log(data.data.items);
+            setCartItems(data.data.items || []);
+            toast.success("Giỏ hàng đã được tải thành công");
+            console.log(cartItems);
             setLoading(false);
         } catch (error) {
             toast.error("Lỗi lấy thông tin giỏ hàng");
