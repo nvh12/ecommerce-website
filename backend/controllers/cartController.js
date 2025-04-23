@@ -60,7 +60,7 @@ async function rollback(updatedProducts) {
     for (const product of updatedProducts) {
         await Product.findByIdAndUpdate(
             product.productId,
-            { $set: { stock: product.originalStock } }
+            { $set: { stocks: product.originalStock } }
         );
     }
 }
@@ -89,15 +89,15 @@ async function checkout(req, res) {
         const updatedProducts = [];
         for (const item of cart.items) {
             const product = await Product.findById(item.product._id);
-            const originalStock = product.stock;
+            const originalStock = product.stocks;
             const update = await Product.findOneAndUpdate(
-                { _id: item.product._id, stock: { $gte: item.quantity } },
-                { $inc: { stock: -item.quantity } },
+                { _id: item.product._id, stocks: { $gte: item.quantity } },
+                { $inc: { stocks: -item.quantity } },
                 { runValidators: true }
             );
             if (!update) {
                 await rollback(updatedProducts);
-                return res.status(400).json({ message: `${item.product.name} went out of stock during checkout.` });
+                return res.status(400).json({ message: `${item.product.productName} went out of stock during checkout.` });
             }
             updatedProducts.push({ productId: item.product._id, originalStock });
         }

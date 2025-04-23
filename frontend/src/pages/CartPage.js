@@ -13,7 +13,8 @@ const CartPage = () => {
     const [checkoutInfo, setCheckoutInfo] = useState({
         payment: 'cash',
         delivery: 'store',
-        address: ''
+        address: '',
+        userId: ''
     });
     const navigate = useNavigate();
 
@@ -21,10 +22,10 @@ const CartPage = () => {
     const fetchCart = async () => {
         try {
             const { data } = await axios.get(`${backendUrl}/cart`, { withCredentials: true });
-            console.log(data.data.items);
+            // console.log(data.data.items);
             setCartItems(data.data.items || []);
             toast.success("Giỏ hàng đã được tải thành công");
-            console.log(cartItems);
+            console.log("cart", cartItems);
             setLoading(false);
         } catch (error) {
             toast.error("Lỗi lấy thông tin giỏ hàng");
@@ -56,7 +57,7 @@ const CartPage = () => {
             }
 
             await axios.post(`${backendUrl}${endpoint}`, {
-                productId,
+                id: productId,
                 price: cartItems.find(item => item.product._id === productId)?.price
             }, { withCredentials: true });
 
@@ -74,17 +75,32 @@ const CartPage = () => {
                 toast.error("Vui lòng nhập địa chỉ giao hàng");
                 return;
             }
-
-            await axios.post(`${backendUrl}/cart/checkout`, checkoutInfo, 
-                { withCredentials: true }
-            );
-            
-            toast.success("Đặt hàng thành công");
-            navigate('/user'); // Navigate to user profile/orders
+    
+            const res = await axios.get(`${backendUrl}/user/`, { withCredentials: true });
+            const userId = res.data.data._id;
+    
+            const finalCheckoutInfo = {
+                ...checkoutInfo,
+                userId
+            };
+    
+            console.log("checkoutInfo gửi đi:", finalCheckoutInfo);
+    
+            const checkoutRes = await axios.post(`${backendUrl}/cart/checkout`, {
+                ...finalCheckoutInfo,
+            }, {
+                withCredentials: true
+            });
+    
+            toast.success(checkoutRes.data.message || "Đặt hàng thành công!");
+            navigate('/user');
         } catch (error) {
-            toast.error("Lỗi đặt hàng");
+            const message = error.response?.data?.message || error.response?.data?.error || "Lỗi đặt hàng";
+            toast.error(message);
+            console.error("Chi tiết lỗi:", message);
         }
     };
+    
 
     if (loading) {
         return (
