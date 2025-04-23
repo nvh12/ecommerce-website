@@ -11,24 +11,53 @@ const Rating = ({ productId, onRatingUpdate }) => {
     const [userRating, setUserRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Validate productId
+    const isValidProductId = (id) => {
+        return id && typeof id === 'string' && id.length === 24;
+    };
 
     // Fetch ratings
     useEffect(() => {
-        fetchRatings();
+        if (isValidProductId(productId)) {
+            fetchRatings();
+        } else {
+            setError('ID sản phẩm không hợp lệ');
+            setLoading(false);
+        }
     }, [productId]);
 
     const fetchRatings = async () => {
+        if (!isValidProductId(productId)) {
+            setError('ID sản phẩm không hợp lệ');
+            return;
+        }
+
         try {
+            setLoading(true);
+            setError(null);
             const { data } = await axios.get(`${backendUrl}/rating/${productId}`);
-            setRatings(data.ratings || []);
-            // Find user's rating if it exists
-            const userRating = data.ratings?.find(r => r.fromUser);
-            if (userRating) {
-                setUserRating(userRating.rate);
+            
+            if (data.ratings) {
+                setRatings(data.ratings);
+                // Find user's rating if it exists
+                const userRating = data.ratings.find(r => r.fromUser);
+                if (userRating) {
+                    setUserRating(userRating.rate);
+                } else {
+                    setUserRating(0);
+                }
+            } else {
+                setRatings([]);
+                setUserRating(0);
             }
         } catch (error) {
             console.error('Error fetching ratings:', error);
-            toast.error('Không thể tải đánh giá');
+            const errorMessage = error.response?.data?.message || 'Không thể tải đánh giá';
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -40,6 +69,15 @@ const Rating = ({ productId, onRatingUpdate }) => {
             return;
         }
 
+        if (!isValidProductId(productId)) {
+            toast.error('ID sản phẩm không hợp lệ');
+            return;
+        }
+
+        if (submitting) return;
+        setSubmitting(true);
+        setError(null);
+
         try {
             const existingRating = ratings.find(r => r.fromUser);
             if (existingRating) {
@@ -49,6 +87,7 @@ const Rating = ({ productId, onRatingUpdate }) => {
                     { rate: rating },
                     { withCredentials: true }
                 );
+                toast.success('Đã cập nhật đánh giá');
             } else {
                 // Create new rating
                 await axios.post(
@@ -59,18 +98,33 @@ const Rating = ({ productId, onRatingUpdate }) => {
                     },
                     { withCredentials: true }
                 );
+                toast.success('Đã gửi đánh giá');
             }
             
-            toast.success('Đánh giá thành công');
             await fetchRatings();
-            if (onRatingUpdate) onRatingUpdate();
+            if (onRatingUpdate) {
+                await onRatingUpdate();
+            }
         } catch (error) {
             console.error('Error submitting rating:', error);
-            toast.error('Không thể gửi đánh giá');
+            const errorMessage = error.response?.data?.message || 'Không thể gửi đánh giá';
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setSubmitting(false);
         }
     };
 
     const handleRatingDelete = async (ratingId) => {
+        if (!ratingId || !isValidProductId(productId)) {
+            toast.error('Không tìm thấy đánh giá');
+            return;
+        }
+
+        if (submitting) return;
+        setSubmitting(true);
+        setError(null);
+
         try {
             await axios.delete(
                 `${backendUrl}/rating/delete/${ratingId}`,
@@ -78,25 +132,35 @@ const Rating = ({ productId, onRatingUpdate }) => {
             );
             toast.success('Đã xóa đánh giá');
             await fetchRatings();
-            if (onRatingUpdate) onRatingUpdate();
+            if (onRatingUpdate) {
+                await onRatingUpdate();
+            }
         } catch (error) {
             console.error('Error deleting rating:', error);
-            toast.error('Không thể xóa đánh giá');
+            const errorMessage = error.response?.data?.message || 'Không thể xóa đánh giá';
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setSubmitting(false);
         }
     };
 
-    const StarRating = ({ value, onHover, onClick, size = 24 }) => {
+    const StarRating = ({ value, onHover, onClick, size = 24, interactive = true }) => {
         return (
             <div className="d-flex">
                 {[1, 2, 3, 4, 5].map((star) => (
                     <FaStar
                         key={star}
                         size={size}
-                        style={{ cursor: 'pointer', marginRight: '4px' }}
+                        style={{ 
+                            cursor: interactive ? 'pointer' : 'default',
+                            marginRight: '4px',
+                            transition: 'color 0.2s ease'
+                        }}
                         color={star <= (hoveredRating || value) ? "#ffc107" : "#e4e5e9"}
-                        onMouseEnter={() => onHover(star)}
-                        onMouseLeave={() => onHover(0)}
-                        onClick={() => onClick(star)}
+                        onMouseEnter={() => interactive && onHover(star)}
+                        onMouseLeave={() => interactive && onHover(0)}
+                        onClick={() => interactive && onClick(star)}
                     />
                 ))}
             </div>
@@ -104,7 +168,25 @@ const Rating = ({ productId, onRatingUpdate }) => {
     };
 
     if (loading) {
-        return <div>Đang tải đánh giá...</div>;
+        return (
+            <div className="ratings-section my-4">
+                <div className="text-center py-4">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="ratings-section my-4">
+                <div className="alert alert-danger">
+                    {error}
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -120,7 +202,15 @@ const Rating = ({ productId, onRatingUpdate }) => {
                             value={userRating}
                             onHover={setHoveredRating}
                             onClick={handleRatingSubmit}
+                            interactive={!submitting}
                         />
+                        {submitting && (
+                            <div className="ms-2">
+                                <div className="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </Card>
             )}
@@ -139,6 +229,7 @@ const Rating = ({ productId, onRatingUpdate }) => {
                                                 onHover={() => {}}
                                                 onClick={() => {}}
                                                 size={16}
+                                                interactive={false}
                                             />
                                             <span className="ms-2 text-muted">
                                                 {new Date(rating.createdAt).toLocaleDateString()}
@@ -156,6 +247,7 @@ const Rating = ({ productId, onRatingUpdate }) => {
                                                 variant="outline-danger"
                                                 size="sm"
                                                 onClick={() => handleRatingDelete(rating._id)}
+                                                disabled={submitting}
                                             >
                                                 Xóa
                                             </Button>

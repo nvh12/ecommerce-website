@@ -11,3 +11,8 @@ Chưa có phần comment (xem xét bỏ qua)
 ---- Cart Page ------
 Chưa đồng bộ với phần userProfile
 Chưa đồng bộ phần fetch ở các file khác
+
+
+------- Sign up -------------
+Khi load sign up theo kịch bản: home - product detail - login - sign up.
+Thì tự động lấy thông tin hàng như ở home
