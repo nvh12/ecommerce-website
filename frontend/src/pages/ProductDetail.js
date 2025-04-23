@@ -214,6 +214,13 @@ const ProductDetail = () => {
                             >
                                 Tiếp tục mua sắm
                             </Button>
+                            <Button 
+                                variant="outline-primary" 
+                                size="lg"
+                                onClick={() => navigate('/cart')}
+                            >
+                                Giỏ hàng
+                            </Button>
                         </div>
                     </div>
                 </Col>
