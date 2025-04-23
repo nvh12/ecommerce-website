@@ -4,9 +4,8 @@ Chưa xử lý các tab '/phone','/laptop',.....
 
 ------- Product detail ----------
 - Là trang chi tiết sản phẩm, khi bấm vào product card tương ứng ở đâu đó
-Chưa xử lí phần click product card để ra trang product detail tương ứng
-Chưa fetch
-Chưa có phần comment (xem xét bỏ qua)
+Chưa xử lý xong rating, rating chưa tự động cập nhật và show lên cho user
+Chưa có phần comment 
 
 ---- Cart Page ------
 Chưa đồng bộ với phần userProfile

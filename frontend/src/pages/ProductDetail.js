@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Button, Badge, Card } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
@@ -12,7 +12,7 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { backendUrl, isLoggedIn } = useContext(AppContext);
+    const { backendUrl, isLoggedIn, user } = useContext(AppContext);
     
     // Get product data from location state
     const [product, setProduct] = useState(location.state?.product);
@@ -24,29 +24,21 @@ const ProductDetail = () => {
     const [hoverRating, setHoverRating] = useState(0);
     const [ratings, setRatings] = useState([]);
     const [isLoadingRatings, setIsLoadingRatings] = useState(false);
-
-    // If no product data in state, fetch it
-    useEffect(() => {
-        if (!product) {
-            fetchProduct();
+    const [lastRatingUpdate, setLastRatingUpdate] = useState(0);
+    const [ratingStats, setRatingStats] = useState({
+        average: 0,
+        count: 0,
+        distribution: {
+            5: 0,
+            4: 0,
+            3: 0,
+            2: 0,
+            1: 0
         }
-        fetchRatings();
-    }, [id]);
+    });
+    const RATING_UPDATE_INTERVAL = 30000; // 30 seconds
 
-    const fetchRatings = async () => {
-        setIsLoadingRatings(true);
-        try {
-            const { data } = await axios.get(`${backendUrl}/rating/${id}`);
-            setRatings(data.ratings);
-        } catch (error) {
-            console.error('Error fetching ratings:', error);
-            toast.error('Không thể tải đánh giá');
-        } finally {
-            setIsLoadingRatings(false);
-        }
-    };
-
-    const fetchProduct = async () => {
+    const fetchProduct = useCallback(async () => {
         try {
             const { data } = await axios.get(`${backendUrl}/product/${id}`);
             setProduct(data.product);
@@ -57,25 +49,94 @@ const ProductDetail = () => {
             toast.error('Không thể tải thông tin sản phẩm');
             navigate('/');
         }
-    };
+    }, [id, backendUrl, navigate]);
+
+    const fetchRatings = useCallback(async () => {
+        try {
+            const { data } = await axios.get(`${backendUrl}/rating/${id}`);
+            setRatings(data.ratings);
+            
+            // Calculate and update average rating
+            if (data.ratings && data.ratings.length > 0) {
+                const avgRating = data.ratings.reduce((acc, curr) => acc + curr.rate, 0) / data.ratings.length;
+                setRating(avgRating);
+            }
+        } catch (error) {
+            console.error('Error fetching ratings:', error);
+            toast.error('Failed to fetch ratings');
+        }
+    }, [id, backendUrl]);
+
+    // Update rating stats whenever ratings change
+    useEffect(() => {
+        setRatingStats(calculateRatingStats(ratings));
+    }, [ratings]);
+
+    // Fetch product and ratings on component mount
+    useEffect(() => {
+        if (!product) {
+            fetchProduct();
+        }
+        fetchRatings();
+    }, [id, product, fetchProduct, fetchRatings]);
+
+    // Fetch ratings periodically
+    useEffect(() => {
+        const fetchRatingsPeriodically = () => {
+            const now = Date.now();
+            if (now - lastRatingUpdate >= RATING_UPDATE_INTERVAL) {
+                fetchRatings();
+                setLastRatingUpdate(now);
+            }
+        };
+
+        // Initial fetch
+        fetchRatings();
+
+        // Set up interval for periodic updates
+        const intervalId = setInterval(fetchRatingsPeriodically, RATING_UPDATE_INTERVAL);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(intervalId);
+    }, [id, lastRatingUpdate, fetchRatings]);
 
     // Rating handlers
     const handleRatingSubmit = async (newRating) => {
         if (!isLoggedIn) {
-            toast.error('Vui lòng đăng nhập để đánh giá');
+            toast.error('Please login to rate this product');
             return;
         }
         try {
-            await axios.post(`${backendUrl}/rating/create`, {
-                productId: id,
-                rate: newRating
-            }, { withCredentials: true });
+            // Check if user has already rated this product
+            const existingRating = ratings.find(r => r.userId === user._id);
+            
+            if (existingRating) {
+                // Update existing rating
+                await axios.put(`${backendUrl}/rating/update/${existingRating._id}`, {
+                    rate: newRating
+                }, { withCredentials: true });
+            } else {
+                // Create new rating
+                await axios.post(`${backendUrl}/rating/create`, {
+                    productId: id,
+                    rate: newRating
+                }, { withCredentials: true });
+            }
+            
+            // Immediately update local state
             setRating(newRating);
-            fetchRatings(); // Refresh ratings
-            toast.success('Đã gửi đánh giá');
+            
+            // Fetch fresh product data to update ratingsAvg and ratingsCount
+            const { data: productData } = await axios.get(`${backendUrl}/product/${id}`);
+            setProduct(productData.product);
+            
+            // Fetch fresh ratings from server
+            await fetchRatings();
+            
+            toast.success('Rating submitted successfully');
         } catch (error) {
             console.error('Error submitting rating:', error);
-            toast.error('Không thể gửi đánh giá');
+            toast.error('Failed to submit rating');
         }
     };
 
@@ -140,33 +201,35 @@ const ProductDetail = () => {
         }
     };
 
-    // Calculate rating statistics
-    const getRatingStats = () => {
-        const total = Array.isArray(ratings) ? ratings.length : 0;
-        const stats = {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
-            1: 0
-        };
-        
-        if (Array.isArray(ratings)) {
-            ratings.forEach(rating => {
-                stats[rating.rate]++;
-            });
+    const calculateRatingStats = (ratings) => {
+        if (!ratings || ratings.length === 0) {
+            return {
+                average: 0,
+                count: 0,
+                distribution: {
+                    5: 0,
+                    4: 0,
+                    3: 0,
+                    2: 0,
+                    1: 0
+                }
+            };
         }
 
-        return Object.keys(stats).map(rate => ({
-            rate: parseInt(rate),
-            count: stats[rate],
-            percentage: total ? (stats[rate] / total * 100).toFixed(1) : 0
-        })).reverse();
-    };
+        const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        let total = 0;
 
-    const averageRating = Array.isArray(ratings) && ratings.length > 0 
-        ? (ratings.reduce((acc, curr) => acc + curr.rate, 0) / ratings.length).toFixed(1)
-        : '0';
+        ratings.forEach(rating => {
+            distribution[rating.rate]++;
+            total += rating.rate;
+        });
+
+        return {
+            average: (total / ratings.length).toFixed(1),
+            count: ratings.length,
+            distribution
+        };
+    };
 
     return (
         <div>
@@ -239,12 +302,10 @@ const ProductDetail = () => {
                         <div className="d-flex align-items-center mb-3">
                                 <span className="text-warning me-2">
                                     <FaStar className="me-1" />
-                                    {ratings.length > 0 
-                                        ? (ratings.reduce((acc, curr) => acc + curr.rate, 0) / ratings.length).toFixed(1)
-                                        : '0.0'}
+                                    {product.ratingsAvg.toFixed(1)}
                                 </span>
                                 <span className="text-muted">
-                                    {ratings.length} đánh giá
+                                    {product.ratingsCount.total} đánh giá
                                 </span>
                         </div>
 
@@ -337,67 +398,58 @@ const ProductDetail = () => {
 
                 {/* Rating Section */}
                 <Row className="mt-4">
-                    <Col>
-                        <div className="ratings-section">
-                            <h4 className="mb-4">Đánh giá {product.productName}</h4>
-                            
-            <Row>
-                                <Col md={4} className="text-center">
-                                    <div className="d-flex flex-column align-items-center">
-                                        <div className="h1 mb-0" style={{ color: '#F8C146' }}>
-                                            {averageRating}
-                                            <span className="h3">/5</span>
-                                        </div>
-                                        <div className="mb-2">
-                                            <StarRating
-                                                value={parseFloat(averageRating)}
-                                                onHover={() => {}}
-                                                onClick={() => {}}
-                                                size={20}
-                                                interactive={false}
-                                            />
-                                        </div>
+                    <Col md={12}>
+                        <Card className="mb-4">
+                            <Card.Body>
+                                <h3>Product Ratings</h3>
+                                <div className="d-flex align-items-center mb-3">
+                                    <div className="me-3">
+                                        <h2 className="mb-0">{product.ratingsAvg.toFixed(1)}</h2>
                                         <div className="text-muted">
-                                            {ratings.length} đánh giá
+                                            {product.ratingsCount.total} {product.ratingsCount.total === 1 ? 'rating' : 'ratings'}
                                         </div>
                                     </div>
-                                </Col>
-                                <Col md={8}>
-                                    <div className="rating-bars">
-                                        {getRatingStats().map(stat => (
-                                            <div key={stat.rate} className="d-flex align-items-center mb-2">
-                                                <div style={{ width: '60px' }} className="text-end me-2">
-                                                    {stat.rate} <FaStar style={{ color: '#F8C146' }} size={14} />
-                                                </div>
-                                                <div className="flex-grow-1">
-                                                    <div className="progress" style={{ height: '8px' }}>
-                                                        <div
-                                                            className="progress-bar"
-                                                            role="progressbar"
-                                                            style={{ 
-                                                                width: `${stat.percentage}%`,
-                                                                backgroundColor: '#F8C146'
-                                                            }}
-                                                            aria-valuenow={stat.percentage}
-                                                            aria-valuemin="0"
-                                                            aria-valuemax="100"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div style={{ width: '60px' }} className="text-start ms-2">
-                                                    {stat.percentage}%
+                                    <div>
+                                        <StarRating
+                                            value={product.ratingsAvg}
+                                            onHover={() => {}}
+                                            onClick={() => {}}
+                                            size={24}
+                                            interactive={false}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Rating Distribution */}
+                                <div className="mt-3">
+                                    {[5, 4, 3, 2, 1].map((star) => (
+                                        <div key={star} className="d-flex align-items-center mb-2">
+                                            <div className="me-2" style={{ width: '30px' }}>
+                                                {star} <FaStar style={{ color: '#F8C146' }} />
+                                            </div>
+                                            <div className="flex-grow-1">
+                                                <div className="progress" style={{ height: '8px' }}>
+                                                    <div
+                                                        className="progress-bar"
+                                                        role="progressbar"
+                                                        style={{
+                                                            width: `${(product.ratingsCount[star] / product.ratingsCount.total) * 100}%`,
+                                                            backgroundColor: '#F8C146'
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </Col>
-                            </Row>
+                                            <div className="ms-2" style={{ width: '40px' }}>
+                                                {product.ratingsCount[star]}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
 
-                            {/* Rating Input */}
-                            {isLoggedIn && (
-                                <Card className="my-4 p-3 border-0 bg-light">
-                                    <div className="d-flex align-items-center">
-                                        <div className="me-3">Đánh giá của bạn:</div>
+                                {/* Rating Input (if user is logged in) */}
+                                {isLoggedIn && (
+                                    <div className="mt-4">
+                                        <h5>Your Rating</h5>
                                         <StarRating
                                             value={rating}
                                             onHover={setHoverRating}
@@ -405,54 +457,11 @@ const ProductDetail = () => {
                                             size={24}
                                         />
                                     </div>
-                                </Card>
-                            )}
-
-                            {/* Ratings List */}
-                            <div className="ratings-list mt-4">
-                                {Array.isArray(ratings) && ratings.map((rating) => (
-                                    <div key={rating.id} className="mb-4">
-                                        <div className="d-flex align-items-start">
-                                            <div className="flex-grow-1">
-                                                <div className="d-flex align-items-center mb-2">
-                                                    <StarRating
-                                                        value={rating.rate}
-                                                        onHover={() => {}}
-                                                        onClick={() => {}}
-                                                        size={16}
-                                                        interactive={false}
-                                                    />
-                                                </div>
-                                                <div className="mb-2">
-                                                    <strong>{rating.user.name}</strong>
-                                                </div>
-                                                <p className="mb-2">{rating.comment}</p>
-                                                <div className="d-flex align-items-center">
-                                                    {isLoggedIn && rating.fromUser && (
-                                                        <button 
-                                                            className="btn btn-link btn-sm text-danger p-0"
-                                                            onClick={() => handleRatingDelete(rating.id)}
-                                                        >
-                                                            Xóa
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {Array.isArray(ratings) && ratings.length > 2 && (
-                                <div className="text-center mt-4">
-                                    <Button variant="outline-primary">
-                                        Xem {ratings.length} đánh giá
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                </Col>
-            </Row>
+                                )}
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
         </Container>
         <Footer />
         </div>
