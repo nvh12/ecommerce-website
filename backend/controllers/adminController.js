@@ -1,5 +1,6 @@
 require('dotenv').config();
 const orderServices = require('../services/orderServices');
+const userServices = require('../services/userServices');
 
 async function getOrders(req, res) {
     try {
@@ -31,13 +32,24 @@ async function updateOrder(req, res) {
         const { id } = req.params;
         const { updateData } = req.body;
         const order = await orderServices.updateOrder(id, updateData);
-        res.status(200).json({ status: 'success', product: product })
+        res.status(200).json({ status: 'success', order: order });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
+async function getUsers(req, res) {
+    try {
+        const { name } = req.query;
+        const user = await userServices.getUsers(name);
+        res.status(200).json({ status: 'success', user: user })
     } catch (error) {
         res.status(500).json({ status: 'error', error: error.message });
     }
 }
 
 module.exports = {
+    getUsers,
     getOrders,
     updateOrder
 };
