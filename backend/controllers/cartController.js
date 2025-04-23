@@ -97,7 +97,7 @@ async function checkout(req, res) {
             );
             if (!update) {
                 await rollback(updatedProducts);
-                return res.status(400).json({ message: `${item.product.name} went out of stock during checkout.` });
+                return res.status(400).json({ message: `${item.product.productName} went out of stock during checkout.` });
             }
             updatedProducts.push({ productId: item.product._id, originalStock });
         }
