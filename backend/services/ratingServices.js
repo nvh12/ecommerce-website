@@ -4,21 +4,23 @@ const mongoose = require("mongoose")
 
 const createRating = async (userId , productID, rating) => {
     try{
+        
         const check = await Rating.findOne({
-            user: mongoose.Types.ObjectId(userId),
-            product: mongoose.Types.ObjectId(productID)
+            user:new mongoose.Types.ObjectId(userId),
+            product:new mongoose.Types.ObjectId(productID)
         })
+        
         if (check){
             return await updateRating(check._id, rating)
         }
         else{
             const newRating = await Rating.create({
-                user: mongoose.Types.ObjectId(userId),
-                product: mongoose.Types.ObjectId(productID),
+                user:new mongoose.Types.ObjectId(userId),
+                product:new mongoose.Types.ObjectId(productID),
                 rate: rating})
             if(newRating){
                 // Xu ly san pham khi co them rating moi
-                const product = await Product.findById(mongoose.Types.ObjectId(productID))
+                const product = await Product.findById( new mongoose.Types.ObjectId(productID))
                 if(product){
                     //Them so rating va tinh la tb rating
                     const newCount = product.ratingsCount.total + 1
@@ -42,12 +44,12 @@ const createRating = async (userId , productID, rating) => {
     }
 }
 
-const getRatingProduct = async (productId, userId= null, allRating = true) => {
+const getRatingProduct = async (productId, userId = null, allRating = true) => {
     try{
         let ratingFound
         if (allRating=== true){
             ratingFound = await Rating.find({
-                product: mongoose.Types.ObjectId(productId)
+                product: new mongoose.Types.ObjectId(productId)
             }).lean()
         }
         else {
@@ -55,14 +57,14 @@ const getRatingProduct = async (productId, userId= null, allRating = true) => {
                 throw new Error("Thiếu userId để truy vấn rating cụ thể.");
             }
             ratingFound = await Rating.findOne({
-                product: mongoose.Types.ObjectId(productId),
-                user:  mongoose.Types.ObjectId(userId)
+                product:new mongoose.Types.ObjectId(productId),
+                user: new mongoose.Types.ObjectId(userId)
             })
             if (ratingFound) {
                 return {...ratingFound, fromUser:true}
             }
             else{
-                throw new Error("Không tìm được rating của sản phảmphảm") 
+                throw new Error("Không tìm được rating của sản phảm") 
             }
         }
         if (Array.isArray(ratingFound) && ratingFound.length > 0){
@@ -93,18 +95,18 @@ const deleteRating = async (objectId, objectType = "rating") => {
         
         if (objectType === "product"){
             ratingFound = await Rating.deleteMany({
-                product: mongoose.Types.ObjectId(objectId)
+                product:new  mongoose.Types.ObjectId(objectId)
             })
         }
         else if (objectType === "user"){
-            ratingFound = await Rating.find({ user: mongoose.Types.ObjectId(objectId) });
+            ratingFound = await Rating.find({ user: new mongoose.Types.ObjectId(objectId) });
             await Rating.deleteMany({
-                user:mongoose.Types.ObjectId(objectId)
+                user: new mongoose.Types.ObjectId(objectId)
             })
             
         }
         else {
-            ratingFound = await Rating.findByIdAndDelete(mongoose.Types.ObjectId(objectId))
+            ratingFound = await Rating.findByIdAndDelete(new mongoose.Types.ObjectId(objectId))
             ratingFound = [ratingFound]
         }
         if (!ratingFound){
@@ -116,7 +118,7 @@ const deleteRating = async (objectId, objectType = "rating") => {
                     if (!rating) continue; // Nếu không tìm thấy rating, bỏ qua
 
                     
-                    const productFound = await Product.findById(mongoose.Types.ObjectId(rating.product));
+                    const productFound = await Product.findById( new mongoose.Types.ObjectId(rating.product));
 
                     // Xu ly hang hoa bi anh huonghuong
                     if (productFound) {
@@ -145,9 +147,9 @@ const deleteRating = async (objectId, objectType = "rating") => {
 
 const updateRating = async (ratingId, newRating) => {
     try{
-        const updateRating =await Rating.findById(mongoose.Types.ObjectId(ratingId))
+        const updateRating =await Rating.findById(new mongoose.Types.ObjectId(ratingId))
         const oldRating = updateRating.rate
-        const updateProduct =await Product.findById(mongoose.Types.ObjectId(updateRating.product))
+        const updateProduct =await Product.findById(new mongoose.Types.ObjectId(updateRating.product))
         const newRatingsAvg = Math.round((updateProduct.ratingsAvg * updateProduct.ratingsCount.total - oldRating + newRating) / updateProduct.ratingsCount.total)
         updateProduct.ratingsAvg = newRatingsAvg
         updateProduct.ratingsCount[parseInt(oldRating)] --;

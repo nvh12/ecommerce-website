@@ -6,7 +6,7 @@ const ACCESS_SECRET = process.env.JWT_SECRET;
 
 const createRatingControl = async (req, res) =>{
     try{
-       
+        let userId
         const { productId, rate} = req.body
         if(req.cookies.accessToken){
             const accessToken = req.cookies.accessToken
@@ -14,7 +14,7 @@ const createRatingControl = async (req, res) =>{
             userId = decode.id;
         }
         else{
-            userId = 1
+            userId ="67e90ba169f6b16b579ceecb"
         }
         if (!userId || !productId || !rate) {
             return res.status(400).json({ message: "Thiếu thông tin userId, productId hoặc rate" });
@@ -42,17 +42,17 @@ const findRatingControl = async (req, res) => {
             userId = decode.id;
         }
         else{
-            userId = 1
+            userId = "67e90ba169f6b16b579ceecb"
         }
-        const ratings = await ratingServices.getRatingProduct(productId, userId, false);
-        if (!ratings || ratings.length === 0) {
+        const ratings = await ratingServices.getRatingProduct(productId, "67e90ba169f6b16b579ceecb",false);
+        if (!ratings) {
             res.status(404).json({ message: "Không tìm thấy đánh giá nào cho sản phẩm này" });
         } else {
             res.status(200).json({ message: "Tìm thấy đánh giá", ratings });
         }
     }
     catch(err){
-        res.status(500).json({message:"Loi khi tim rating cua san pham", error:err.message})
+        res.status(500).json({message:"Loi khi tim rating cua san pham ", error:err.message})
     }
 }
 const findRatingByIdControl = async (req, res) => {
