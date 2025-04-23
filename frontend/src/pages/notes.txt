@@ -7,3 +7,7 @@ Chưa xử lý các tab '/phone','/laptop',.....
 Chưa xử lí phần click product card để ra trang product detail tương ứng
 Chưa fetch
 Chưa có phần comment (xem xét bỏ qua)
+
+---- Cart Page ------
+Chưa đồng bộ với phần userProfile
+Chưa đồng bộ phần fetch ở các file khác

@@ -15,20 +15,11 @@ import Header from './components/Header.js';
 import ProductCard from './components/ProductCard.js';
 import ProductDetail from './pages/ProductDetail.js';
 import Footer from './components/Footer.js';
+import CartPage from './pages/CartPage';
 import PhonePage from './components/PhonePage.js';
 import LaptopPage from './components/LaptopPage.js';
 
-const product = {
-  name: "Lenovo Ideapad Slim 3 15IAH8 i5 12450H",
-  image: "/path/to/laptop-image.jpg",
-  ram: "16 GB",
-  ssd: "512 GB",
-  price: 14690000,
-  originalPrice: 15990000,
-  installmentAmount: 2190000,
-  rating: 4.9,
-  soldCount: 8000
-};
+
 function App() {
   return (
     <div>
@@ -41,13 +32,11 @@ function App() {
           <Route path='/user' element={<UserProfile />} />
           <Route path='/phone' element={<PhonePage />} />
           <Route path='/laptop' element={<LaptopPage />} />
+          <Route path='/cart' element={<CartPage />} /> 
           <Route path='/admin/userlist' element={<UserListPage/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
       {/* <Footer /> */}
-      {/* <Header />
-      <NavbarComponent />
-      <ProductCard product={product} /> */}
     </div>
   );
 }

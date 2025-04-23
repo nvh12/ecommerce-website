@@ -4,7 +4,7 @@ import { AppContext } from "../context/AppContext";
 
 const Header = () => {
     const navigate = useNavigate();
-    const { userData, isLoggedIn } = useContext(AppContext);
+    const { userData, isLoggedIn, cartItems } = useContext(AppContext);
 
     useEffect(() => {
         console.log("userData updated:", userData); 
@@ -33,9 +33,14 @@ const Header = () => {
                             <span className='d-none d-sm-inline'>{userData.name}</span>
                         </button>
                         <button className='bg-transparent btn rounded-pill hover-style'
-                        onClick={() => navigate('/user')}>
+                        onClick={() => navigate('/cart')}>
                             <i className="bi bi-cart3 me-1"></i>
                             <span className='d-none d-sm-inline'>Giỏ hàng</span>
+                            {cartItems?.length > 0 && (
+                                <span className="badge bg-danger ms-1">
+                                    {cartItems.length}
+                                </span>
+                            )}
                         </button>
                     </>)
                     :

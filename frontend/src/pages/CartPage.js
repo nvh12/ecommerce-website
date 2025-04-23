@@ -1,0 +1,214 @@
+import React, { useContext, useEffect, useState } from 'react';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
+import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
+import CartItem from '../components/CartItem';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const CartPage = () => {
+    const { backendUrl, isLoggedIn } = useContext(AppContext);
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [checkoutInfo, setCheckoutInfo] = useState({
+        payment: 'cash',
+        delivery: 'store',
+        address: ''
+    });
+    const navigate = useNavigate();
+
+    // Fetch cart items
+    const fetchCart = async () => {
+        try {
+            const { data } = await axios.get(`${backendUrl}/cart`, { withCredentials: true });
+            if (data.success) {
+                setCartItems(data.items || []);
+            }
+            setLoading(false);
+        } catch (error) {
+            toast.error("Lỗi lấy thông tin giỏ hàng");
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+        fetchCart();
+    }, [isLoggedIn, navigate]);
+
+    // Calculate total
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    // Handle quantity changes
+    const handleQuantityChange = async (productId, action) => {
+        try {
+            let endpoint = '';
+            if (action === 'increase') {
+                endpoint = '/cart/add';
+            } else if (action === 'decrease') {
+                endpoint = '/cart/reduce';
+            } else if (action === 'remove') {
+                endpoint = '/cart/remove';
+            }
+
+            await axios.post(`${backendUrl}${endpoint}`, {
+                productId,
+                price: cartItems.find(item => item.product._id === productId)?.price
+            }, { withCredentials: true });
+
+            fetchCart(); // Refresh cart after update
+            toast.success("Giỏ hàng đã được cập nhật");
+        } catch (error) {
+            toast.error("Lỗi cập nhật giỏ hàng");
+        }
+    };
+
+    // Handle checkout
+    const handleCheckout = async () => {
+        try {
+            if (checkoutInfo.delivery === 'delivery' && !checkoutInfo.address) {
+                toast.error("Vui lòng nhập địa chỉ giao hàng");
+                return;
+            }
+
+            await axios.post(`${backendUrl}/cart/checkout`, checkoutInfo, 
+                { withCredentials: true }
+            );
+            
+            toast.success("Đặt hàng thành công");
+            navigate('/user'); // Navigate to user profile/orders
+        } catch (error) {
+            toast.error("Lỗi đặt hàng");
+        }
+    };
+
+    if (loading) {
+        return (
+            <Container className="py-5 text-center">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </Container>
+        );
+    }
+
+    return (
+        <Container className="py-5">
+            <h1 className="mb-4">Giỏ hàng</h1>
+            
+            {cartItems.length === 0 ? (
+                <div className="text-center py-5">
+                    <h3>Giỏ hàng trống</h3>
+                    <Button 
+                        variant="primary" 
+                        className="mt-3"
+                        onClick={() => navigate('/')}
+                    >
+                        Tiếp tục mua sắm
+                    </Button>
+                </div>
+            ) : (
+                <Row>
+                    {/* Cart Items */}
+                    <Col md={8}>
+                        <div className="cart-items">
+                            {cartItems.map((item) => (
+                                <CartItem 
+                                    key={item.product._id}
+                                    item={item}
+                                    onIncrease={() => handleQuantityChange(item.product._id, 'increase')}
+                                    onDecrease={() => handleQuantityChange(item.product._id, 'decrease')}
+                                    onRemove={() => handleQuantityChange(item.product._id, 'remove')}
+                                />
+                            ))}
+                        </div>
+                    </Col>
+
+                    {/* Checkout Section */}
+                    <Col md={4}>
+                        <div className="checkout-section bg-light p-4 rounded">
+                            <h4 className="mb-3">Thông tin đặt hàng</h4>
+                            
+                            {/* Payment Method */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Phương thức thanh toán</Form.Label>
+                                <Form.Select 
+                                    value={checkoutInfo.payment}
+                                    onChange={(e) => setCheckoutInfo({
+                                        ...checkoutInfo,
+                                        payment: e.target.value
+                                    })}
+                                >
+                                    <option value="cash">Tiền mặt</option>
+                                    <option value="QR">QR Code</option>
+                                </Form.Select>
+                            </Form.Group>
+
+                            {/* Delivery Method */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Phương thức nhận hàng</Form.Label>
+                                <Form.Select 
+                                    value={checkoutInfo.delivery}
+                                    onChange={(e) => setCheckoutInfo({
+                                        ...checkoutInfo,
+                                        delivery: e.target.value
+                                    })}
+                                >
+                                    <option value="store">Nhận tại cửa hàng</option>
+                                    <option value="delivery">Giao hàng tận nơi</option>
+                                </Form.Select>
+                            </Form.Group>
+
+                            {/* Address (for delivery) */}
+                            {checkoutInfo.delivery === 'delivery' && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Địa chỉ giao hàng</Form.Label>
+                                    <Form.Control 
+                                        as="textarea" 
+                                        rows={3}
+                                        value={checkoutInfo.address}
+                                        onChange={(e) => setCheckoutInfo({
+                                            ...checkoutInfo,
+                                            address: e.target.value
+                                        })}
+                                        placeholder="Nhập địa chỉ giao hàng"
+                                    />
+                                </Form.Group>
+                            )}
+
+                            {/* Total and Checkout Button */}
+                            <div className="total-section mt-4">
+                                <div className="d-flex justify-content-between mb-2">
+                                    <span>Tạm tính:</span>
+                                    <span>{total.toLocaleString()}₫</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-3">
+                                    <span>Phí vận chuyển:</span>
+                                    <span>{checkoutInfo.delivery === 'delivery' ? '30,000₫' : '0₫'}</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-4 fw-bold">
+                                    <span>Tổng cộng:</span>
+                                    <span className="text-danger fs-5">
+                                        {(total + (checkoutInfo.delivery === 'delivery' ? 30000 : 0)).toLocaleString()}₫
+                                    </span>
+                                </div>
+                                <Button 
+                                    variant="danger" 
+                                    className="w-100"
+                                    onClick={handleCheckout}
+                                >
+                                    Đặt hàng
+                                </Button>
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+            )}
+        </Container>
+    );
+};
+
+export default CartPage; 

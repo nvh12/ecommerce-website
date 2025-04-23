@@ -1,50 +1,51 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import Rating from '../components/Rating';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { productItems } = useContext(AppContext);
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
+    const location = useLocation();
+    const { backendUrl, isLoggedIn } = useContext(AppContext);
+    
+    // Get product data from location state
+    const product = location.state?.product;
+    const [selectedColor, setSelectedColor] = useState(product?.color?.[0] || null);
+    const [selectedImage, setSelectedImage] = useState(product?.images?.[0] || null);
 
-    // Get product directly from productItems
-    const product = productItems.find(p => p._id === id);
-
-    useEffect(() => {
-        if (product) {
-            // Set initial image
-            if (product.images && product.images.length > 0) {
-                setSelectedImage(product.images[0]);
-            }
-            // Set initial color
-            if (product.color && product.color.length > 0) {
-                setSelectedColor(product.color[0]);
-            }
-        }
-    }, [product]);
-
+    // If no product data in state, redirect to home
     if (!product) {
-        return (
-            <Container className="py-5 text-center">
-                <h2>Không tìm thấy sản phẩm</h2>
-                <Button 
-                    variant="primary" 
-                    className="mt-3"
-                    onClick={() => navigate('/')}
-                >
-                    Quay về trang chủ
-                </Button>
-            </Container>
-        );
+        navigate('/');
+        return null;
     }
 
     const finalPrice = product.discount 
         ? product.price - (product.price * (product.discount / 100)) 
         : product.price;
+
+    // Add to cart handler
+    const handleAddToCart = async () => {
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            await axios.post(`${backendUrl}/cart/add`, {
+                productId: product._id,
+                price: product.price
+            }, { withCredentials: true });
+            
+            toast.success("Đã thêm vào giỏ hàng");
+        } catch (error) {
+            toast.error("Lỗi thêm vào giỏ hàng");
+        }
+    };
 
     return (
         <Container className="py-4">
@@ -54,7 +55,7 @@ const ProductDetail = () => {
                     <div className="product-images">
                         <div className="main-image-container mb-3 border rounded p-3">
                             <img 
-                                src={selectedImage || product.images[0]} 
+                                src={selectedImage} 
                                 alt={product.productName}
                                 className="img-fluid"
                                 style={{ 
@@ -89,6 +90,20 @@ const ProductDetail = () => {
                 {/* Right Column - Product Info */}
                 <Col md={6}>
                     <div className="product-info">
+                        {/* Categories */}
+                        <div className="mb-2">
+                            {product.category.map((cat, index) => (
+                                <Badge 
+                                    key={index} 
+                                    bg="light" 
+                                    text="dark"
+                                    className="me-2"
+                                >
+                                    {cat}
+                                </Badge>
+                            ))}
+                        </div>
+
                         {/* Product Name */}
                         <h1 className="h3 mb-2">{product.productName}</h1>
 
@@ -132,11 +147,11 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        {/* Stock */}
+                        {/* Stock Status */}
                         <div className="stock-info mb-3">
-                            <span className="fw-bold me-2">Kho:</span>
+                            <span className="fw-bold me-2">Tình trạng:</span>
                             <span className={product.stocks > 0 ? 'text-success' : 'text-danger'}>
-                                {product.stocks > 0 ? `${product.stocks} sản phẩm` : 'Hết hàng'}
+                                {product.stocks > 0 ? `Còn hàng (${product.stocks})` : 'Hết hàng'}
                             </span>
                         </div>
 
@@ -161,20 +176,6 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* Categories */}
-                        {product.category && product.category.length > 0 && (
-                            <div className="categories-section mb-3">
-                                <div className="fw-bold mb-2">Danh mục</div>
-                                <div className="d-flex gap-2 flex-wrap">
-                                    {product.category.map((cat, index) => (
-                                        <span key={index} className="badge bg-light text-dark">
-                                            {cat}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
                         {/* Features */}
                         {product.features && product.features.length > 0 && (
                             <div className="features-section mb-3">
@@ -190,12 +191,10 @@ const ProductDetail = () => {
                         )}
 
                         {/* Description */}
-                        {product.description && (
-                            <div className="description-section mb-4">
-                                <div className="fw-bold mb-2">Mô tả sản phẩm</div>
-                                <p className="text-muted">{product.description}</p>
-                            </div>
-                        )}
+                        <div className="description-section mb-4">
+                            <div className="fw-bold mb-2">Mô tả sản phẩm</div>
+                            <p className="text-muted">{product.description}</p>
+                        </div>
 
                         {/* Action Buttons */}
                         <div className="d-grid gap-2">
@@ -203,18 +202,32 @@ const ProductDetail = () => {
                                 variant="danger" 
                                 size="lg"
                                 disabled={product.stocks <= 0}
+                                onClick={handleAddToCart}
                             >
-                                MUA NGAY
+                                <FaShoppingCart className="me-2" />
+                                Thêm vào giỏ hàng
                             </Button>
                             <Button 
                                 variant="outline-primary" 
                                 size="lg"
-                                disabled={product.stocks <= 0}
+                                onClick={() => navigate('/')}
                             >
-                                THÊM VÀO GIỎ HÀNG
+                                Tiếp tục mua sắm
                             </Button>
                         </div>
                     </div>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Rating 
+                        productId={product._id} 
+                        onRatingUpdate={() => {
+                            // Optionally refresh product data if needed
+                            // This would be needed if you want to update the average rating
+                            // displayed in the product details
+                        }}
+                    />
                 </Col>
             </Row>
         </Container>
