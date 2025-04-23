@@ -14,3 +14,9 @@ Chưa có thao tác click để đến product detail
 ------------ Advertise carousel ----------
 - Là cái banner quảng cáo tự động chạy ngang ở home
 Chưa chuẩn format
+
+------------ Cart Item ---------------
+- Là sản phẩm trong giỏ hàng
+Phần này còn nhiều thứ nhập nhằng chưa rõ về logic. 
+Những item này được lấy từ đâu, lưu local trên máy người dùng hay bắt đăng nhập rồi cho lên backend.
+Vừa đọc model cart thì hình như là đồng bộ với csdl, không cần xử lí bên fe

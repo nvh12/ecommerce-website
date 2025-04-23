@@ -6,6 +6,7 @@ import Login from './pages/Login.js';
 import Register from './pages/Register.js';
 import UserProfile from './pages/UserProfile.js';
 import UserListPage from './pages/Admin/UserListPage.js';
+import ProductListPage from './pages/Admin/ProductListPage.js';
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useContext, useEffect } from 'react';
@@ -34,6 +35,7 @@ function App() {
           <Route path='/laptop' element={<LaptopPage />} />
           <Route path='/cart' element={<CartPage />} /> 
           <Route path='/admin/userlist' element={<UserListPage/>} />
+          <Route path='/admin/productlist' element={<ProductListPage/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
       {/* <Footer /> */}
