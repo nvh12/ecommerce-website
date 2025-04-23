@@ -8,6 +8,8 @@ const AppContextProvider = (props) => {
     const [productItems, setProductItems] = useState([])
     const [userData, setUserData] = useState([])
     const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [currentProduct, setCurrentProduct] = useState(null)
+    const [loading, setLoading] = useState(false)
 
     // const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const backendUrl = "http://localhost:5000"
@@ -49,6 +51,7 @@ const AppContextProvider = (props) => {
         return foundProduct;
     };
 
+        
     useEffect(() => {
         fetchProductData()
     }, [])
@@ -61,7 +64,11 @@ const AppContextProvider = (props) => {
         setIsLoggedIn,
         isLoggedIn,
         fetchProductData,
-        getProductById
+        getProductById,
+        currentProduct,
+        setCurrentProduct,
+        loading,
+        setLoading
     }
 
     return (
