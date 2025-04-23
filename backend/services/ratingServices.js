@@ -61,9 +61,10 @@ const getRatingProduct = async (productId, userId = null, allRating = true) => {
                 user: new mongoose.Types.ObjectId(userId)
             })
             if (ratingFound) {
-                return {...ratingFound, fromUser:true}
+                return {...ratingFound.toObject(), fromUser:true}
             }
             else{
+                return []
                 throw new Error("Không tìm được rating của sản phảm") 
             }
         }

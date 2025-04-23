@@ -1,2 +1,113 @@
 const Comment = require("../models/comment")
 const commentServices = require("../services/commentServices")
+
+
+const getCommentProductControl = async (req, res) =>{
+    try{
+        const {productId} = req.params
+        let userId
+        if(req.cookies.accessToken){
+            const accessToken = req.cookies.accessToken
+            const decode = jwt.verify(accessToken, ACCESS_SECRET)
+            userId = decode.id;
+        }
+        else{
+            userId = "67e90ba169f6b16b579ceecb"
+        }
+        const commentProduct = await commentServices.getProductComment(productId, userId)
+        if (commentProduct){
+            res.status(200).json({message:"Success", commentProduct})
+        }
+        else {
+            res.status(404).json({ message: "không tìm thấy comment của sản phẩm" });
+        }
+    }
+    catch(err){
+        res.status(500).json({message:"Loi khong load cmt duoc, controller", error: err.message})
+    }
+}
+
+const deleteCommentControl = async (req, res) =>{
+    try{
+        const {commentId} = req.params
+        
+        
+        const deletedComment = await commentServices.deleteComment(commentId)
+        if (deletedComment){
+            res.status(200).json({message:"Success", deletedComment})
+        }
+        else {
+            res.status(404).json({ message: "không tìm thấy comment để xóa" });
+        }
+    }
+    catch(err){
+        res.status(500).json({message:"Loi khong xoa cmt duoc, controller", error: err.message})
+    }
+}
+
+const updateCommentControl = async (req, res)=>{
+    try{
+        const {commentId} = req.params
+        const {newComment} = req.body
+        
+        const updatedComment = await commentServices.updateComment(commentId, newComment)
+        if (updatedComment){
+            res.status(200).json({message:"Success", updatedComment})
+        }
+        else {
+            res.status(404).json({ message: "không tìm thấy comment để update " });
+        }
+    }
+    catch(err){
+        res.status(500).json({message:"Loi khong update cmt duoc, controller", error: err.message})
+    }
+}
+
+const createCommentControl = async (req, res) =>{
+    try{
+
+        const {comment,productId} = req.body
+        let userId
+        if(req.cookies.accessToken){
+            const accessToken = req.cookies.accessToken
+            const decode = jwt.verify(accessToken, ACCESS_SECRET)
+            userId = decode.id;
+        }
+        else{
+            userId = "67e90ba169f6b16b579ceecb"
+        }
+        const newComment = await commentServices.createComment(userId,productId, comment)
+        if (newComment){
+            res.status(200).json({message:"Success", newComment})
+        }
+        else {
+            res.status(404).json({ message: "không tạo được comment mới" });
+        }
+    }
+    catch(err){
+        res.status(500).json({message:"Loi khong tạo  cmt duoc, controller", error: err.message})
+    }
+}
+
+const getCommentByIdControl = async (req, res) => {
+    try{
+        const {commentId} = req.params
+        const foundComment = await commentServices.getCommentById(commentId)
+        if(foundComment){
+            res.status(200).json({message:"Success", foundComment})
+        }
+        else{
+            res.status(404).json({ message: "Không tồn tại comment trên hoặc comment đã bị xóa" });
+        }
+    }
+    catch(err){
+        res.status(500).json({message:"Loi khong tim duoc cmt nay, controller", error: err.message})
+    }
+}
+module.exports ={
+    getCommentProductControl,
+    deleteCommentControl,
+    updateCommentControl,
+    createCommentControl,
+    getCommentByIdControl
+}
