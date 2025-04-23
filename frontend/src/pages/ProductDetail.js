@@ -66,7 +66,10 @@ const ProductDetail = () => {
             return;
         }
         try {
-            await axios.post(`${backendUrl}/rating/${id}`, { rate: newRating });
+            await axios.post(`${backendUrl}/rating/create`, {
+                productId: id,
+                rate: newRating
+            }, { withCredentials: true });
             setRating(newRating);
             fetchRatings(); // Refresh ratings
             toast.success('Đã gửi đánh giá');
