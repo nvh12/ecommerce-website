@@ -7,8 +7,8 @@ const comment = require("../models/comment")
 const createComment = async (userId, productId, comment)=> {
     try{
         const newCmt = await Comment.create({
-            user:mongoose.Types.ObjectId(userId),
-            product: mongoose.Types.ObjectId(productId),
+            user:new mongoose.Types.ObjectId(userId),
+            product: new mongoose.Types.ObjectId(productId),
             context: comment
         })
         if (!newCmt){
@@ -26,7 +26,7 @@ const createComment = async (userId, productId, comment)=> {
 
 const updateComment = async (commentId, newComment) => {
     try {
-        const commentFound = await Comment.findByIdAndUpdate(mongoose.Types.ObjectId(commentId), {context: newComment}, {new:true, runValidators: true})
+        const commentFound = await Comment.findByIdAndUpdate(new mongoose.Types.ObjectId(commentId), {context: newComment}, {new:true, runValidators: true})
         if (!commentFound) {
             throw new Error("Khong the tim thay hoac update comment");
         }
@@ -44,11 +44,11 @@ const deleteComment = async (objectId, objectType = "comment") => {
         let commentFound
         if (objectType !== "comment"){
             commentFound = Comment.deleteMany({
-                [objectType]: mongoose.Types.ObjectId(objectId)
+                [objectType]: new mongoose.Types.ObjectId(objectId)
             })
         }
         else{
-            commentFound = Comment.findByIdAndDelete(mongoose.Types.ObjectId(objectId))
+            commentFound = Comment.findByIdAndDelete(new mongoose.Types.ObjectId(objectId))
         }
         if(!commentFound){
             throw new Error("Khong tim duoc hoac khong xoa duoc")
@@ -62,9 +62,9 @@ const deleteComment = async (objectId, objectType = "comment") => {
     }
     
 }
-const getCommentById = async (commnetId) => {
+const getCommentById = async (commentId) => {
     try{
-        return await Comment.findById(mongoose.Types.ObjectId(commentId))
+        return await Comment.findById(new mongoose.Types.ObjectId(commentId))
     }
     catch(err){
         throw err
@@ -73,12 +73,15 @@ const getCommentById = async (commnetId) => {
 const getProductComment = async (productId, userId = null) => {
     try{
         const commentFound = await Comment.find({
-            product: mongoose.Types.ObjectId(productId)
-        })
+            product: new mongoose.Types.ObjectId(productId)
+        }).populate("user", "name _id")
+        userId = userId ? userId.toString(): null
+        
         if(commentFound){
             const result = commentFound.map(comment => {
-                return {...comment, 
-                    fromUser: userId ?  mongoose.Types.ObjectId(userId) === comment.user :false
+                return {...comment.toObject(), 
+                    fromUser: userId ?  userId === comment.user._id.toString() :false,
+                    
                 }
             })
             return result

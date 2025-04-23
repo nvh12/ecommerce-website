@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const ratingRoutes = require('./routes/ratingRoutes')
+const commentRoutes = require('./routes/commentRoutes')
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cors({
     origin: process.env.FRONT_URI,
     credentials: true
 }));
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -31,5 +33,7 @@ app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
 app.use('/cart', cartRoutes);
 app.use('/rating', ratingRoutes);
+app.use('/comment', commentRoutes);
+
 
 module.exports = app;
