@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/user');
-
+const {deleteRating} = require('../services/ratingServices')
+const {deleteComment}= require('../services/commentServices')
 async function getUserByObjectId(id) {
     try {
         const objectId = new mongoose.Types.ObjectId(`${id}`);
@@ -20,7 +21,14 @@ async function updateUser(id, updateData) {
 
 async function deleteUser(id) {
     try {
-        return await User.findByIdAndDelete(id);
+        const userFound = await User.findByIdAndDelete(id);
+        if(userFound){
+            deleteRating(id, "user")
+            deleteComment(id, "user")
+        }
+        else{
+            throw new Error("Chua tim duoc user hoac khong the xoa user")
+        }
     } catch (error) {
         throw error;
     }

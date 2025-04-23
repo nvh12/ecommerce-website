@@ -24,13 +24,17 @@ const productSchema = new mongoose.Schema({
     },
     price:{type:Number, required:true},
     currency:{type:String, required:true},
-    ratings:{type:Number,default:0},
     discount:{type:Number, default:0},
     color:[{type:String}],
-    reviews_count:{type:Number, default:0},
-    reviews:[{
-        type:String
-    }]
+    reviewsCount:{type:Number, default:0},
+    ratingsCount:{
+        type:Number,
+        default:0
+    },
+    ratingsAvg:{
+        type:Number,
+        default: 0
+    }
    
 }, { timestamps: true });
 

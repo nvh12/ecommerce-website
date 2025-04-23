@@ -1,0 +1,64 @@
+.product-gallery .thumbnail-item.active {
+  border: 2px solid #0d6efd;
+  border-radius: 4px;
+}
+
+.color-option:hover {
+  border-color: #0d6efd !important;
+}
+
+.specifications-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.highlights-section {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.action-buttons {
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  padding: 15px 0;
+  border-top: 1px solid #dee2e6;
+}
+
+.product-images .main-image-container {
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.thumbnail-container {
+    transition: all 0.2s ease;
+}
+
+.thumbnail-container:hover {
+    border-color: #0d6efd !important;
+}
+
+.color-option {
+    transition: all 0.2s ease;
+}
+
+.color-option:hover {
+    border-color: #0d6efd !important;
+}
+
+.price-section {
+    background-color: #f8f9fa;
+}
+
+.features-section, .description-section {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+} 
