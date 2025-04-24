@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
@@ -10,6 +10,9 @@ const AppContextProvider = (props) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [currentProduct, setCurrentProduct] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [product, setProduct] = useState(null)
+    const [isLoadingProduct, setIsLoadingProduct] = useState(false)
+    const [productError, setProductError] = useState(null)
 
     // const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const backendUrl = "http://localhost:5000"
@@ -43,15 +46,64 @@ const AppContextProvider = (props) => {
     }
 
     // Function to get a single product
-    const getProductById = (productId) => {
-        console.log("Looking for product:", productId);
-        console.log("Available products:", productItems);
-        const foundProduct = productItems.find(product => product._id === productId);
-        console.log("Found product:", foundProduct);
-        return foundProduct;
+    // const getProductById = (productId) => {
+    //     console.log("Looking for product:", productId);
+    //     console.log("Available products:", productItems);
+    //     const foundProduct = productItems.find(product => product._id === productId);
+    //     console.log("Found product:", foundProduct);
+    //     return foundProduct;
+    // };
+
+    // Fetch product details
+    const fetchProduct = useCallback(async (productId) => {
+        if (!productId) return;
+        
+        console.log('Starting to fetch product:', productId);
+        setIsLoadingProduct(true);
+        setProductError(null);
+        
+        try {
+            const { data } = await axios.get(`${backendUrl}/product/${productId}`);
+            console.log('Raw response data:', data);
+            
+            if (data && data.product && Array.isArray(data.product) && data.product.length > 0) {
+                const productFromResponse = data.product[0];
+                console.log('Product data from response:', productFromResponse);
+                
+                // Create a new object with the correct structure
+                const productData = {
+                    ...productFromResponse,
+                    // Ensure numeric values are properly handled
+                    price: Number(productFromResponse.price) || 0,
+                    discount: Number(productFromResponse.discount) || 0,
+                    stocks: Number(productFromResponse.stocks) || 0,
+                    ratingsAvg: Number(productFromResponse.ratingsAvg) || 0,
+                    ratingsCount: productFromResponse.ratingsCount || { total: 0 },
+                    reviewsCount: Number(productFromResponse.reviewsCount) || 0
+                };
+                
+                console.log('Processed product data:', productData);
+                setProduct(productData);
+            } else {
+                console.log('No valid product data in response');
+                setProduct(null);
+            }
+        } catch (error) {
+            console.error('Error fetching product:', error);
+            setProductError(error.response?.data?.message || 'Failed to fetch product');
+            toast.error('Failed to fetch product details');
+            setProduct(null);
+        } finally {
+            setIsLoadingProduct(false);
+        }
+    }, [backendUrl]);
+
+    // Clear product data
+    const clearProduct = () => {
+        setProduct(null);
+        setProductError(null);
     };
 
-        
     useEffect(() => {
         fetchProductData()
     }, [])
@@ -64,11 +116,16 @@ const AppContextProvider = (props) => {
         setIsLoggedIn,
         isLoggedIn,
         fetchProductData,
-        getProductById,
+        // getProductById,
         currentProduct,
         setCurrentProduct,
         loading,
-        setLoading
+        setLoading,
+        product,
+        isLoadingProduct,
+        productError,
+        fetchProduct,
+        clearProduct
     }
 
     return (

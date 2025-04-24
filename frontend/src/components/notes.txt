@@ -1,7 +1,8 @@
 
 
 
-
+--------------- Product ------------
+Lưu ý product trả về là message và 1 mảng, lưu ý khi xử lý nó =)))
 
 ----------- Product Card ---------------
 - Là các thẻ con dùng chung ở home và ở tất cả các tab con như phone, laptop,....
