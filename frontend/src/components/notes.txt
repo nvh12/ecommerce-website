@@ -1,15 +1,11 @@
 
 
 
--------- Product grid ---------------------
-- Danh sách sản phẩm thể hiện dưới dạng grid, có thể dùng lại ở tất cả các tab như phone, laptop,....
-Có thể không cần product grid nữa vì đã làm riêng cho home 2 grid là sale carousel và recommnedation grid.
-Nhưng vẫn chưa xóa Product grid vì có thể còn cần đến
+
 
 ----------- Product Card ---------------
 - Là các thẻ con dùng chung ở home và ở tất cả các tab con như phone, laptop,....
-Chưa có fetch để lấy dữ liệu từ backend
-Chưa có thao tác click để đến product detail
+
 
 ------------ Advertise carousel ----------
 - Là cái banner quảng cáo tự động chạy ngang ở home
@@ -25,3 +21,13 @@ Vừa đọc model cart thì hình như là đồng bộ với csdl, không cầ
 
 -------------- Rating -------------
 Đang test rating
+
+-------------- Comment -------------
+Chưa làm
+
+--------------- Thông số kĩ thuật -------------
+Mới demo, chờ DB 
+
+
+-------------- Search bar ------------------
+Cần thêm chức năng search theo feature của product
