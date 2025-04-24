@@ -48,8 +48,34 @@ async function getUsers(req, res) {
     }
 }
 
+async function getUserOrders(req, res) {
+    try {
+        let { id, page = 1, sortBy = null, order } = req.query;
+        page = parseInt(page);
+        if (Number.isNaN(page) || page < 1) page = 1;
+        const total = await orderServices.getOrderNumber(id);
+        if (total === 0) {
+            return res.status(200).json({
+                status: 'success',
+                message: 'No orders found'
+            });
+        }
+        const orders = await orderServices.getOrdersByUser(id, page, 20, sortBy, order);
+        res.status(200).json({
+            totalPages: Math.ceil(total / 20),
+            page: page,
+            order: order,
+            data: orders || [],
+            status: 'success'
+        });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
 module.exports = {
     getUsers,
     getOrders,
-    updateOrder
+    updateOrder,
+    getUserOrders 
 };
