@@ -1,6 +1,9 @@
 const express = require("express")
 const ratingController = require("../controllers/ratingController")
+const { verifyUser } = require("../middleware/authMiddleware")
 const router = express.Router();
+
+router.use(verifyUser)
 //Tìm kiếm rating của một sản phẩm, kết quả rating trả về ngoài các trường rating trong model thì
 //có kèm thêm trường fromUser: true nếu đó là rating của người dùng. Việc này nhờ front-end chú ý để
 // xây giao diện có phần update và delete cho riêng rating có trường này là true

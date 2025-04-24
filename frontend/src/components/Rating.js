@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaStar } from 'react-icons/fa';
 import { Card } from 'react-bootstrap';
 import { AppContext } from '../context/AppContext';
@@ -14,20 +14,56 @@ const Rating = ({
     const { backendUrl, user, fetchProduct } = useContext(AppContext);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
+    const [userRating, setUserRating] = useState(null);
 
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchUserRating();
+        }
+    }, [productId, isLoggedIn]);
+
+    const fetchUserRating = async () => {
+        try {
+            const response = await axios.get(`${backendUrl}/rating/${productId}`, {
+                withCredentials: true
+            });
+            
+            // Check if response.data.ratings exists and is an array
+            if (response.data && Array.isArray(response.data.ratings)) {
+                // Find the current user's rating
+                const userRating = response.data.ratings.find(r => r.fromUser);
+                if (userRating) {
+                    setRating(userRating.rate);
+                    setUserRating(userRating);
+                } else {
+                    setRating(0);
+                    setUserRating(null);
+                }
+            } else {
+                setRating(0);
+                setUserRating(null);
+            }
+        } catch (error) {
+            console.error('Error fetching user rating:', error);
+            toast.error('Failed to load your rating');
+        }
+    };
+    
     const handleRatingSubmit = async (newRating) => {
         if (!isLoggedIn) {
             toast.error('Please login to rate this product');
             return;
         }
 
+        if (newRating < 1 || newRating > 5) {
+            toast.error('Rating must be between 1 and 5');
+            return;
+        }
+
         try {
-            // Check if user has already rated this product
-            const existingRating = ratingsCount?.ratings?.find(r => r.userId === user._id);
-            
-            if (existingRating) {
+            if (userRating) {
                 // Update existing rating
-                await axios.put(`${backendUrl}/rating/update/${existingRating._id}`, {
+                await axios.put(`${backendUrl}/rating/update/${userRating._id}`, {
                     rate: newRating
                 }, { withCredentials: true });
             } else {
@@ -40,11 +76,32 @@ const Rating = ({
             
             // Fetch fresh product data to update ratings
             await fetchProduct(productId);
+            await fetchUserRating();
             
             toast.success('Rating submitted successfully');
         } catch (error) {
             console.error('Error submitting rating:', error);
-            toast.error('Failed to submit rating');
+            toast.error(error.response?.data?.message || 'Failed to submit rating');
+        }
+    };
+
+    const handleDeleteRating = async () => {
+        if (!userRating) return;
+        
+        try {
+            await axios.delete(`${backendUrl}/rating/delete/${userRating._id}`, {
+                withCredentials: true
+            });
+            
+            // Fetch fresh product data to update ratings
+            await fetchProduct(productId);
+            setRating(0);
+            setUserRating(null);
+            
+            toast.success('Rating deleted successfully');
+        } catch (error) {
+            console.error('Error deleting rating:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete rating');
         }
     };
 
@@ -121,7 +178,17 @@ const Rating = ({
                 {/* Rating Input (if user is logged in) */}
                 {isLoggedIn && (
                     <div className="mt-4">
-                        <h5>Your Rating</h5>
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h5 className="mb-0">Your Rating</h5>
+                            {userRating && (
+                                <button 
+                                    className="btn btn-link text-danger p-0"
+                                    onClick={handleDeleteRating}
+                                >
+                                    Delete Rating
+                                </button>
+                            )}
+                        </div>
                         <StarRating
                             value={rating}
                             onHover={setHoverRating}

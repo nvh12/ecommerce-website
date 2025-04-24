@@ -1,6 +1,8 @@
 const Comment = require("../models/comment")
 const commentServices = require("../services/commentServices")
-
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const ACCESS_SECRET = process.env.JWT_SECRET;
 
 const getCommentProductControl = async (req, res) =>{
     try{

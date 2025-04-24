@@ -1,28 +1,29 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { Container, Row, Col, Button, Badge, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Badge, Card, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
-import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaStar } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ProductComments from '../components/ProductComments';
 import Rating from '../components/Rating';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { 
-        backendUrl, 
-        isLoggedIn, 
+    const {
+        backendUrl,
+        isLoggedIn,
         user,
         product,
         isLoadingProduct,
         productError,
         fetchProduct
     } = useContext(AppContext);
-    
+
     // Initialize state with null values
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -33,7 +34,7 @@ const ProductDetail = () => {
         if (id) {
             fetchProduct(id);
         }
-    }, [id]);
+    }, [id, fetchProduct]);
 
     // Update selected color and image when product is loaded
     useEffect(() => {
@@ -113,22 +114,11 @@ const ProductDetail = () => {
                 id: product._id,
                 price: product.price
             }, { withCredentials: true });
-            
+
             toast.success("Added to cart");
         } catch (error) {
             toast.error("Failed to add to cart");
         }
-    };
-
-    const toggleSpecification = (e, id) => {
-        e.preventDefault();
-        const container = document.getElementById('specification-item-' + id);
-        const link = container.querySelector('a');
-        const list = container.querySelector('.text-specifi');
-        
-        // Toggle active class for clicked specification only
-        link.classList.toggle('active');
-        list.classList.toggle('active');
     };
 
     return (
@@ -140,14 +130,14 @@ const ProductDetail = () => {
                     <Col md={6} className="mb-4">
                         <div className="product-images">
                             <div className="main-image-container mb-3 border rounded p-3">
-                                <img 
-                                    src={selectedImage} 
+                                <img
+                                    src={selectedImage}
                                     alt={product.productName}
                                     className="img-fluid"
-                                    style={{ 
-                                        maxHeight: '400px', 
-                                        width: '100%', 
-                                        objectFit: 'contain' 
+                                    style={{
+                                        maxHeight: '400px',
+                                        width: '100%',
+                                        objectFit: 'contain'
                                     }}
                                 />
                             </div>
@@ -160,7 +150,7 @@ const ProductDetail = () => {
                                             className={`thumbnail-container border rounded p-1 ${selectedImage === image ? 'border-primary' : ''}`}
                                             style={{ cursor: 'pointer', width: '70px', height: '70px' }}
                                         >
-                                            <img 
+                                            <img
                                                 src={image}
                                                 alt={`${product.productName} ${index + 1}`}
                                                 className="w-100 h-100"
@@ -179,9 +169,9 @@ const ProductDetail = () => {
                             {/* Categories */}
                             <div className="mb-2">
                                 {product.category?.map((cat, index) => (
-                                    <Badge 
-                                        key={index} 
-                                        bg="light" 
+                                    <Badge
+                                        key={index}
+                                        bg="light"
                                         text="dark"
                                         className="me-2"
                                     >
@@ -197,33 +187,6 @@ const ProductDetail = () => {
                             {product.brand && (
                                 <div className="text-muted mb-3">{product.brand}</div>
                             )}
-
-                            {/* Rating Section */}
-                            <Row className="mt-4">
-                                <Col md={12}>
-                                    <Rating
-                                        productId={product._id}
-                                        ratingsAvg={product.ratingsAvg}
-                                        ratingsCount={product.ratingsCount}
-                                        isLoggedIn={isLoggedIn}
-                                    />
-                                </Col>
-                            </Row>
-
-                            {/* Price Section */}
-                            <div className="price-section p-3 bg-light rounded mb-3">
-                                <div className="current-price text-danger fs-3 fw-bold">
-                                    {typeof finalPrice === 'number' ? finalPrice.toLocaleString() : '0'}{product?.currency || '$'}
-                                </div>
-                                {product?.discount > 0 && (
-                                    <div className="d-flex align-items-center gap-2">
-                                        <span className="text-decoration-line-through text-muted">
-                                            {typeof product.price === 'number' ? product.price.toLocaleString() : '0'}{product?.currency || '$'}
-                                        </span>
-                                        <span className="text-danger">-{product.discount}%</span>
-                                    </div>
-                                )}
-                            </div>
 
                             {/* Stock Status */}
                             <div className="stock-info mb-3">
@@ -242,9 +205,7 @@ const ProductDetail = () => {
                                             <div
                                                 key={color}
                                                 onClick={() => setSelectedColor(color)}
-                                                className={`color-option p-2 border rounded ${
-                                                    selectedColor === color ? 'border-primary' : ''
-                                                }`}
+                                                className={`color-option p-2 border rounded ${selectedColor === color ? 'border-primary' : ''}`}
                                                 style={{ cursor: 'pointer' }}
                                             >
                                                 <div className="small">{color}</div>
@@ -260,10 +221,25 @@ const ProductDetail = () => {
                                 <p>{product.description}</p>
                             </div>
 
+                            {/* Price Section */}
+                            <div className="price-section p-3 bg-light rounded mb-3">
+                                <div className="current-price text-danger fs-3 fw-bold">
+                                    {typeof finalPrice === 'number' ? finalPrice.toLocaleString() : '0'}{product?.currency || '$'}
+                                </div>
+                                {product?.discount > 0 && (
+                                    <div className="d-flex align-items-center gap-2">
+                                        <span className="text-decoration-line-through text-muted">
+                                            {typeof product.price === 'number' ? product.price.toLocaleString() : '0'}{product?.currency || '$'}
+                                        </span>
+                                        <span className="text-danger">-{product.discount}%</span>
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Action Buttons */}
                             <div className="d-grid gap-2">
-                                <Button 
-                                    variant="danger" 
+                                <Button
+                                    variant="danger"
                                     size="lg"
                                     disabled={product.stocks <= 0}
                                     onClick={handleAddToCart}
@@ -271,8 +247,8 @@ const ProductDetail = () => {
                                     <FaShoppingCart className="me-2" />
                                     Add to Cart
                                 </Button>
-                                <Button 
-                                    variant="outline-primary" 
+                                <Button
+                                    variant="outline-primary"
                                     size="lg"
                                     onClick={() => navigate('/')}
                                 >
@@ -280,6 +256,28 @@ const ProductDetail = () => {
                                 </Button>
                             </div>
                         </div>
+                    </Col>
+                </Row>
+
+                {/* Rating Section */}
+                <Row className="mt-4">
+                    <Col md={12}>
+                        <Rating
+                            productId={product._id}
+                            ratingsAvg={product.ratingsAvg}
+                            ratingsCount={product.ratingsCount}
+                            isLoggedIn={isLoggedIn}
+                        />
+                    </Col>
+                </Row>
+
+                {/* Comments Section */}
+                <Row className="mt-4">
+                    <Col md={12}>
+                        <ProductComments 
+                            productId={product._id}
+                            onCommentAdded={() => {}}
+                        />
                     </Col>
                 </Row>
             </Container>
