@@ -6,9 +6,10 @@ const Header = () => {
     const navigate = useNavigate();
     const { userData, isLoggedIn, cartItems } = useContext(AppContext);
 
-    useEffect(() => {
-        console.log("userData updated:", userData); 
-    }, [isLoggedIn, userData]);
+    // useEffect(() => {
+    //     console.log("userData updated:", userData); 
+    // }, [isLoggedIn]);
+    // console.log("isLoggedIn:", isLoggedIn);
 
     return (
         <div>

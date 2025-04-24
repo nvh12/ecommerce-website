@@ -12,6 +12,7 @@ const ProductListPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log(isLoggedIn, userData);
         if (!isLoggedIn || userData.role !== 'admin') {
             navigate('/');
             toast.error('Bạn không có quyền truy cập trang này');

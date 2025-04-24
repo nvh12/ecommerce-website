@@ -3,10 +3,14 @@ import { AppContext } from '../../context/AppContext';
 import UserCard from '../../components/UserCard';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const UserListPage = () => {
-    const {userData, backendUrl} = useContext(AppContext)
+    const {userData, backendUrl, isLoggedIn} = useContext(AppContext)
     const [userList, setUserList] = useState([])
+    const navigate = useNavigate()
+    console.log(isLoggedIn, userData)
+
     const fetchUserList = async () => {
         try {
             const res = await axios.get(backendUrl + "admin/user", {withCredentials: true})
@@ -18,8 +22,14 @@ const UserListPage = () => {
     }
 
     useEffect(() => {
-        fetchUserList()
-    }, []);
+        console.log(isLoggedIn, userData)
+        if(!isLoggedIn || userData.role !== "admin") {
+            toast.error("Bạn không có quyền truy cập trang này")
+            navigate('/')
+        } else {
+            fetchUserList()
+        }
+    }, [userData, isLoggedIn, navigate]);
 
     return (
         <div className='container'>
@@ -50,7 +60,7 @@ const UserListPage = () => {
                 </div>
                 <div>
                     {
-                        userData.map((user, index) => (
+                        userList.map((user, index) => (
                             <>
                                 <UserCard key={index} user={user}/>
                                 <UserCard key={index} user={user}/>

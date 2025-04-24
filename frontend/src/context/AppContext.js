@@ -6,8 +6,14 @@ export const AppContext = createContext(null)
 
 const AppContextProvider = (props) => {
     const [productItems, setProductItems] = useState([])
-    const [userData, setUserData] = useState([])
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [userData, setUserData] = useState(() => {
+        const storedUser = localStorage.getItem("userData");
+        return storedUser ? JSON.parse(storedUser) : {};
+    });
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        return localStorage.getItem("isLoggedIn") === "true";
+    });
+    
     const [currentProduct, setCurrentProduct] = useState(null)
     const [loading, setLoading] = useState(false)
 
@@ -17,8 +23,8 @@ const AppContextProvider = (props) => {
     const fetchUserData = async () => {
         try {
             const {data} = await axios.get(backendUrl + "/user", {withCredentials: true})
-            setUserData(data)
-            console.log(data)
+            setUserData(data.data)
+            console.log(userData)
             setIsLoggedIn(true)
             console.log(isLoggedIn)
         } catch (error) {
@@ -32,8 +38,8 @@ const AppContextProvider = (props) => {
             const {data} = await axios.get(backendUrl + "/product")
             if (data.message === "Success") {
                 setProductItems(data.product)
-                console.log("Products loaded:", data.product)
-                toast.success("Lấy sản phẩm thành công")
+                // console.log("Products loaded:", data.product)
+                //toast.success("Lấy sản phẩm thành công")
             } else {
                 toast.error("Lỗi lấy sản phẩm")
             }
@@ -55,10 +61,22 @@ const AppContextProvider = (props) => {
     useEffect(() => {
         fetchProductData()
     }, [])
+    useEffect(() => {
+        // khi userData thay đổi, lưu vào localStorage
+        if (userData && Object.keys(userData).length > 0) {
+            localStorage.setItem("userData", JSON.stringify(userData));
+            localStorage.setItem("isLoggedIn", "true");
+        } else {
+            localStorage.removeItem("userData");
+            localStorage.removeItem("isLoggedIn");
+        }
+    }, [userData, isLoggedIn]);
+    
 
     const value = {
         productItems,
         userData,
+        setUserData,
         backendUrl,
         fetchUserData,
         setIsLoggedIn,
