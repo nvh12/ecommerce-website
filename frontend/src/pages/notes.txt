@@ -4,9 +4,8 @@ Chưa xử lý các tab '/phone','/laptop',.....
 
 ------- Product detail ----------
 - Là trang chi tiết sản phẩm, khi bấm vào product card tương ứng ở đâu đó
-Chưa xử lí phần click product card để ra trang product detail tương ứng
-Chưa fetch
-Chưa có phần comment (xem xét bỏ qua)
+Chưa xử lý xong rating, rating chưa tự động cập nhật và show lên cho user
+Chưa có phần comment 
 
 ---- Cart Page ------
 Chưa đồng bộ với phần userProfile
@@ -16,3 +15,10 @@ Chưa đồng bộ phần fetch ở các file khác
 ------- Sign up -------------
 Khi load sign up theo kịch bản: home - product detail - login - sign up.
 Thì tự động lấy thông tin hàng như ở home
+
+----------- Admin --------------- 
+Đang demo
+
+-------------- User Profile ------------ 
+Phần tab giỏ hàng trong page này chưa link với giỏ hàng thực tế. 
+Xem xét bỏ luôn vì đã có giỏ hàng ở Header

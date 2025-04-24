@@ -24,7 +24,7 @@ const createRating = async (userId , productID, rating) => {
                 if(product){
                     //Them so rating va tinh la tb rating
                     const newCount = product.ratingsCount.total + 1
-                    product.ratingsAvg = Math.round((product.ratingsAvg * product.ratingsCount.total + rating)/ newCount)
+                    product.ratingsAvg = parseFloat((product.ratingsAvg * product.ratingsCount.total + rating)/ newCount).toFixed(1)
                     product.ratingsCount.total  = newCount
                     product.ratingsCount[parseInt(rating)]++
                     await product.save()
@@ -61,9 +61,10 @@ const getRatingProduct = async (productId, userId = null, allRating = true) => {
                 user: new mongoose.Types.ObjectId(userId)
             })
             if (ratingFound) {
-                return {...ratingFound, fromUser:true}
+                return {...ratingFound.toObject(), fromUser:true}
             }
             else{
+                return []
                 throw new Error("Không tìm được rating của sản phảm") 
             }
         }
@@ -124,7 +125,7 @@ const deleteRating = async (objectId, objectType = "rating") => {
                     if (productFound) {
                         const newRatingsCount = productFound.ratingsCount.total - 1; 
                         const newRatingsAvg = newRatingsCount > 0 
-                            ? Math.round((productFound.ratingsAvg * productFound.ratingsCount.total - rating.rate) / newRatingsCount)
+                            ? parseFloat((productFound.ratingsAvg * productFound.ratingsCount.total - rating.rate) / newRatingsCount).toFixed(1)
                             : 0; 
 
                         
@@ -150,7 +151,9 @@ const updateRating = async (ratingId, newRating) => {
         const updateRating =await Rating.findById(new mongoose.Types.ObjectId(ratingId))
         const oldRating = updateRating.rate
         const updateProduct =await Product.findById(new mongoose.Types.ObjectId(updateRating.product))
-        const newRatingsAvg = Math.round((updateProduct.ratingsAvg * updateProduct.ratingsCount.total - oldRating + newRating) / updateProduct.ratingsCount.total)
+        const newRatingsAvg = 
+        parseFloat((updateProduct.ratingsAvg * updateProduct.ratingsCount.total - oldRating + newRating) 
+        / updateProduct.ratingsCount.total).toFixed(1);
         updateProduct.ratingsAvg = newRatingsAvg
         updateProduct.ratingsCount[parseInt(oldRating)] --;
         updateProduct.ratingsCount[parseInt(newRating)] ++;

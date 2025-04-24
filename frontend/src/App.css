@@ -1,0 +1,32 @@
+/* Advertisement Carousel Styles */
+.advertisement-carousel .carousel-control-prev,
+.advertisement-carousel .carousel-control-next {
+    width: 5%;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0 10px;
+}
+
+.advertisement-carousel .carousel-control-prev-icon,
+.advertisement-carousel .carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.advertisement-carousel .carousel-item {
+    padding: 10px 0;
+}
+
+.advertisement-carousel {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.advertisement-carousel img:hover {
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+}

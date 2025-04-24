@@ -8,9 +8,9 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const UserProfile = () => {
-  const {backendUrl, userData, setIsLoggedIn } = useContext(AppContext)
+  const {backendUrl, userData, setUserData, setIsLoggedIn, isLoggedIn } = useContext(AppContext)
 
-  const [activeSection, setActiveSection] = useState("account")
+  const [activeSection, setActiveSection] = useState("orders")
   const [userOrders, setUserOrders] = useState([])
   const [userCart, setUserCart] = useState([])
 
@@ -23,22 +23,32 @@ const UserProfile = () => {
   const onLogOutHandler = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(backendUrl + "/auth/logout", {}, {withCredentials: true})
-      console.log("Logout successfully")
+      await axios.post(backendUrl + "/auth/logout", {}, { withCredentials: true })
+  
+      
+      localStorage.removeItem("userData")
+      localStorage.removeItem("isLoggedIn")
+      console.log(userData)
+      console.log(isLoggedIn)
+  
+      setUserData({})
+      setIsLoggedIn(false)
+      setUserOrders([])
+  
       toast.success("Đăng xuất thành công")
       navigate('/')
-      setIsLoggedIn(false)
     } catch (error) {
-      toast.error("Lỗi đăng xuất")
+      console.log("Logout error:", error)
+  toast.error("Lỗi đăng xuất: " + (error.response?.data?.error || error.message))
     }
   }
 
   const fetchUserOrders = async () => {
     try {
       const res = await axios.get(backendUrl + "/user/order", {withCredentials: true})
-      console.log("Đã lấy đơn hàng người dùng !")
-      console.log(res.data.data)
-      setUserOrders(res.data.data)
+      const temp = res.data.data
+      console.log("don hang", temp)
+      setUserOrders(temp)
     } catch (error) {
       toast.error("Lỗi lấy đơn hàng")
     }
@@ -48,23 +58,23 @@ const UserProfile = () => {
     try {
       const res = await axios.get(backendUrl + "/cart", {withCredentials: true})
       console.log("Đã lấy giỏ hàng người dùng !")
-      console.log(res.data.data)
-      setUserCart(res.data.data)
+      console.log(res.data)
+      // setUserCart(res.data)
     } catch (error) {
       toast.error("Lỗi lấy giỏ hàng")
     }
   }
   useEffect(() => { 
     fetchUserOrders()
-    fetchUserCart()
-    }, [userData])
+    // fetchUserCart()
+    }, [])
   
   return (
     <div>
         <Header />
         <div className='container my-5'>
             <div className='row'>
-                <div className='col-3 d-flex flex-column gap-2 border rounded'>
+                <div className='col-12 col-md-3 d-flex flex-column gap-2 border rounded'>
                     <div className='d-flex flex-column justify-content-center align-items-center'>
                         <p className='fs-2 m-0 mt-2'>{userData.name}</p>
                         <p className='text-muted small m-0'>{userData.email}</p>
@@ -102,7 +112,7 @@ const UserProfile = () => {
                       </button>
                     </div>
                 </div>
-                <div className='col-9 d-flex flex-column  p-3 border rounded'>
+                <div className='col-12 col-md-9 d-flex flex-column  p-3 border rounded'>
                       <UserProfileComponent activeSection={activeSection} userOrders={userOrders} userCart={userCart}/>
                 </div>
             </div>

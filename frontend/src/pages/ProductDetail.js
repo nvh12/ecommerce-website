@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Container, Row, Col, Button, Badge, Card } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
@@ -7,95 +7,99 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Rating from '../components/Rating';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { backendUrl, isLoggedIn } = useContext(AppContext);
+    const { 
+        backendUrl, 
+        isLoggedIn, 
+        user,
+        product,
+        isLoadingProduct,
+        productError,
+        fetchProduct
+    } = useContext(AppContext);
     
-    // Get product data from location state
-    const [product, setProduct] = useState(location.state?.product);
-    const [selectedColor, setSelectedColor] = useState(product?.color?.[0] || null);
-    const [selectedImage, setSelectedImage] = useState(product?.images?.[0] || null);
+    // Initialize state with null values
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const currentIdRef = useRef(id);
 
-    // Demo rating state
-    const [rating, setRating] = useState(0);
-    const [hoverRating, setHoverRating] = useState(0);
-    const [ratings, setRatings] = useState([
-        { id: 1, rate: 5, user: { name: 'Nguyễn Thị Tú Trinh' }, comment: 'Đẹp, phục vụ nhiệt tình' },
-        { id: 2, rate: 3, user: { name: 'Phạm Thanh Toàn' }, comment: 'Lỗi loa' },
-    ]);
-
-    // If no product data in state, fetch it
+    // Fetch product when component mounts or id changes
     useEffect(() => {
-        if (!product) {
-            fetchProduct();
+        if (id) {
+            fetchProduct(id);
         }
-    }, []);
+    }, [id]);
 
-    const fetchProduct = async () => {
-        try {
-            const { data } = await axios.get(`${backendUrl}/product/${id}`);
-            setProduct(data.product);
-            setSelectedColor(data.product?.color?.[0] || null);
-            setSelectedImage(data.product?.images?.[0] || null);
-        } catch (error) {
-            console.error('Error fetching product:', error);
-            toast.error('Không thể tải thông tin sản phẩm');
-            navigate('/');
+    // Update selected color and image when product is loaded
+    useEffect(() => {
+        if (product) {
+            setSelectedColor(product.color?.[0] || null);
+            setSelectedImage(product.images?.[0] || null);
         }
-    };
+    }, [product]);
 
-    // Demo rating handlers
-    const handleRatingSubmit = (newRating) => {
-        if (!isLoggedIn) {
-            toast.error('Vui lòng đăng nhập để đánh giá');
-            return;
-        }
-        setRating(newRating);
-        // In a real app, this would call the backend API
-        console.log('Submitting rating:', newRating);
-        toast.success('Đã gửi đánh giá');
-    };
-
-    const handleRatingDelete = (ratingId) => {
-        setRatings(ratings.filter(r => r.id !== ratingId));
-        // In a real app, this would call the backend API
-        console.log('Deleting rating:', ratingId);
-        toast.success('Đã xóa đánh giá');
-    };
-
-    const StarRating = ({ value, onHover, onClick, size = 24, interactive = true }) => {
+    // Show loading state
+    if (isLoadingProduct) {
         return (
-            <div className="d-flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                    <FaStar
-                        key={star}
-                        size={size}
-                        style={{ 
-                            cursor: interactive ? 'pointer' : 'default',
-                            marginRight: '4px',
-                            transition: 'color 0.2s ease'
-                        }}
-                        color={star <= (hoverRating || value) ? "#ffc107" : "#e4e5e9"}
-                        onMouseEnter={() => interactive && onHover(star)}
-                        onMouseLeave={() => interactive && onHover(0)}
-                        onClick={() => interactive && onClick(star)}
-                    />
-                ))}
+            <div>
+                <Header />
+                <Container className="py-4">
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </Container>
+                <Footer />
             </div>
         );
-    };
-
-    // If no product data, show loading
-    if (!product) {
-        return <div>Đang tải...</div>;
     }
 
-    const finalPrice = product.discount 
-        ? product.price - (product.price * (product.discount / 100)) 
-        : product.price;
+    // Show error state
+    if (productError) {
+        return (
+            <div>
+                <Header />
+                <Container className="py-4">
+                    <div className="alert alert-danger">
+                        {productError}
+                    </div>
+                </Container>
+                <Footer />
+            </div>
+        );
+    }
+
+    // Show not found state
+    if (!product) {
+        return (
+            <div>
+                <Header />
+                <Container className="py-4">
+                    <div className="alert alert-warning">
+                        Product not found
+                    </div>
+                </Container>
+                <Footer />
+            </div>
+        );
+    }
+
+    // Calculate final price with proper checks
+    const calculateFinalPrice = () => {
+        if (!product || typeof product.price !== 'number') return 0;
+        if (product.discount) {
+            return product.price - (product.price * (product.discount / 100));
+        }
+        return product.price;
+    };
+
+    const finalPrice = calculateFinalPrice();
 
     // Add to cart handler
     const handleAddToCart = async () => {
@@ -110,37 +114,22 @@ const ProductDetail = () => {
                 price: product.price
             }, { withCredentials: true });
             
-            toast.success("Đã thêm vào giỏ hàng");
+            toast.success("Added to cart");
         } catch (error) {
-            toast.error("Lỗi thêm vào giỏ hàng");
+            toast.error("Failed to add to cart");
         }
     };
 
-    // Calculate rating statistics
-    const getRatingStats = () => {
-        const total = ratings.length;
-        const stats = {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
-            1: 0
-        };
+    const toggleSpecification = (e, id) => {
+        e.preventDefault();
+        const container = document.getElementById('specification-item-' + id);
+        const link = container.querySelector('a');
+        const list = container.querySelector('.text-specifi');
         
-        ratings.forEach(rating => {
-            stats[rating.rate]++;
-        });
-
-        return Object.keys(stats).map(rate => ({
-            rate: parseInt(rate),
-            count: stats[rate],
-            percentage: total ? (stats[rate] / total * 100).toFixed(1) : 0
-        })).reverse();
+        // Toggle active class for clicked specification only
+        link.classList.toggle('active');
+        list.classList.toggle('active');
     };
-
-    const averageRating = ratings.length > 0 
-        ? (ratings.reduce((acc, curr) => acc + curr.rate, 0) / ratings.length).toFixed(1)
-        : '0';
 
     return (
         <div>
@@ -162,7 +151,7 @@ const ProductDetail = () => {
                                     }}
                                 />
                             </div>
-                            {product.images.length > 1 && (
+                            {product.images?.length > 1 && (
                                 <div className="d-flex gap-2 flex-wrap">
                                     {product.images.map((image, index) => (
                                         <div
@@ -189,7 +178,7 @@ const ProductDetail = () => {
                         <div className="product-info">
                             {/* Categories */}
                             <div className="mb-2">
-                                {product.category.map((cat, index) => (
+                                {product.category?.map((cat, index) => (
                                     <Badge 
                                         key={index} 
                                         bg="light" 
@@ -209,28 +198,27 @@ const ProductDetail = () => {
                                 <div className="text-muted mb-3">{product.brand}</div>
                             )}
 
-                            {/* Demo Ratings */}
-                            <div className="d-flex align-items-center mb-3">
-                                <span className="text-warning me-2">
-                                    <FaStar className="me-1" />
-                                    {ratings.length > 0 
-                                        ? (ratings.reduce((acc, curr) => acc + curr.rate, 0) / ratings.length).toFixed(1)
-                                        : '0.0'}
-                                </span>
-                                <span className="text-muted">
-                                    {ratings.length} đánh giá
-                                </span>
-                            </div>
+                            {/* Rating Section */}
+                            <Row className="mt-4">
+                                <Col md={12}>
+                                    <Rating
+                                        productId={product._id}
+                                        ratingsAvg={product.ratingsAvg}
+                                        ratingsCount={product.ratingsCount}
+                                        isLoggedIn={isLoggedIn}
+                                    />
+                                </Col>
+                            </Row>
 
                             {/* Price Section */}
                             <div className="price-section p-3 bg-light rounded mb-3">
                                 <div className="current-price text-danger fs-3 fw-bold">
-                                    {finalPrice.toLocaleString()}{product.currency}
+                                    {typeof finalPrice === 'number' ? finalPrice.toLocaleString() : '0'}{product?.currency || '$'}
                                 </div>
-                                {product.discount > 0 && (
+                                {product?.discount > 0 && (
                                     <div className="d-flex align-items-center gap-2">
                                         <span className="text-decoration-line-through text-muted">
-                                            {product.price.toLocaleString()}{product.currency}
+                                            {typeof product.price === 'number' ? product.price.toLocaleString() : '0'}{product?.currency || '$'}
                                         </span>
                                         <span className="text-danger">-{product.discount}%</span>
                                     </div>
@@ -239,16 +227,16 @@ const ProductDetail = () => {
 
                             {/* Stock Status */}
                             <div className="stock-info mb-3">
-                                <span className="fw-bold me-2">Tình trạng:</span>
+                                <span className="fw-bold me-2">Stock:</span>
                                 <span className={product.stocks > 0 ? 'text-success' : 'text-danger'}>
-                                    {product.stocks > 0 ? `Còn hàng (${product.stocks})` : 'Hết hàng'}
+                                    {product.stocks > 0 ? `In Stock (${product.stocks})` : 'Out of Stock'}
                                 </span>
                             </div>
 
                             {/* Colors */}
-                            {product.color && product.color.length > 0 && (
+                            {product.color?.length > 0 && (
                                 <div className="colors-section mb-3">
-                                    <div className="fw-bold mb-2">Màu sắc</div>
+                                    <div className="fw-bold mb-2">Colors</div>
                                     <div className="d-flex gap-2 flex-wrap">
                                         {product.color.map((color) => (
                                             <div
@@ -266,24 +254,10 @@ const ProductDetail = () => {
                                 </div>
                             )}
 
-                            {/* Features */}
-                            {product.features && product.features.length > 0 && (
-                                <div className="features-section mb-3">
-                                    <div className="fw-bold mb-2">Tính năng nổi bật</div>
-                                    <ul className="list-unstyled">
-                                        {product.features.map((feature, index) => (
-                                            <li key={index} className="mb-2">
-                                                • {feature}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
                             {/* Description */}
-                            <div className="description-section mb-4">
-                                <div className="fw-bold mb-2">Mô tả sản phẩm</div>
-                                <p className="text-muted">{product.description}</p>
+                            <div className="mb-4">
+                                <h4>Product Description</h4>
+                                <p>{product.description}</p>
                             </div>
 
                             {/* Action Buttons */}
@@ -295,135 +269,16 @@ const ProductDetail = () => {
                                     onClick={handleAddToCart}
                                 >
                                     <FaShoppingCart className="me-2" />
-                                    Thêm vào giỏ hàng
+                                    Add to Cart
                                 </Button>
                                 <Button 
                                     variant="outline-primary" 
                                     size="lg"
                                     onClick={() => navigate('/')}
                                 >
-                                    Tiếp tục mua sắm
+                                    Continue Shopping
                                 </Button>
                             </div>
-                        </div>
-                    </Col>
-                </Row>
-
-                {/* Rating Section */}
-                <Row className="mt-4">
-                    <Col>
-                        <div className="ratings-section">
-                            <h4 className="mb-4">Đánh giá {product.productName}</h4>
-                            
-                            <Row>
-                                <Col md={4} className="text-center">
-                                    <div className="d-flex flex-column align-items-center">
-                                        <div className="h1 mb-0" style={{ color: '#F8C146' }}>
-                                            {averageRating}
-                                            <span className="h3">/5</span>
-                                        </div>
-                                        <div className="mb-2">
-                                            <StarRating
-                                                value={parseFloat(averageRating)}
-                                                onHover={() => {}}
-                                                onClick={() => {}}
-                                                size={20}
-                                                interactive={false}
-                                            />
-                                        </div>
-                                        <div className="text-muted">
-                                            {ratings.length} đánh giá
-                                        </div>
-                                    </div>
-                                </Col>
-                                <Col md={8}>
-                                    <div className="rating-bars">
-                                        {getRatingStats().map(stat => (
-                                            <div key={stat.rate} className="d-flex align-items-center mb-2">
-                                                <div style={{ width: '60px' }} className="text-end me-2">
-                                                    {stat.rate} <FaStar style={{ color: '#F8C146' }} size={14} />
-                                                </div>
-                                                <div className="flex-grow-1">
-                                                    <div className="progress" style={{ height: '8px' }}>
-                                                        <div
-                                                            className="progress-bar"
-                                                            role="progressbar"
-                                                            style={{ 
-                                                                width: `${stat.percentage}%`,
-                                                                backgroundColor: '#F8C146'
-                                                            }}
-                                                            aria-valuenow={stat.percentage}
-                                                            aria-valuemin="0"
-                                                            aria-valuemax="100"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div style={{ width: '60px' }} className="text-start ms-2">
-                                                    {stat.percentage}%
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </Col>
-                            </Row>
-
-                            {/* Rating Input */}
-                            {isLoggedIn && (
-                                <Card className="my-4 p-3 border-0 bg-light">
-                                    <div className="d-flex align-items-center">
-                                        <div className="me-3">Đánh giá của bạn:</div>
-                                        <StarRating
-                                            value={rating}
-                                            onHover={setHoverRating}
-                                            onClick={handleRatingSubmit}
-                                            size={24}
-                                        />
-                                    </div>
-                                </Card>
-                            )}
-
-                            {/* Ratings List */}
-                            <div className="ratings-list mt-4">
-                                {ratings.map((rating) => (
-                                    <div key={rating.id} className="mb-4">
-                                        <div className="d-flex align-items-start">
-                                            <div className="flex-grow-1">
-                                                <div className="d-flex align-items-center mb-2">
-                                                    <StarRating
-                                                        value={rating.rate}
-                                                        onHover={() => {}}
-                                                        onClick={() => {}}
-                                                        size={16}
-                                                        interactive={false}
-                                                    />
-                                                </div>
-                                                <div className="mb-2">
-                                                    <strong>{rating.user.name}</strong>
-                                                </div>
-                                                <p className="mb-2">{rating.comment}</p>
-                                                <div className="d-flex align-items-center">
-                                                    {isLoggedIn && rating.fromUser && (
-                                                        <button 
-                                                            className="btn btn-link btn-sm text-danger p-0"
-                                                            onClick={() => handleRatingDelete(rating.id)}
-                                                        >
-                                                            Xóa
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {ratings.length > 2 && (
-                                <div className="text-center mt-4">
-                                    <Button variant="outline-primary">
-                                        Xem {ratings.length} đánh giá
-                                    </Button>
-                                </div>
-                            )}
                         </div>
                     </Col>
                 </Row>

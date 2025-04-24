@@ -1,9 +1,36 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import UserCard from '../../components/UserCard';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const UserListPage = () => {
-    const {userData} = useContext(AppContext)
+    const {userData, backendUrl, isLoggedIn} = useContext(AppContext)
+    const [userList, setUserList] = useState([])
+    const navigate = useNavigate()
+    console.log(isLoggedIn, userData)
+
+    const fetchUserList = async () => {
+        try {
+            const res = await axios.get(backendUrl + "admin/user", {withCredentials: true})
+            setUserList(res.data.data)
+            console.log("userList", res.data.data)
+        } catch (error) {
+            toast.error("Lỗi lấy danh sách người dùng")
+        }
+    }
+
+    useEffect(() => {
+        console.log(isLoggedIn, userData)
+        if(!isLoggedIn || userData.role !== "admin") {
+            toast.error("Bạn không có quyền truy cập trang này")
+            navigate('/')
+        } else {
+            fetchUserList()
+        }
+    }, [userData, isLoggedIn, navigate]);
+
     return (
         <div className='container'>
             <h1>Danh sách người dùng</h1>
@@ -33,7 +60,7 @@ const UserListPage = () => {
                 </div>
                 <div>
                     {
-                        userData.map((user, index) => (
+                        userList.map((user, index) => (
                             <>
                                 <UserCard key={index} user={user}/>
                                 <UserCard key={index} user={user}/>
