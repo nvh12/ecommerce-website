@@ -231,6 +231,17 @@ const ProductDetail = () => {
         };
     };
 
+    const toggleSpecification = (e, id) => {
+        e.preventDefault();
+        const container = document.getElementById('specification-item-' + id);
+        const link = container.querySelector('a');
+        const list = container.querySelector('.text-specifi');
+        
+        // Toggle active class for clicked specification only
+        link.classList.toggle('active');
+        list.classList.toggle('active');
+    };
+
     return (
         <div>
             <Header />
@@ -354,7 +365,7 @@ const ProductDetail = () => {
                         )}
 
                         {/* Features */}
-                        {product.features && product.features.length > 0 && (
+                        {/* {product.features && product.features.length > 0 && (
                             <div className="features-section mb-3">
                                 <div className="fw-bold mb-2">Tính năng nổi bật</div>
                                 <ul className="list-unstyled">
@@ -365,13 +376,14 @@ const ProductDetail = () => {
                                     ))}
                                 </ul>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Description */}
-                        <div className="description-section mb-4">
-                            <div className="fw-bold mb-2">Mô tả sản phẩm</div>
-                            <p className="text-muted">{product.description}</p>
+                        <div className="mb-4">
+                            <h4>Mô tả sản phẩm</h4>
+                            <p>{product.description}</p>
                         </div>
+
 
                         {/* Action Buttons */}
                         <div className="d-grid gap-2">
@@ -396,74 +408,331 @@ const ProductDetail = () => {
                 </Col>
             </Row>
 
-                {/* Rating Section */}
-                <Row className="mt-4">
-                    <Col md={12}>
-                        <Card className="mb-4">
-                            <Card.Body>
-                                <h3>Product Ratings</h3>
-                                <div className="d-flex align-items-center mb-3">
-                                    <div className="me-3">
-                                        <h2 className="mb-0">{product.ratingsAvg.toFixed(1)}</h2>
-                                        <div className="text-muted">
-                                            {product.ratingsCount.total} {product.ratingsCount.total === 1 ? 'rating' : 'ratings'}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <StarRating
-                                            value={product.ratingsAvg}
-                                            onHover={() => {}}
-                                            onClick={() => {}}
-                                            size={24}
-                                            interactive={false}
-                                        />
-                                    </div>
+                        {/* Technical Specifications */}
+                        <div className="specifications-container">
+                            <div id="specification-item-332236" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" className="active" data-group-id="2121" data-index="1" onClick={(e) => toggleSpecification(e, '332236')}>
+                                        <h3>Cấu hình & Bộ nhớ</h3>
+                                    </a>
+                                    <ul className="text-specifi active">
+                                        <li>
+                                            <span className="label">Hệ điều hành:</span>
+                                            <span className="value">Android 14</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Chip xử lý (CPU):</span>
+                                            <span className="value">MediaTek Helio G92 Max 8 nhân</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Tốc độ CPU:</span>
+                                            <span className="value">2 nhân 2.0 GHz & 6 nhân 1.8 GHz</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">RAM:</span>
+                                            <span className="value">8 GB</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Dung lượng lưu trữ:</span>
+                                            <span className="value">512 GB</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Dung lượng còn lại (khả dụng):</span>
+                                            <span className="value">497 GB</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Thẻ nhớ:</span>
+                                            <span className="value">MicroSD, hỗ trợ tối đa 256 GB</span>
+                                        </li>
+                                    </ul>
                                 </div>
+                            </div>
 
-                                {/* Rating Distribution */}
-                                <div className="mt-3">
-                                    {[5, 4, 3, 2, 1].map((star) => (
-                                        <div key={star} className="d-flex align-items-center mb-2">
-                                            <div className="me-2" style={{ width: '30px' }}>
-                                                {star} <FaStar style={{ color: '#F8C146' }} />
-                                            </div>
-                                            <div className="flex-grow-1">
-                                                <div className="progress" style={{ height: '8px' }}>
-                                                    <div
-                                                        className="progress-bar"
-                                                        role="progressbar"
-                                                        style={{
-                                                            width: `${(product.ratingsCount[star] / product.ratingsCount.total) * 100}%`,
-                                                            backgroundColor: '#F8C146'
-                                                        }}
-                                                    />
+                            <div id="specification-item-332237" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" data-group-id="2122" data-index="2" onClick={(e) => toggleSpecification(e, '332237')}>
+                                        <h3>Camera & Màn hình</h3>
+                                    </a>
+                                    <ul className="text-specifi">
+                                        <li>
+                                            <span className="label">Camera sau:</span>
+                                            <span className="value">50 MP, f/1.8</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Camera trước:</span>
+                                            <span className="value">8 MP, f/2.0</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Kích thước màn hình:</span>
+                                            <span className="value">6.72 inch</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Độ phân giải màn hình:</span>
+                                            <span className="value">2400 x 1080 (FHD+)</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Tần số quét:</span>
+                                            <span className="value">90 Hz</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div id="specification-item-332238" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" data-group-id="2123" data-index="3" onClick={(e) => toggleSpecification(e, '332238')}>
+                                        <h3>Pin & Sạc</h3>
+                                    </a>
+                                    <ul className="text-specifi">
+                                        <li>
+                                            <span className="label">Dung lượng pin:</span>
+                                            <span className="value">6000 mAh</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Công nghệ sạc:</span>
+                                            <span className="value">Sạc nhanh 45W</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Cổng sạc:</span>
+                                            <span className="value">Type-C</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div id="specification-item-332239" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" data-group-id="2124" data-index="4" onClick={(e) => toggleSpecification(e, '332239')}>
+                                        <h3>Tiện ích</h3>
+                                    </a>
+                                    <ul className="text-specifi">
+                                        <li>
+                                            <span className="label">Chống nước, bụi:</span>
+                                            <span className="value">IP69</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Tính năng đặc biệt:</span>
+                                            <span className="value">Chống nước, chống bụi, Sạc ngược</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Bảo mật:</span>
+                                            <span className="value">Vân tay cạnh viền</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div id="specification-item-332240" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" data-group-id="2125" data-index="5" onClick={(e) => toggleSpecification(e, '332240')}>
+                                        <h3>Kết nối</h3>
+                                    </a>
+                                    <ul className="text-specifi">
+                                        <li>
+                                            <span className="label">SIM:</span>
+                                            <span className="value">2 Nano SIM</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Wifi:</span>
+                                            <span className="value">Wi-Fi 802.11 a/b/g/n/ac</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">GPS:</span>
+                                            <span className="value">GPS, GLONASS, BDS, GALILEO</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Bluetooth:</span>
+                                            <span className="value">v5.0</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Jack tai nghe:</span>
+                                            <span className="value">3.5 mm</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div id="specification-item-332241" className="specification-item">
+                                <div className="box-specifi">
+                                    <a href="javascript:;" data-group-id="2126" data-index="6" onClick={(e) => toggleSpecification(e, '332241')}>
+                                        <h3>Thiết kế & Chất liệu</h3>
+                                    </a>
+                                    <ul className="text-specifi">
+                                        <li>
+                                            <span className="label">Kích thước:</span>
+                                            <span className="value">165.69 x 76.22 x 7.99 mm</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Trọng lượng:</span>
+                                            <span className="value">196 g</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Chất liệu:</span>
+                                            <span className="value">Khung nhôm & Mặt lưng kính</span>
+                                        </li>
+                                        <li>
+                                            <span className="label">Màu sắc:</span>
+                                            <span className="value">Lightning Gold, Storm Black</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <style jsx>{`
+                            .specifications-container {
+                                border: 1px solid #ddd;
+                                border-radius: 8px;
+                            }
+                            .specification-item {
+                                border-bottom: 1px solid #ddd;
+                            }
+                            .specification-item:last-child {
+                                border-bottom: none;
+                            }
+                            .box-specifi {
+                                padding: 15px;
+                            }
+                            .box-specifi a {
+                                display: block;
+                                color: #333;
+                                text-decoration: none;
+                                margin-bottom: 10px;
+                                position: relative;
+                                padding-right: 20px;
+                            }
+                            .box-specifi a:after {
+                                content: '';
+                                position: absolute;
+                                right: 0;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                width: 0;
+                                height: 0;
+                                border-left: 6px solid transparent;
+                                border-right: 6px solid transparent;
+                                border-top: 6px solid #666;
+                                transition: transform 0.3s ease;
+                            }
+                            .box-specifi a.active:after {
+                                transform: translateY(-50%) rotate(180deg);
+                            }
+                            .box-specifi a.active {
+                                color: #0066cc;
+                            }
+                            .box-specifi h3 {
+                                margin: 0;
+                                font-size: 16px;
+                                font-weight: 500;
+                            }
+                            .text-specifi {
+                                list-style: none;
+                                padding: 0;
+                                margin: 0;
+                                display: none;
+                            }
+                            .text-specifi.active {
+                                display: block;
+                            }
+                            .text-specifi li {
+                                display: flex;
+                                padding: 8px 0;
+                                border-bottom: 1px solid #eee;
+                            }
+                            .text-specifi li:last-child {
+                                border-bottom: none;
+                            }
+                            .text-specifi .label {
+                                width: 200px;
+                                color: #666;
+                            }
+                            .text-specifi .value {
+                                flex: 1;
+                            }
+                        `}</style>
+
+                        <script jsx>{`
+                            function toggleSpecification(e, id) {
+                                e.preventDefault();
+                                const container = document.getElementById('specification-item-' + id);
+                                const link = container.querySelector('a');
+                                const list = container.querySelector('.text-specifi');
+                                
+                                // Toggle active class for clicked specification only
+                                link.classList.toggle('active');
+                                list.classList.toggle('active');
+                            }
+                        `}</script>
+
+                        {/* Rating Section */}
+                        
+                        <Row className="mt-4">
+                            <Col md={12}>
+                                <Card className="mb-4">
+                                    <Card.Body>
+                                        <h3>Product Ratings</h3>
+                                        <div className="d-flex align-items-center mb-3">
+                                            <div className="me-3">
+                                                <h2 className="mb-0">{product.ratingsAvg.toFixed(1)}</h2>
+                                                <div className="text-muted">
+                                                    {product.ratingsCount.total} {product.ratingsCount.total === 1 ? 'rating' : 'ratings'}
                                                 </div>
                                             </div>
-                                            <div className="ms-2" style={{ width: '40px' }}>
-                                                {product.ratingsCount[star]}
+                                            <div>
+                                                <StarRating
+                                                    value={product.ratingsAvg}
+                                                    onHover={() => {}}
+                                                    onClick={() => {}}
+                                                    size={24}
+                                                    interactive={false}
+                                                />
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
 
-                                {/* Rating Input (if user is logged in) */}
-                                {isLoggedIn && (
-                                    <div className="mt-4">
-                                        <h5>Your Rating</h5>
-                                        <StarRating
-                                            value={rating}
-                                            onHover={setHoverRating}
-                                            onClick={handleRatingSubmit}
-                                            size={24}
-                                        />
-                                    </div>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-        </Container>
-        <Footer />
+                                        {/* Rating Distribution */}
+                                        <div className="mt-3">
+                                            {[5, 4, 3, 2, 1].map((star) => (
+                                                <div key={star} className="d-flex align-items-center mb-2">
+                                                    <div className="me-2" style={{ width: '30px' }}>
+                                                        {star} <FaStar style={{ color: '#F8C146' }} />
+                                                    </div>
+                                                    <div className="flex-grow-1">
+                                                        <div className="progress" style={{ height: '8px' }}>
+                                                            <div
+                                                                className="progress-bar"
+                                                                role="progressbar"
+                                                                style={{
+                                                                    width: `${(product.ratingsCount[star] / product.ratingsCount.total) * 100}%`,
+                                                                    backgroundColor: '#F8C146'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="ms-2" style={{ width: '40px' }}>
+                                                        {product.ratingsCount[star]}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Rating Input (if user is logged in) */}
+                                        {isLoggedIn && (
+                                            <div className="mt-4">
+                                                <h5>Your Rating</h5>
+                                                <StarRating
+                                                    value={rating}
+                                                    onHover={setHoverRating}
+                                                    onClick={handleRatingSubmit}
+                                                    size={24}
+                                                />
+                                            </div>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                </Container>
+                <Footer />
         </div>
     );
 };
