@@ -14,7 +14,8 @@ const createRatingControl = async (req, res) =>{
             userId = decode.id;
         }
         else{
-            userId ="67e90ba169f6b16b579ceecb"
+            userId = "68067abc2ad670712f13645c"
+            // "67e90ba169f6b16b579ceecb"
         }
         if (!userId || !productId || !rate) {
             return res.status(400).json({ message: "Thiếu thông tin userId, productId hoặc rate" });
