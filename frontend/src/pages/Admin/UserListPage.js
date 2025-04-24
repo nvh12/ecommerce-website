@@ -1,9 +1,26 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import UserCard from '../../components/UserCard';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const UserListPage = () => {
-    const {userData} = useContext(AppContext)
+    const {userData, backendUrl} = useContext(AppContext)
+    const [userList, setUserList] = useState([])
+    const fetchUserList = async () => {
+        try {
+            const res = await axios.get(backendUrl + "admin/user", {withCredentials: true})
+            setUserList(res.data.data)
+            console.log("userList", res.data.data)
+        } catch (error) {
+            toast.error("Lỗi lấy danh sách người dùng")
+        }
+    }
+
+    useEffect(() => {
+        fetchUserList()
+    }, []);
+
     return (
         <div className='container'>
             <h1>Danh sách người dùng</h1>
