@@ -1,6 +1,7 @@
 import React, { useEffect, useContext } from 'react'
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import SearchBar from './SearchBar';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -57,6 +58,13 @@ const Header = () => {
                             <span className='d-none d-sm-inline'>Giỏ hàng</span>
                         </button>
                     </>)}
+                </div>
+            </div>
+            <div className="container">
+                <div className="row align-items-center">
+                    <div className="col-12 col-md-6 mt-3 mt-md-0">
+                        <SearchBar />
+                    </div>
                 </div>
             </div>
         </div>
