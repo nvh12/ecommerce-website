@@ -32,7 +32,7 @@ const Rating = ({
             if (response.data && Array.isArray(response.data.ratings)) {
                 // Find the current user's rating
                 const userRating = response.data.ratings.find(r => r.fromUser);
-                if (userRating) {
+            if (userRating) {
                     setRating(userRating.rate);
                     setUserRating(userRating);
                 } else {
@@ -48,7 +48,7 @@ const Rating = ({
             toast.error('Failed to load your rating');
         }
     };
-    
+
     const handleRatingSubmit = async (newRating) => {
         if (!isLoggedIn) {
             toast.error('Please login to rate this product');
@@ -69,7 +69,7 @@ const Rating = ({
             } else {
                 // Create new rating
                 await axios.post(`${backendUrl}/rating/create`, {
-                    productId,
+                        productId,
                     rate: newRating
                 }, { withCredentials: true });
             }
@@ -171,9 +171,9 @@ const Rating = ({
                             <div className="ms-2" style={{ width: '40px' }}>
                                 {ratingsCount?.[star] || 0}
                             </div>
-                        </div>
+                                        </div>
                     ))}
-                </div>
+                                            </div>
 
                 {/* Rating Input (if user is logged in) */}
                 {isLoggedIn && (
@@ -187,7 +187,7 @@ const Rating = ({
                                 >
                                     Delete Rating
                                 </button>
-                            )}
+                                    )}
                         </div>
                         <StarRating
                             value={rating}

@@ -3,10 +3,11 @@ import { Form, InputGroup, Button, Dropdown } from 'react-bootstrap';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
+import axios from 'axios';
 import './SearchBar.css';
 
 const SearchBar = () => {
-    const { productItems } = useContext(AppContext);
+    const { productItems, backendUrl } = useContext(AppContext);
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -21,6 +22,38 @@ const SearchBar = () => {
     const [brand, setBrand] = useState('');
     const [priceMin, setPriceMin] = useState('');
     const [priceMax, setPriceMax] = useState('');
+    
+    // State for categories and brands from backend
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // Fetch categories and brands from backend
+    useEffect(() => {
+        const fetchCategoriesAndBrands = async () => {
+            setLoading(true);
+            try {
+                // Fetch brands
+                const brandResponse = await axios.get(`${backendUrl}/product/brand`);
+                if (brandResponse.data && brandResponse.data.message === "Success") {
+                    setBrands(brandResponse.data.brandFound || []);
+                    console.log(brandResponse.data.brandFound);
+                }
+                //Fetch categories
+                const categoryResponse = await axios.get(`${backendUrl}/product/category`);
+                if (categoryResponse.data && categoryResponse.data.message === "Success") {
+                    setCategories(categoryResponse.data.category || []);
+                }
+                
+            } catch (error) {
+                console.error('Error fetching categories and brands:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchCategoriesAndBrands();
+    }, [backendUrl]);
 
     // Handle search input change
     const handleSearchChange = (e) => {
@@ -114,12 +147,6 @@ const SearchBar = () => {
         }
     };
 
-    // Get unique categories from products
-    const categories = [...new Set(productItems.map(item => item.category))];
-    
-    // Get unique brands from products
-    const brands = [...new Set(productItems.map(item => item.brand))];
-
     return (
         <div className="tgdd-search-container">
             <div className="search-input-wrapper" ref={searchInputRef}>
@@ -167,6 +194,7 @@ const SearchBar = () => {
                                 <Form.Select 
                                     value={category} 
                                     onChange={(e) => setCategory(e.target.value)}
+                                    disabled={loading}
                                 >
                                     <option value="">Tất cả danh mục</option>
                                     {categories.map((cat, index) => (
@@ -180,10 +208,11 @@ const SearchBar = () => {
                                 <Form.Select 
                                     value={brand} 
                                     onChange={(e) => setBrand(e.target.value)}
+                                    disabled={loading}
                                 >
                                     <option value="">Tất cả thương hiệu</option>
                                     {brands.map((b, index) => (
-                                        <option key={index} value={b}>{b}</option>
+                                        <option key={b._id} value={b.name}>{b.name}</option>
                                     ))}
                                 </Form.Select>
                             </Form.Group>

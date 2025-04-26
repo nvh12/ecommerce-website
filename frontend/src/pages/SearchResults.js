@@ -79,7 +79,6 @@ const SearchResults = () => {
         <div>
             <Header />
             <Container className="py-4">
-                <SearchBar />
                 
                 <h3 className="mb-4">{getSearchDescription()}</h3>
                 

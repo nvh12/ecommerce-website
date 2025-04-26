@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
 // Dashboard Component
 const Dashboard = ({ stats }) => {
   return (
@@ -57,7 +56,13 @@ const UserList = ({ backendUrl }) => {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/admin/user`);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true
+      };
+      const { data } = await axios.get(`${backendUrl}/admin/user`, config);
       setUsers(data.user || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -68,8 +73,13 @@ const UserList = ({ backendUrl }) => {
   const handleEditUser = async (e) => {
     e.preventDefault();
     try {
-      // Assuming an endpoint for updating users
-      await axios.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true
+      };
+      await axios.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser, config);
       toast.success('User updated successfully');
       setShowEditModal(false);
       fetchUsers();
@@ -82,8 +92,13 @@ const UserList = ({ backendUrl }) => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        // Assuming an endpoint for deleting users
-        await axios.delete(`${backendUrl}/admin/user/${userId}`);
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          withCredentials: true
+        };
+        await axios.delete(`${backendUrl}/admin/user/${userId}`, config);
         toast.success('User deleted successfully');
         fetchUsers();
       } catch (error) {
@@ -223,8 +238,15 @@ const ProductList = ({ backendUrl }) => {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/product/all`);
-      setProducts(data.products || []);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true
+      };
+      const { data } = await axios.get(`${backendUrl}/product`, config);
+      setProducts(data.product || []);
+      console.log(data.product);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to fetch products');
@@ -236,13 +258,32 @@ const ProductList = ({ backendUrl }) => {
     try {
       // Prepare the data
       const productData = {
-        ...newProduct,
-        category: newProduct.category.split(',').map(cat => cat.trim()),
-        color: newProduct.color.split(',').map(col => col.trim()),
-        currency: 'USD' // Default value
+        productName: newProduct.productName,
+        price: Number(newProduct.price),
+        description: newProduct.description,
+        category: typeof newProduct.category === 'string' 
+          ? newProduct.category.split(',').map(cat => cat.trim()) 
+          : newProduct.category,
+        brand: newProduct.brand,
+        stocks: Number(newProduct.stocks),
+        color: typeof newProduct.color === 'string'
+          ? newProduct.color.split(',').map(col => col.trim())
+          : newProduct.color,
+        images: Array.isArray(newProduct.images) 
+          ? newProduct.images 
+          : [newProduct.images].filter(Boolean),
+        currency: 'USD'
       };
 
-      await axios.post(`${backendUrl}/product/create`, productData);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      };
+      
+      await axios.post(`${backendUrl}/product/create`, productData, config);
       toast.success('Product added successfully');
       setShowAddModal(false);
       setNewProduct({
@@ -258,7 +299,7 @@ const ProductList = ({ backendUrl }) => {
       fetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
-      toast.error('Failed to add product');
+      toast.error(`Failed to add product: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -267,34 +308,58 @@ const ProductList = ({ backendUrl }) => {
     try {
       // Prepare the data
       const productData = {
-        ...selectedProduct,
+        productName: selectedProduct.productName,
+        price: Number(selectedProduct.price),
+        description: selectedProduct.description,
         category: typeof selectedProduct.category === 'string' 
           ? selectedProduct.category.split(',').map(cat => cat.trim()) 
           : selectedProduct.category,
+        brand: selectedProduct.brand,
+        stocks: Number(selectedProduct.stocks),
         color: typeof selectedProduct.color === 'string'
           ? selectedProduct.color.split(',').map(col => col.trim())
-          : selectedProduct.color
+          : selectedProduct.color,
+        images: Array.isArray(selectedProduct.images) 
+          ? selectedProduct.images 
+          : [selectedProduct.images].filter(Boolean),
+        currency: 'USD'
       };
 
-      await axios.put(`${backendUrl}/product/update/${selectedProduct._id}`, productData);
+      console.log('Sending product data:', productData);
+
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      };
+      console.log(selectedProduct._id)
+      await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
       toast.success('Product updated successfully');
       setShowEditModal(false);
       fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error);
-      toast.error('Failed to update product');
+      toast.error(`Failed to update product: ${error.response?.data?.message || error.message}`);
     }
   };
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`${backendUrl}/product/delete/${productId}`);
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          withCredentials: true
+        };
+        await axios.delete(`${backendUrl}/product/delete/${productId}`, config);
         toast.success('Product deleted successfully');
         fetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
-        toast.error('Failed to delete product');
+        toast.error(`Failed to delete product: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -574,25 +639,32 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    if (!isLoggedIn || user?.role !== 'admin') {
-      navigate('/');
-      return;
-    }
+    // if (!isLoggedIn || user?.role !== 'admin') {
+    //   navigate('/');
+    //   return;
+    // }
     fetchStats();
   }, [isLoggedIn, user, navigate]);
 
   const fetchStats = async () => {
     try {
-      const productsRes = await axios.get(`${backendUrl}/product/all`);
-      const usersRes = await axios.get(`${backendUrl}/admin/user`);
-      const ordersRes = await axios.get(`${backendUrl}/admin/order`);
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true
+      };
+      
+      const productsRes = await axios.get(`${backendUrl}/product`, config);
+      const usersRes = await axios.get(`${backendUrl}/admin/user`, config);
+      const ordersRes = await axios.get(`${backendUrl}/admin/order`, config);
       
       // Calculate total revenue from orders
       const orders = ordersRes.data.data || [];
       const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
       
       setStats({
-        totalProducts: productsRes.data.products?.length || 0,
+        totalProducts: productsRes.data.product?.length || 0,
         totalOrders: orders.length,
         totalUsers: usersRes.data.user?.length || 0,
         totalRevenue: totalRevenue.toFixed(2)
