@@ -5,7 +5,7 @@ const {deleteComment}= require('../services/commentServices');
 
 async function getUsers(name = null) {
     try {
-        const query = name ? { name } : {};
+        const query = name ? { name: new RegExp(name, 'i') } : {};
         return await User.find(query);
     } catch (error) {
         throw error;

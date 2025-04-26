@@ -11,7 +11,9 @@ const Order = ({indexOrder, dataOrder}) => {
     const navigate = useNavigate()
 
     const fetchOrderDetail = async () => {
+        // console.log("dataOrder", dataOrder) //id đơn hàng
         const idList = dataOrder.items.map(item => item.product)
+        //console.log("idList", idList) //danh sách id sản phẩm được mua của 1 đơn
         const dataList = await Promise.all( 
             idList.map(id =>
                 axios
@@ -19,10 +21,13 @@ const Order = ({indexOrder, dataOrder}) => {
                     .then(res => res.data.product[0])
             )
         )
+        // console.log("dataList", dataList) //danh sách id sản phẩm được mua của 1 đơn 
         setOrderDetail(dataList)
+         //danh sách id sản phẩm được mua của 1 đơn
     }
     useEffect(() => {
         fetchOrderDetail()
+        console.log("orderDetail", orderDetail.address) //id đơn hàng
     }, [])
 
   return (
@@ -35,7 +40,35 @@ const Order = ({indexOrder, dataOrder}) => {
             <div className='col-auto me-0'>
               <b className='dangGiao'>{dataOrder.status}</b>
             </div>
-          </div>
+    </div>
+    <div className='d-flex gap-2 mb-1'>
+        <p className='m-0'>Ngày đặt hàng: </p>
+        <span className='m-0'>{(new Date(dataOrder.createdAt)).toLocaleString("vi-VN")}</span>
+    </div>
+    {
+      dataOrder.address ?
+      <>
+        <div className='d-flex gap-2 mb-2'>
+          <p className='m-0'>Ngày giao hàng dự kiến: </p>
+          <span className='m-0'>
+            {
+              new Date(new Date(dataOrder.createdAt).setDate(new Date(dataOrder.createdAt).getDate() + 3))
+                .toLocaleDateString('vi-VN')
+            }
+          </span>
+        </div>
+        <div className='d-flex gap-2'>
+          <p>Địa chỉ giao hàng: </p>
+          <span>{dataOrder.address}</span>
+        </div>
+      </>
+      :
+      <>
+        <div>
+          <p>Nhận hàng trực tiếp tại cửa hàng</p>
+        </div>
+      </>
+    }
           <hr />
     {!show ?
     <>
@@ -49,7 +82,7 @@ const Order = ({indexOrder, dataOrder}) => {
                     )}
                 </div>
                 <div className='col-auto'>
-                  <p>Tổng tiền: </p><span>{dataOrder.total_price.toLocaleString('vi-VN')}</span>
+                  <p>Tổng tiền: </p><span>{`${dataOrder.total_price.toLocaleString('vi-VN')} VND`}</span>
                 </div>
               </div>
           </div>
@@ -65,7 +98,7 @@ const Order = ({indexOrder, dataOrder}) => {
       }
     </>
     } 
-    <button className='bg-transparent btn rounded-pill hover-style' style={{backgroundColor: '#FFD400'}}
+    <button className='btn rounded-pill hover-style my-2' style={{backgroundColor: '#FFD400'}}
           onClick={() => setShow(!show)}>
             {!show ?
               "Xem chi tiết"

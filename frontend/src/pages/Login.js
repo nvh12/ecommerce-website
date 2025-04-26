@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"
 import { AppContext } from "../context/AppContext";
@@ -8,7 +8,7 @@ const Login = () => {
   const navigate = useNavigate()
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
-  const {backendUrl, fetchUserData} = useContext(AppContext)
+  const {backendUrl, fetchUserData, userData, setUserData, isLoggedIn, setIsLoggedIn} = useContext(AppContext)
 
   const goToRegister = () => {
     navigate('/register')
@@ -18,10 +18,7 @@ const Login = () => {
     try {
       await axios.post(backendUrl + "/auth/login", {identifier, password}, 
         {withCredentials: true})
-      console.log("Login successfully")
-      toast.success("Đăng nhập thành công")
-      fetchUserData()
-      navigate('/user')
+      await fetchUserData()
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error(error.response.data.error || "Thông tin đăng nhập sai!");
@@ -30,6 +27,20 @@ const Login = () => {
       }
     }
   }
+
+  useEffect(() => { 
+    console.log(isLoggedIn)
+    console.log(userData)
+    if(userData.role === "admin" && isLoggedIn) {
+      navigate('/admin')
+      toast.success("Đăng nhập thành công với quyền admin")
+    }
+    else if (userData.role === "user" && isLoggedIn) {
+      navigate('/user')
+      toast.success("Đăng nhập thành công")
+    }
+  }, [isLoggedIn, userData])
+
   return (
     <section className="vh-100 gradient-custom">
       <div className="container py-5 h-100">
@@ -57,7 +68,7 @@ const Login = () => {
 
                   <button className="btn btn-lg px-5 hover-style" type="submit" style={{backgroundColor: '#FFD400'}}
                   onClick={onSubmitHandler}>
-                    Dăng nhập
+                    Đăng nhập
                   </button>
                 </div>
 

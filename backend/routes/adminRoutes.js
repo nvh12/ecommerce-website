@@ -1,5 +1,5 @@
 const express = require('express');
-const { getOrders, updateOrder, getUsers } = require('../controllers/adminController');
+const { getOrders, updateOrder, getUsers, getUserOrders } = require('../controllers/adminController');
 const { verifyRole, verifyUser } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -15,4 +15,7 @@ router.put('/order/:id', updateOrder); // Cập nhật đơn hàng
 router.get('/user', getUsers); //Lấy user
 // admin/user?name=${name}
 // nếu ko có name trả tất cả user
+router.get('/user/order', getUserOrders); //Lấy các order của user
+// admin/user/order?id=${id}&page=${page}&sortBy=${sortBy}&order=${order}
+// ko cần sắp xếp thì bỏ sortBy với order
 module.exports = router;

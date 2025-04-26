@@ -1,147 +1,107 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Form, Button, Card, Row, Col } from 'react-bootstrap';
 import { FaStar } from 'react-icons/fa';
+import { Card } from 'react-bootstrap';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const Rating = ({ productId, onRatingUpdate }) => {
-    const { backendUrl, isLoggedIn, user } = useContext(AppContext);
-    const [ratings, setRatings] = useState([]);
-    const [userRating, setUserRating] = useState(0);
-    const [hoveredRating, setHoveredRating] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState(null);
+const Rating = ({ 
+    productId,
+    ratingsAvg, 
+    ratingsCount, 
+    isLoggedIn
+}) => {
+    const { backendUrl, user, fetchProduct } = useContext(AppContext);
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [userRating, setUserRating] = useState(null);
 
-    // Validate productId
-    const isValidProductId = (id) => {
-        return id && typeof id === 'string' && id.length === 24;
-    };
-
-    // Fetch ratings
     useEffect(() => {
-        if (isValidProductId(productId)) {
-            fetchRatings();
-        } else {
-            setError('ID sản phẩm không hợp lệ');
-            setLoading(false);
+        if (isLoggedIn) {
+            fetchUserRating();
         }
-    }, [productId]);
+    }, [productId, isLoggedIn]);
 
-    const fetchRatings = async () => {
-        if (!isValidProductId(productId)) {
-            setError('ID sản phẩm không hợp lệ');
-            return;
-        }
-
+    const fetchUserRating = async () => {
         try {
-            setLoading(true);
-            setError(null);
-            const { data } = await axios.get(`${backendUrl}/rating/${productId}`);
+            const response = await axios.get(`${backendUrl}/rating/${productId}`, {
+                withCredentials: true
+            });
             
-            if (data.ratings) {
-                setRatings(data.ratings);
-                // Find user's rating if it exists
-                const userRating = data.ratings.find(r => r.fromUser);
+            // Check if response.data.ratings exists and is an array
+            if (response.data && Array.isArray(response.data.ratings)) {
+                // Find the current user's rating
+                const userRating = response.data.ratings.find(r => r.fromUser);
                 if (userRating) {
-                    setUserRating(userRating.rate);
+                    setRating(userRating.rate);
+                    setUserRating(userRating);
                 } else {
-                    setUserRating(0);
+                    setRating(0);
+                    setUserRating(null);
                 }
             } else {
-                setRatings([]);
-                setUserRating(0);
+                setRating(0);
+                setUserRating(null);
             }
         } catch (error) {
-            console.error('Error fetching ratings:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể tải đánh giá';
-            setError(errorMessage);
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching user rating:', error);
+            toast.error('Failed to load your rating');
         }
     };
-
-    const handleRatingSubmit = async (rating) => {
+    
+    const handleRatingSubmit = async (newRating) => {
         if (!isLoggedIn) {
-            toast.error('Vui lòng đăng nhập để đánh giá');
+            toast.error('Please login to rate this product');
             return;
         }
 
-        if (!isValidProductId(productId)) {
-            toast.error('ID sản phẩm không hợp lệ');
+        if (newRating < 1 || newRating > 5) {
+            toast.error('Rating must be between 1 and 5');
             return;
         }
-
-        if (submitting) return;
-        setSubmitting(true);
-        setError(null);
 
         try {
-            const existingRating = ratings.find(r => r.fromUser);
-            if (existingRating) {
+            if (userRating) {
                 // Update existing rating
-                await axios.put(
-                    `${backendUrl}/rating/update/${existingRating._id}`,
-                    { rate: rating },
-                    { withCredentials: true }
-                );
-                toast.success('Đã cập nhật đánh giá');
+                await axios.put(`${backendUrl}/rating/update/${userRating._id}`, {
+                    rate: newRating
+                }, { withCredentials: true });
             } else {
                 // Create new rating
-                await axios.post(
-                    `${backendUrl}/rating/create`,
-                    {
-                        productId,
-                        rate: rating,
-                    },
-                    { withCredentials: true }
-                );
-                toast.success('Đã gửi đánh giá');
+                await axios.post(`${backendUrl}/rating/create`, {
+                    productId,
+                    rate: newRating
+                }, { withCredentials: true });
             }
             
-            await fetchRatings();
-            if (onRatingUpdate) {
-                await onRatingUpdate();
-            }
+            // Fetch fresh product data to update ratings
+            await fetchProduct(productId);
+            await fetchUserRating();
+            
+            toast.success('Rating submitted successfully');
         } catch (error) {
             console.error('Error submitting rating:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể gửi đánh giá';
-            setError(errorMessage);
-            toast.error(errorMessage);
-        } finally {
-            setSubmitting(false);
+            toast.error(error.response?.data?.message || 'Failed to submit rating');
         }
     };
 
-    const handleRatingDelete = async (ratingId) => {
-        if (!ratingId || !isValidProductId(productId)) {
-            toast.error('Không tìm thấy đánh giá');
-            return;
-        }
-
-        if (submitting) return;
-        setSubmitting(true);
-        setError(null);
-
+    const handleDeleteRating = async () => {
+        if (!userRating) return;
+        
         try {
-            await axios.delete(
-                `${backendUrl}/rating/delete/${ratingId}`,
-                { withCredentials: true }
-            );
-            toast.success('Đã xóa đánh giá');
-            await fetchRatings();
-            if (onRatingUpdate) {
-                await onRatingUpdate();
-            }
+            await axios.delete(`${backendUrl}/rating/delete/${userRating._id}`, {
+                withCredentials: true
+            });
+            
+            // Fetch fresh product data to update ratings
+            await fetchProduct(productId);
+            setRating(0);
+            setUserRating(null);
+            
+            toast.success('Rating deleted successfully');
         } catch (error) {
             console.error('Error deleting rating:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể xóa đánh giá';
-            setError(errorMessage);
-            toast.error(errorMessage);
-        } finally {
-            setSubmitting(false);
+            toast.error(error.response?.data?.message || 'Failed to delete rating');
         }
     };
 
@@ -157,7 +117,7 @@ const Rating = ({ productId, onRatingUpdate }) => {
                             marginRight: '4px',
                             transition: 'color 0.2s ease'
                         }}
-                        color={star <= (hoveredRating || value) ? "#ffc107" : "#e4e5e9"}
+                        color={star <= (hoverRating || value) ? "#ffc107" : "#e4e5e9"}
                         onMouseEnter={() => interactive && onHover(star)}
                         onMouseLeave={() => interactive && onHover(0)}
                         onClick={() => interactive && onClick(star)}
@@ -167,101 +127,81 @@ const Rating = ({ productId, onRatingUpdate }) => {
         );
     };
 
-    if (loading) {
-        return (
-            <div className="ratings-section my-4">
-                <div className="text-center py-4">
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
+    return (
+        <Card className="mb-4">
+            <Card.Body>
+                <h3>Product Ratings</h3>
+                <div className="d-flex align-items-center mb-3">
+                    <div className="me-3">
+                        <h2 className="mb-0">{ratingsAvg?.toFixed(1) || '0.0'}</h2>
+                        <div className="text-muted">
+                            {ratingsCount?.total || 0} {ratingsCount?.total === 1 ? 'rating' : 'ratings'}
+                        </div>
+                    </div>
+                    <div>
+                        <StarRating
+                            value={ratingsAvg || 0}
+                            onHover={() => {}}
+                            onClick={() => {}}
+                            size={24}
+                            interactive={false}
+                        />
                     </div>
                 </div>
-            </div>
-        );
-    }
 
-    if (error) {
-        return (
-            <div className="ratings-section my-4">
-                <div className="alert alert-danger">
-                    {error}
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="ratings-section my-4">
-            <h4 className="mb-3">Đánh giá sản phẩm</h4>
-            
-            {/* Rating Input */}
-            {isLoggedIn && (
-                <Card className="mb-4 p-3">
-                    <div className="d-flex align-items-center">
-                        <div className="me-3">Đánh giá của bạn:</div>
-                        <StarRating
-                            value={userRating}
-                            onHover={setHoveredRating}
-                            onClick={handleRatingSubmit}
-                            interactive={!submitting}
-                        />
-                        {submitting && (
-                            <div className="ms-2">
-                                <div className="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span className="visually-hidden">Loading...</span>
+                {/* Rating Distribution */}
+                <div className="mt-3">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                        <div key={star} className="d-flex align-items-center mb-2">
+                            <div className="me-2" style={{ width: '30px' }}>
+                                {star} <FaStar style={{ color: '#F8C146' }} />
+                            </div>
+                            <div className="flex-grow-1">
+                                <div className="progress" style={{ height: '8px' }}>
+                                    <div
+                                        className="progress-bar"
+                                        role="progressbar"
+                                        style={{
+                                            width: `${(ratingsCount?.[star] || 0) / (ratingsCount?.total || 1) * 100}%`,
+                                            backgroundColor: '#F8C146'
+                                        }}
+                                    />
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </Card>
-            )}
+                            <div className="ms-2" style={{ width: '40px' }}>
+                                {ratingsCount?.[star] || 0}
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
-            {/* Ratings List */}
-            <div className="ratings-list">
-                {ratings.length > 0 ? (
-                    ratings.map((rating) => (
-                        <Card key={rating._id} className="mb-2">
-                            <Card.Body>
-                                <Row className="align-items-center">
-                                    <Col>
-                                        <div className="d-flex align-items-center">
-                                            <StarRating
-                                                value={rating.rate}
-                                                onHover={() => {}}
-                                                onClick={() => {}}
-                                                size={16}
-                                                interactive={false}
-                                            />
-                                            <span className="ms-2 text-muted">
-                                                {new Date(rating.createdAt).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                        {rating.user && (
-                                            <div className="text-muted mt-1">
-                                                Bởi: {rating.user.name || 'Người dùng'}
-                                            </div>
-                                        )}
-                                    </Col>
-                                    {rating.fromUser && (
-                                        <Col xs="auto">
-                                            <Button
-                                                variant="outline-danger"
-                                                size="sm"
-                                                onClick={() => handleRatingDelete(rating._id)}
-                                                disabled={submitting}
-                                            >
-                                                Xóa
-                                            </Button>
-                                        </Col>
-                                    )}
-                                </Row>
-                            </Card.Body>
-                        </Card>
-                    ))
-                ) : (
-                    <p className="text-muted">Chưa có đánh giá nào.</p>
+                {/* Rating Input (if user is logged in) */}
+                {isLoggedIn && (
+                    <div className="mt-4">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h5 className="mb-0">Your Rating</h5>
+                            {userRating && (
+                                <button 
+                                    className="btn btn-link text-danger p-0"
+                                    onClick={handleDeleteRating}
+                                >
+                                    Delete Rating
+                                </button>
+                            )}
+                        </div>
+                        <StarRating
+                            value={rating}
+                            onHover={setHoverRating}
+                            onClick={(newRating) => {
+                                setRating(newRating);
+                                handleRatingSubmit(newRating);
+                            }}
+                            size={24}
+                        />
+                    </div>
                 )}
-            </div>
-        </div>
+            </Card.Body>
+        </Card>
     );
 };
 

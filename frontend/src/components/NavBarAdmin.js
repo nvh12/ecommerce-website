@@ -1,38 +1,19 @@
 import React, { useEffect, useContext } from 'react'
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-import SearchBar from './SearchBar';
 
-const Header = () => {
+const NavBarAdmin = () => {
     const navigate = useNavigate();
-    const { userData, isLoggedIn, cartItems } = useContext(AppContext);
+    const { userData, isLoggedIn } = useContext(AppContext);
 
-    // useEffect(() => {
-    //     console.log("userData updated:", userData); 
-    // }, [isLoggedIn]);
-    // console.log("isLoggedIn:", isLoggedIn);
 
     return (
         <div>
             <div className='container-fluid row d-flex shadow p-3 rounded' style={{backgroundColor: '#FFD400'}}>
                 <div className='col-2 d-flex me-auto'>
                     <h2 className='mx-auto' style={{cursor: "pointer"}}
-                    onClick={() => navigate("/")}>EShop</h2>
+                    onClick={() => navigate("/")}>Admin</h2>
                 </div>
-                {/* <div className='col-5 mx-auto'>
-                    <div className='input-group flex-nowrap bg-white rounded'>
-                        <button className='btn'><i className="bi bi-search"></i></button>
-                        <input type="text" placeholder='Bạn tìm gì...'
-                        className='form-control border-0 shadow-none outline-none'/>
-                    </div>
-                </div> */}
-                <div className="col-5 mx-auto">
-                    <div className="row align-items-center">
-                        <div className="col-12 col-md-6 mt-3 mt-md-0">
-                            <SearchBar />
-                        </div>
-                    </div>
-                </div>                
                 <div className='col-auto d-flex'>
                     {isLoggedIn ? 
                     (<>
@@ -42,14 +23,14 @@ const Header = () => {
                             <span className='d-none d-sm-inline'>{userData.name}</span>
                         </button>
                         <button className='bg-transparent btn rounded-pill hover-style'
-                        onClick={() => navigate('/cart')}>
-                            <i className="bi bi-cart3 me-1"></i>
-                            <span className='d-none d-sm-inline'>Giỏ hàng</span>
-                            {cartItems?.length > 0 && (
-                                <span className="badge bg-danger ms-1">
-                                    {cartItems.length}
-                                </span>
-                            )}
+                        onClick={() => navigate('/admin/productlist')}>
+                            <i className="bi bi-archive-fill me-1"></i>
+                            <span className='d-none d-sm-inline'>Mặt hàng</span>
+                        </button>
+                        <button className='bg-transparent btn rounded-pill hover-style'
+                        onClick={() => navigate('/admin/userlist')}>
+                            <i className="bi bi-person-fill-gear me-1"></i>
+                            <span className='d-none d-sm-inline'>Người dùng</span>
                         </button>
                     </>)
                     :
@@ -67,9 +48,8 @@ const Header = () => {
                     </>)}
                 </div>
             </div>
-
         </div>
     );
 }
 
-export default Header;
+export default NavBarAdmin;

@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const UserProfile = () => {
-  const {backendUrl, userData, setIsLoggedIn } = useContext(AppContext)
+  const {backendUrl, userData, setUserData, setIsLoggedIn, isLoggedIn } = useContext(AppContext)
 
   const [activeSection, setActiveSection] = useState("orders")
   const [userOrders, setUserOrders] = useState([])
@@ -23,13 +23,23 @@ const UserProfile = () => {
   const onLogOutHandler = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(backendUrl + "/auth/logout", {}, {withCredentials: true})
-      console.log("Logout successfully")
+      await axios.post(backendUrl + "/auth/logout", {}, { withCredentials: true })
+  
+      
+      localStorage.removeItem("userData")
+      localStorage.removeItem("isLoggedIn")
+      console.log(userData)
+      console.log(isLoggedIn)
+  
+      setUserData({})
+      setIsLoggedIn(false)
+      setUserOrders([])
+  
       toast.success("Đăng xuất thành công")
       navigate('/')
-      setIsLoggedIn(false)
     } catch (error) {
-      toast.error("Lỗi đăng xuất")
+      console.log("Logout error:", error)
+  toast.error("Lỗi đăng xuất: " + (error.response?.data?.error || error.message))
     }
   }
 
