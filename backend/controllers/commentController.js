@@ -1,6 +1,8 @@
 const Comment = require("../models/comment")
 const commentServices = require("../services/commentServices")
-
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const ACCESS_SECRET = process.env.JWT_SECRET;
 
 const getCommentProductControl = async (req, res) =>{
     try{
@@ -12,7 +14,7 @@ const getCommentProductControl = async (req, res) =>{
             userId = decode.id;
         }
         else{
-            userId = "67e90ba169f6b16b579ceecb"
+            userId = null
         }
         const commentProduct = await commentServices.getProductComment(productId, userId)
         if (commentProduct){
@@ -74,7 +76,7 @@ const createCommentControl = async (req, res) =>{
             userId = decode.id;
         }
         else{
-            userId = "67e90ba169f6b16b579ceecb"
+            userId = null
         }
         const newComment = await commentServices.createComment(userId,productId, comment)
         if (newComment){

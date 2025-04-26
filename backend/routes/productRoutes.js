@@ -6,6 +6,7 @@ const {
     updateProductControl,
     findOneProductControl
 } = require("../controllers/productController");
+const {findBrandControl,findCategoryControl}= require("../controllers/indexController")
 const { verifyUser, verifyRole} = require('../middleware/authMiddleware');
 const router = express.Router();
 
@@ -25,6 +26,11 @@ const router = express.Router();
 //     ratingsAvg
 //Done
 router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
+
+// Gọi ra brand và category
+router.get("/brand", findBrandControl)
+router.get("/category", findCategoryControl)
+
 router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các trường thông tin của sản phẩm như
 //search(tên),  category, features(một số chức năng), brand, dir(desc hoặc asc theo cột trong order),order, priceMax, priceMin
 // VD: product/?search=iphone&features=choi-game&dir=desc&order=price?priceMax=20000000?priceMin=5000000
