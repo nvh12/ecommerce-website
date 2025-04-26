@@ -32,7 +32,7 @@ const Login = () => {
     console.log(isLoggedIn)
     console.log(userData)
     if(userData.role === "admin" && isLoggedIn) {
-      navigate('/admin/productlist')
+      navigate('/admin')
       toast.success("Đăng nhập thành công với quyền admin")
     }
     else if (userData.role === "user" && isLoggedIn) {

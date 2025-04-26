@@ -20,7 +20,6 @@ import CartPage from './pages/CartPage';
 import PhonePage from './components/PhonePage.js';
 import LaptopPage from './components/LaptopPage.js';
 import AdminPage from './pages/AdminPage';
-import AdminDemo from './pages/AdminDemo';
 import SearchResults from './pages/SearchResults';
 
 
@@ -41,7 +40,6 @@ function App() {
           <Route path='/admin/productlist' element={<ProductListPage/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/demo" element={<AdminDemo />} />
           <Route path="/search" element={<SearchResults />} />
       </Routes>
       {/* <Footer /> */}
