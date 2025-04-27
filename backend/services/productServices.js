@@ -1,14 +1,17 @@
 const { default: mongoose } = require("mongoose");
 const Product = require("../models/product");
-const Rating = require("../models/rating");
-const Comment = require("../models/comment");
+const {addIndex} = require("./indexService")
 const {
     deleteRating
 } = require("../services/ratingServices")
 const {deleteComment} = require("../services/commentServices")
 const createProduct = async (info) => {
     try {
+        if (info.brand || info.category){
+            await addIndex(info.brand,info.category)
+        }
         return await Product.create({ ...info });
+        
     } catch (err) {
         throw err;
     }
@@ -66,6 +69,9 @@ const deleteProduct = async (info) => {
 const updateProduct = async (info, updateData) => {
     try {
         const { _id } = info;
+        if (updateData.brand || updateData.category){
+            await addIndex(updateData.brand, updateData.category)
+        }
         return await Product.findByIdAndUpdate(
             new mongoose.Types.ObjectId(`${_id}`),
             updateData,

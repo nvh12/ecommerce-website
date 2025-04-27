@@ -14,7 +14,7 @@ const createRatingControl = async (req, res) =>{
             userId = decode.id;
         }
         else{
-            userId = "68067abc2ad670712f13645c"
+            userId = null
             // "67e90ba169f6b16b579ceecb"
         }
         if (!userId || !productId || !rate) {
@@ -43,9 +43,9 @@ const findRatingControl = async (req, res) => {
             userId = decode.id;
         }
         else{
-            userId = "67e90ba169f6b16b579ceecb"
+            userId = null
         }
-        const ratings = await ratingServices.getRatingProduct(productId, "67e90ba169f6b16b579ceecb",false);
+        const ratings = await ratingServices.getRatingProduct(productId, userId,false);
         if (!ratings) {
             res.status(404).json({ message: "Không tìm thấy đánh giá nào cho sản phẩm này" });
         } else {
@@ -83,7 +83,7 @@ const updateRatingControl = async (req, res) => {
             return res.status(400).json({ message: "Thiếu thông tin rate để cập nhật" });
         }
 
-        
+
         const updatedRating = await ratingServices.updateRating(ratingId, rate);
         
         if (!updatedRating) {
