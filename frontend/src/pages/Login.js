@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios"
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
+import axiosInstance from "../utils/axiosInstance";
 
 const Login = () => {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ const Login = () => {
   const onSubmitHandler = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(backendUrl + "/auth/login", {identifier, password}, 
+      await axiosInstance.post(backendUrl + "/auth/login", {identifier, password}, 
         {withCredentials: true})
       await fetchUserData()
     } catch (error) {
@@ -40,7 +41,7 @@ const Login = () => {
       toast.success("Đăng nhập thành công")
     }
   }, [isLoggedIn, userData])
-
+  
   return (
     <section className="vh-100 gradient-custom">
       <div className="container py-5 h-100">
@@ -75,7 +76,9 @@ const Login = () => {
                 <div>
                   <p className="mb-0">
                     Bạn chưa có tài khoản?{" "}
-                    <a href="" className="text-black-50 fw-bold" onClick={goToRegister}>Đăng kí</a>
+                      <button className="btn btn-link text-black-50 fw-bold p-0" onClick={goToRegister}>
+                        Đăng kí
+                      </button>
                   </p>
                 </div>
               </div>

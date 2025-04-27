@@ -27,9 +27,9 @@ const AppContextProvider = (props) => {
         try {
             const {data} = await axios.get(backendUrl + "/user", {withCredentials: true})
             setUserData(data.data)
-            console.log(userData)
+            // console.log(userData)
             setIsLoggedIn(true)
-            console.log(isLoggedIn)
+            // console.log(isLoggedIn)
         } catch (error) {
             toast.error("Lỗi lấy thông tin người dùng")
         }

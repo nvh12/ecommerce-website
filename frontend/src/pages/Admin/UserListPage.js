@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from 'react-bootstrap';
 import NavBarAdmin from '../../components/NavBarAdmin'; 
+import axiosInstance from '../../utils/axiosInstance';
 
 const UserListPage = () => {
     const {userData, backendUrl, isLoggedIn} = useContext(AppContext)
@@ -13,11 +14,11 @@ const UserListPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
 
     const navigate = useNavigate()
-    console.log(isLoggedIn, userData)
+    // console.log(isLoggedIn, userData)
 
     const fetchUserList = async () => {
         try {
-            const res = await axios.get(`${backendUrl}/admin/user/`, {
+            const res = await axiosInstance.get(`${backendUrl}/admin/user/`, {
                 params: { name: searchTerm },
                 withCredentials: true
               });
@@ -37,7 +38,7 @@ const UserListPage = () => {
 
 
     useEffect(() => {
-        console.log(isLoggedIn, userData)
+        // console.log(isLoggedIn, userData)
         if(!isLoggedIn || userData.role !== "admin") {
             toast.error("Bạn không có quyền truy cập trang này")
             navigate('/')
@@ -85,9 +86,9 @@ const UserListPage = () => {
                     </div>
                     <div>
                         {
-                            userList.map((user, index) => (
+                            userList.map((user) => (
                                 <>
-                                    <UserCard key={index} user={user}/>
+                                    <UserCard key={user._id} user={user}/>
                                 </>
                             ))
                         }

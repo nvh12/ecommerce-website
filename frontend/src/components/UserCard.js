@@ -6,12 +6,12 @@ import { AppContext } from '../context/AppContext';
 const UserCard = ({user}) => {
     const navigate = useNavigate()
     const {backendUrl} = useContext(AppContext)
-    console.log("user", user._id)
+    // console.log("user", user._id)
 
     const fetchSingleOrder = async () => {
         try {
             const res = await axios.get(`${backendUrl}/user/order/${user._id}`)
-            console.log("res", res.data)
+            // console.log("res", res.data)
         } catch (error) {
             console.log("Lỗi lấy đơn hàng", error)
         }

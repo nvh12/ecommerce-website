@@ -31,4 +31,8 @@ Mới demo, chờ DB
 
 
 -------------- Search bar ------------------
-Cần thêm chức năng search theo feature của product
+Cần thêm chức năng search theo feature của 
+
+--------- CartPage----------
+Số lượng bằng 0 vẫn order được 
+

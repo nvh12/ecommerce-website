@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import UserProfileComponent from '../components/UserProfileComponent'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import axiosInstance from '../utils/axiosInstance'
 
 const UserProfile = () => {
   const {backendUrl, userData, setUserData, setIsLoggedIn, isLoggedIn } = useContext(AppContext)
@@ -28,8 +29,8 @@ const UserProfile = () => {
       
       localStorage.removeItem("userData")
       localStorage.removeItem("isLoggedIn")
-      console.log(userData)
-      console.log(isLoggedIn)
+      // console.log(userData)
+      // console.log(isLoggedIn)
   
       setUserData({})
       setIsLoggedIn(false)
@@ -45,7 +46,7 @@ const UserProfile = () => {
 
   const fetchUserOrders = async () => {
     try {
-      const res = await axios.get(backendUrl + "/user/order", {withCredentials: true})
+      const res = await axiosInstance.get(backendUrl + "/user/order", {withCredentials: true})
       const temp = res.data.data
       console.log("don hang", temp)
       setUserOrders(temp)

@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import axiosInstance from '../utils/axiosInstance';
 
 const CartPage = () => {
     const { backendUrl, isLoggedIn } = useContext(AppContext);
@@ -25,7 +26,7 @@ const CartPage = () => {
     // Fetch cart items
     const fetchCart = async () => {
         try {
-            const { data } = await axios.get(`${backendUrl}/cart`, { withCredentials: true });
+            const { data } = await axiosInstance.get(`${backendUrl}/cart`, { withCredentials: true });
             // console.log(data.data.items);
             setCartItems(data.data.items || []);
             // toast.success("Giỏ hàng đã được tải thành công");
@@ -60,7 +61,7 @@ const CartPage = () => {
                 endpoint = '/cart/remove';
             }
 
-            await axios.post(`${backendUrl}${endpoint}`, {
+            await axiosInstance.post(`${backendUrl}${endpoint}`, {
                 id: productId,
                 price: cartItems.find(item => item.product._id === productId)?.price
             }, { withCredentials: true });
@@ -80,7 +81,7 @@ const CartPage = () => {
                 return;
             }
             // console.log("payment", checkoutInfo.payment)
-            const res = await axios.get(`${backendUrl}/user/`, { withCredentials: true });
+            const res = await axiosInstance.get(`${backendUrl}/user/`, { withCredentials: true });
             const userId = res.data.data._id;
     
             const finalCheckoutInfo = {
@@ -90,7 +91,7 @@ const CartPage = () => {
             
             // console.log("checkoutInfo gửi đi:", finalCheckoutInfo);
             if(finalCheckoutInfo.payment === 'cash') {
-                await axios.post(`${backendUrl}/cart/checkout`, {
+                await axiosInstance.post(`${backendUrl}/cart/checkout`, {
                     ...finalCheckoutInfo,
                 }, {
                     withCredentials: true
@@ -109,14 +110,14 @@ const CartPage = () => {
 
     const handleCheckoutQr = async () => {
         try {
-            const res = await axios.get(`${backendUrl}/user/`, { withCredentials: true });
+            const res = await axiosInstance.get(`${backendUrl}/user/`, { withCredentials: true });
             const userId = res.data.data._id;
             const finalCheckoutInfo = {
                 ...checkoutInfo,
                 userId
             };
             // console.log("checkoutInfo gửi đi:", finalCheckoutInfo);
-            await axios.post(`${backendUrl}/cart/checkout`, {
+            await axiosInstance.post(`${backendUrl}/cart/checkout`, {
                 ...finalCheckoutInfo,
             }, {
                 withCredentials: true
