@@ -57,9 +57,9 @@ const findOneProductControl = async (req, res) => {
 }
 const deleteProductControl = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { _id } = req.params;
 
-        const deleted = await deleteProduct(id);
+        const deleted = await deleteProduct({_id});
 
         if (!deleted) {
             return res.status(404).json({ message: "Product not found or already deleted" });
@@ -74,9 +74,10 @@ const deleteProductControl = async (req, res) => {
 const updateProductControl = async (req, res) => {
     try {
         const { _id } = req.params;
+        
         const updateData = req.body;
 
-        const updated = await updateProduct(_id, updateData);
+        const updated = await updateProduct({_id}, updateData);
 
         if (!updated) {
             return res.status(404).json({ message: "Product not found or update failed" });

@@ -50,7 +50,7 @@ const findProduct = async (info) => {
 const deleteProduct = async (info) => {
     try {
         const { _id } = info;
-        const objectId =new  mongoose.Types.ObjectId(`${_id}`);
+        const objectId =new  mongoose.Types.ObjectId(_id);
 
         const productFound = await Product.findByIdAndDelete(objectId)
         if(productFound){
@@ -77,6 +77,7 @@ const updateProduct = async (info, updateData) => {
             updateData,
             { new: true, runValidators: true }
         );
+        
     } catch (err) {
         throw err;
     }

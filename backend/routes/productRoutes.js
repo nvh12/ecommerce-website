@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Tạo mới sản phẩm
 //Yêu cầu đầu vào ở body
-// productName cần cócó
+// productName cần có
 //     brand cần có
 //     images (mảng) cần có
 //     features:(mảng) cần có
@@ -27,6 +27,7 @@ const router = express.Router();
 //Done
 router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
 
+
 // Gọi ra brand và category
 router.get("/brand", findBrandControl)
 router.get("/category", findCategoryControl)
@@ -38,9 +39,10 @@ router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các
 //Done
 router.get("/:_id", findOneProductControl) // Tìm kiếm duy nhất 1 sản phẩm dựa theo id
 
-
 router.delete('/:_id', verifyUser, verifyRole('admin'), deleteProductControl);// Xóa sản phẩm theo id
 router.put('/:_id', verifyUser, verifyRole('admin'), updateProductControl);// update sản phẩm theo id
+
+
 // Thay đổi các trường như trên get trong bodybody
 
 module.exports = router
