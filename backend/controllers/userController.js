@@ -61,8 +61,29 @@ async function singleOrder(req, res) {
     }
 }
 
+async function updateOrder(req, res) {
+    try {
+        const token = req.cookies.accessToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { id } = req.params;
+        const order = await orderServices.getOrder(id);
+        if (!order) {
+            return res.status(404).json({ status: 'error', error: 'Order not found' });
+        }
+        if (order.user.toString() !== decoded.id) {
+            return res.status(403).json({ status: 'error', error: 'Access denied' });
+        }
+        const { updateData } = req.body;
+        const updatedOrder = await orderServices.updateOrder(id, updateData);
+        res.status(200).json({ status: 'success', order: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
 module.exports = {
     user,
     userOrders,
-    singleOrder
+    singleOrder,
+    updateOrder
 };
