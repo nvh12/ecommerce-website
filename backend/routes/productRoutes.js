@@ -25,8 +25,8 @@ const router = express.Router();
 //     ratingsCount
 //     ratingsAvg
 //Done
-// router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
-router.post("/", createProductControl)
+router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
+
 
 // Gọi ra brand và category
 router.get("/brand", findBrandControl)
@@ -38,7 +38,6 @@ router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các
 
 //Done
 router.get("/:_id", findOneProductControl) // Tìm kiếm duy nhất 1 sản phẩm dựa theo id
-
 
 router.delete('/:_id', verifyUser, verifyRole('admin'), deleteProductControl);// Xóa sản phẩm theo id
 router.put('/:_id', verifyUser, verifyRole('admin'), updateProductControl);// update sản phẩm theo id
