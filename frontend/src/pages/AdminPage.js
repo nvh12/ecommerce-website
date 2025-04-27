@@ -284,7 +284,7 @@ const ProductList = ({ backendUrl }) => {
         withCredentials: true
       };
       
-      await axiosInstance.post(`${backendUrl}/product/create`, productData, config);
+      await axiosInstance.post(`${backendUrl}/product/`, productData, config);
       toast.success('Product added successfully');
       setShowAddModal(false);
       setNewProduct({
@@ -355,7 +355,7 @@ const ProductList = ({ backendUrl }) => {
           },
           withCredentials: true
         };
-        await axiosInstance.delete(`${backendUrl}/product/delete/${productId}`, config);
+        await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
         toast.success('Product deleted successfully');
         fetchProducts();
       } catch (error) {
