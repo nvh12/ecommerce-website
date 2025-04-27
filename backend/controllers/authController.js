@@ -11,7 +11,7 @@ function generateAccessToken(id) {
 }
 
 function generateRefreshToken(id) {
-    return jwt.sign({ id }, REFRESH_SECRET, { expiresIn: '3h' })
+    return jwt.sign({ id }, REFRESH_SECRET, { expiresIn: '6h' })
 }
 
 async function register(req, res) {
@@ -43,7 +43,7 @@ async function login(req, res) {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: false,
-            maxAge: 60 * 60 * 1000
+            maxAge: 6 * 60 * 60 * 1000
         })
         res.status(200).json({ message: 'Login successful' });
     } catch (err) {
