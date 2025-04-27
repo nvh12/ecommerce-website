@@ -30,8 +30,8 @@ const Login = () => {
   }
 
   useEffect(() => { 
-    console.log(isLoggedIn)
-    console.log(userData)
+    // console.log(isLoggedIn)
+    // console.log(userData)
     if(userData.role === "admin" && isLoggedIn) {
       navigate('/admin')
       toast.success("Đăng nhập thành công với quyền admin")
@@ -63,9 +63,9 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}/>
                   </div>
 
-                  <p className="small mb-5 pb-lg-2">
+                  {/* <p className="small mb-5 pb-lg-2">
                     <a className="text-black-50" href="#!">Quên mật khẩu?</a>
-                  </p>
+                  </p> */}
 
                   <button className="btn btn-lg px-5 hover-style" type="submit" style={{backgroundColor: '#FFD400'}}
                   onClick={onSubmitHandler}>

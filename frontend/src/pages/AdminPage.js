@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import axiosInstance from '../utils/axiosInstance';
 // Dashboard Component
 const Dashboard = ({ stats }) => {
   return (
@@ -62,7 +63,7 @@ const UserList = ({ backendUrl }) => {
         },
         withCredentials: true
       };
-      const { data } = await axios.get(`${backendUrl}/admin/user`, config);
+      const { data } = await axiosInstance.get(`${backendUrl}/admin/user`, config);
       setUsers(data.user || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -79,7 +80,7 @@ const UserList = ({ backendUrl }) => {
         },
         withCredentials: true
       };
-      await axios.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser, config);
+      await axiosInstance.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser, config);
       toast.success('User updated successfully');
       setShowEditModal(false);
       fetchUsers();
@@ -98,7 +99,7 @@ const UserList = ({ backendUrl }) => {
           },
           withCredentials: true
         };
-        await axios.delete(`${backendUrl}/admin/user/${userId}`, config);
+        await axiosInstance.delete(`${backendUrl}/admin/user/${userId}`, config);
         toast.success('User deleted successfully');
         fetchUsers();
       } catch (error) {
@@ -283,7 +284,7 @@ const ProductList = ({ backendUrl }) => {
         withCredentials: true
       };
       
-      await axios.post(`${backendUrl}/product/create`, productData, config);
+      await axiosInstance.post(`${backendUrl}/product/create`, productData, config);
       toast.success('Product added successfully');
       setShowAddModal(false);
       setNewProduct({
@@ -354,7 +355,7 @@ const ProductList = ({ backendUrl }) => {
           },
           withCredentials: true
         };
-        await axios.delete(`${backendUrl}/product/delete/${productId}`, config);
+        await axiosInstance.delete(`${backendUrl}/product/delete/${productId}`, config);
         toast.success('Product deleted successfully');
         fetchProducts();
       } catch (error) {
@@ -656,8 +657,8 @@ const AdminPage = () => {
       };
       
       const productsRes = await axios.get(`${backendUrl}/product`, config);
-      const usersRes = await axios.get(`${backendUrl}/admin/user`, config);
-      const ordersRes = await axios.get(`${backendUrl}/admin/order`, config);
+      const usersRes = await axiosInstance.get(`${backendUrl}/admin/user`, config);
+      const ordersRes = await axiosInstance.get(`${backendUrl}/admin/order`, config);
       
       // Calculate total revenue from orders
       const orders = ordersRes.data.data || [];

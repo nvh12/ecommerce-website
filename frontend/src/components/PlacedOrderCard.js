@@ -9,9 +9,6 @@ const PlacedOrderCard = ({indexOrder, dataOrder}) => {
             <div className='col-auto me-auto'>
               <b>Sản phẩm: </b><span className=''>{indexOrder+1}</span>
             </div>
-            <div className='col-auto me-0'>
-              <b className='dangGiao'>Đang giao hàng</b>
-            </div>
           </div>
           <hr />
           <div className='row mb-2'>

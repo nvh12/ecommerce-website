@@ -14,9 +14,9 @@ code {
 .hover-style:hover {
   background-color: #FFE14C !important;
 }
-.dangGiao {
+.daNhan {
   color: #1CAc53;
 }
-.daGiao {
-
+.daHuy {
+  color: red;
 }

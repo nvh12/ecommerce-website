@@ -4,6 +4,7 @@ import { Card } from 'react-bootstrap';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import axiosInstance from '../utils/axiosInstance';
 
 const Rating = ({ 
     productId,
@@ -24,7 +25,7 @@ const Rating = ({
 
     const fetchUserRating = async () => {
         try {
-            const response = await axios.get(`${backendUrl}/rating/${productId}`, {
+            const response = await axiosInstance.get(`${backendUrl}/rating/${productId}`, {
                 withCredentials: true
             });
             
@@ -63,12 +64,12 @@ const Rating = ({
         try {
             if (userRating) {
                 // Update existing rating
-                await axios.put(`${backendUrl}/rating/update/${userRating._id}`, {
+                await axiosInstance.put(`${backendUrl}/rating/update/${userRating._id}`, {
                     rate: newRating
                 }, { withCredentials: true });
             } else {
                 // Create new rating
-                await axios.post(`${backendUrl}/rating/create`, {
+                await axiosInstance.post(`${backendUrl}/rating/create`, {
                         productId,
                     rate: newRating
                 }, { withCredentials: true });
@@ -89,7 +90,7 @@ const Rating = ({
         if (!userRating) return;
         
         try {
-            await axios.delete(`${backendUrl}/rating/delete/${userRating._id}`, {
+            await axiosInstance.delete(`${backendUrl}/rating/delete/${userRating._id}`, {
                 withCredentials: true
             });
             

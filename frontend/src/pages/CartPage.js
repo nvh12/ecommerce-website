@@ -92,7 +92,7 @@ const CartPage = () => {
             // console.log("checkoutInfo gửi đi:", finalCheckoutInfo);
             if(finalCheckoutInfo.payment === 'cash') {
                 await axiosInstance.post(`${backendUrl}/cart/checkout`, {
-                    ...finalCheckoutInfo,
+                    ...finalCheckoutInfo,   
                 }, {
                     withCredentials: true
                 });

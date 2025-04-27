@@ -11,17 +11,26 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu bị 403 và chưa retry lần nào
     if (error.response?.status === 403 && !originalRequest._retry) {
+      if (originalRequest.url.includes('/auth/refresh')) {
+
+        localStorage.removeItem('userData');
+        localStorage.removeItem('isLoggedIn');
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 3000);
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       try {
         await axiosInstance.post("/auth/refresh");
         // console.log("Refresh token thành công");
-        toast.success("Phiên đăng nhập đã được làm mới thành công");
-        return axiosInstance(originalRequest); // Retry request cũ
+        // toast.success("Phiên đăng nhập đã được làm mới thành công");
+ 
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // console.error("Refresh token thất bại");
-
+        // console.error("Refresh token thất bại", refreshError);
         toast.error("Phiên đăng nhập đã hết, vui lòng đăng nhập lại");
 
         localStorage.removeItem('userData');
@@ -29,11 +38,11 @@ axiosInstance.interceptors.response.use(
 
         setTimeout(() => {
           window.location.href = "/";
-        }, 2000); 
-
+        }, 2000);
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );

@@ -4,6 +4,7 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BsThreeDotsVertical, BsPencil, BsTrash } from 'react-icons/bs';
+import axiosInstance from '../utils/axiosInstance';
 
 // Custom dropdown toggle without the default caret
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
@@ -35,7 +36,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
     const fetchComments = async () => {
         try {
             setIsLoading(true);
-            const response = await axios.get(`${backendUrl}/comment/${productId}`, {
+            const response = await axiosInstance.get(`${backendUrl}/comment/${productId}`, {
                 withCredentials: true
             });
             
@@ -58,7 +59,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
 
         setIsSubmitting(true);
         try {
-            const response = await axios.post(
+            const response = await axiosInstance.post(
                 `${backendUrl}/comment/create`,
                 { 
                     productId,
@@ -103,7 +104,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
         }
 
         try {
-            const response = await axios.put(
+            const response = await axiosInstance.put(
                 `${backendUrl}/comment/update/${commentId}`,
                 { newComment: editText },
                 { withCredentials: true }
@@ -131,7 +132,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
 
     const handleDelete = async (commentId) => {
         try {
-            const response = await axios.delete(
+            const response = await axiosInstance.delete(
                 `${backendUrl}/comment/delete/${commentId}`,
                 { withCredentials: true }
             );

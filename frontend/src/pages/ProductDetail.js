@@ -9,6 +9,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductComments from '../components/ProductComments';
 import Rating from '../components/Rating';
+import axiosInstance from '../utils/axiosInstance';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -110,7 +111,7 @@ const ProductDetail = () => {
         }
 
         try {
-            await axios.post(`${backendUrl}/cart/add`, {
+            await axiosInstance.post(`${backendUrl}/cart/add`, {
                 id: product._id,
                 price: product.price
             }, { withCredentials: true });

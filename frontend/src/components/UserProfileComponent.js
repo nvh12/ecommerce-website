@@ -20,20 +20,6 @@ const UserProfileComponent = ({ activeSection, userOrders, userCart }) => {
             </>);
         case "account":
             return <AccountDetails />;
-        case "cart":
-            return (
-                <>
-                    <h2>Giỏ hàng hàng của tôi</h2>
-                    <hr />
-                    {Array.isArray(userCart) && userCart.length > 0 ? (
-                        userCart.map((dataOrder, index) => (
-                            <PlacedOrderCard key={index} indexOrder={index} dataOrder={dataOrder} />
-                        ))
-                    ) : (
-                        <p>Không có giỏ hàng nào</p>
-                    )}
-                </>
-            );
         default:
             return <p>Chọn một mục trong menu bên trái để hiển thị nội dung</p>;
     }

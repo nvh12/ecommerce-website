@@ -48,23 +48,23 @@ const UserProfile = () => {
     try {
       const res = await axiosInstance.get(backendUrl + "/user/order", {withCredentials: true})
       const temp = res.data.data
-      console.log("don hang", temp)
+      // console.log("don hang", temp)
       setUserOrders(temp)
     } catch (error) {
       toast.error("Lỗi lấy đơn hàng")
     }
   }
 
-  const fetchUserCart = async () => {
-    try {
-      const res = await axios.get(backendUrl + "/cart", {withCredentials: true})
-      console.log("Đã lấy giỏ hàng người dùng !")
-      console.log(res.data)
-      // setUserCart(res.data)
-    } catch (error) {
-      toast.error("Lỗi lấy giỏ hàng")
-    }
-  }
+  // const fetchUserCart = async () => {
+  //   try {
+  //     const res = await axios.get(backendUrl + "/cart", {withCredentials: true})
+  //     console.log("Đã lấy giỏ hàng người dùng !")
+  //     console.log(res.data)
+  //     // setUserCart(res.data)
+  //   } catch (error) {
+  //     toast.error("Lỗi lấy giỏ hàng")
+  //   }
+  // }
   useEffect(() => { 
     fetchUserOrders()
     // fetchUserCart()
@@ -87,25 +87,25 @@ const UserProfile = () => {
                         <i className="bi bi-inboxes-fill me-2"></i>
                         <span>Đơn hàng</span>
                       </button>
-                      <button className='bg-transparent btn rounded-pill hover-style'
+                      {/* <button className='bg-transparent btn rounded-pill hover-style'
                       onClick={() => handleMenuClick('wallet')}>
                         <i className="bi bi-wallet-fill me-2"></i>
                         <span>Ví</span>
-                      </button>
-                      <button className='bg-transparent btn rounded-pill hover-style'
+                      </button> */}
+                      {/* <button className='bg-transparent btn rounded-pill hover-style'
                       onClick={() => handleMenuClick('cart')}>
                         <i className="bi bi-basket3-fill me-2"></i>
                         <span>Giỏ hàng</span>
-                      </button>
+                      </button> */}
                       <button className='bg-transparent btn rounded-pill hover-style'
                       onClick={() => handleMenuClick('account')}>
                         <i className="bi bi-person-circle me-2"></i>
                         <span>Thông tin tài khoản</span>
                       </button>
-                      <button className='bg-transparent btn rounded-pill hover-style'>
+                      {/* <button className='bg-transparent btn rounded-pill hover-style'>
                       <i className="bi bi-geo-alt-fill me-2"></i>
                         <span>Địa chỉ</span>
-                      </button>
+                      </button> */}
                       <button className='bg-transparent btn rounded-pill hover-style'
                       onClick={onLogOutHandler}>
                         <i className="bi bi-box-arrow-right me-2"></i>

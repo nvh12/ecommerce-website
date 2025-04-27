@@ -1,17 +1,17 @@
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import PlacedOrderCard from './PlacedOrderCard'
+import { toast } from 'react-toastify'
+import axiosInstance from '../utils/axiosInstance'
 
 const Order = ({indexOrder, dataOrder}) => {
     const {backendUrl} = useContext(AppContext)
     const [orderDetail, setOrderDetail] = useState([])
     const [show, setShow] = useState(false)
-    const navigate = useNavigate()
 
     const fetchOrderDetail = async () => {
-        // console.log("dataOrder", dataOrder) //id đơn hàng
+        //console.log("dataOrder", dataOrder) //thông tin 1 đơn hàng
         const idList = dataOrder.items.map(item => item.product)
         //console.log("idList", idList) //danh sách id sản phẩm được mua của 1 đơn
         const dataList = await Promise.all( 
@@ -21,13 +21,32 @@ const Order = ({indexOrder, dataOrder}) => {
                     .then(res => res.data.product[0])
             )
         )
-        // console.log("dataList", dataList) //danh sách id sản phẩm được mua của 1 đơn 
+        // console.log("dataList", dataList) //danh sách sản phẩm được mua của 1 đơn 
         setOrderDetail(dataList)
-         //danh sách id sản phẩm được mua của 1 đơn
+         //danh sách sản phẩm được mua của 1 đơn
+    }
+    const handleUpdateOrderDetail = async (status) => { 
+      if (status === "completed") {
+        const confirmed = window.confirm("Bạn chắc chắn đã nhận đơn hàng này?");
+        if (!confirmed) {
+          return
+        }
+      } else if (status === "cancelled") {
+        const confirmed = window.confirm("Bạn chắc chắn muốn hủy đơn hàng này?");
+        if (!confirmed) {
+          return
+        }
+      } 
+      try {
+        await axiosInstance.put(`${backendUrl}/user/order/${dataOrder._id}`, {updateData: {status: status}}, {withCredentials: true})
+        toast.success("Cập nhật đơn hàng thành công")
+        window.location.reload();
+      } catch (error) {
+        toast.error("Lỗi cập nhật đơn hàng")
+      }
     }
     useEffect(() => {
         fetchOrderDetail()
-        console.log("orderDetail", orderDetail.address) //id đơn hàng
     }, [])
 
   return (
@@ -38,7 +57,9 @@ const Order = ({indexOrder, dataOrder}) => {
               <b>Đơn hàng: </b><span className=''>{dataOrder._id}</span>
             </div>
             <div className='col-auto me-0'>
-              <b className='dangGiao'>{dataOrder.status}</b>
+              <b className='dangGiao'>{dataOrder.status === "processing" && "Đang giao hàng"}</b>
+              <b className='daNhan'>{dataOrder.status === "completed" && "Đã giao hàng"}</b>
+              <b className='daHuy'>{dataOrder.status === "cancelled" && "Đã hủy đơn hàng"}</b>
             </div>
     </div>
     <div className='d-flex gap-2 mb-1'>
@@ -78,7 +99,7 @@ const Order = ({indexOrder, dataOrder}) => {
               <div className='row'>
                 <div className='col-auto me-auto'>
                     {orderDetail.map((item, index) => 
-                        <p>{item.productName}</p>
+                        <p key={index}>{item.productName}</p>
                     )}
                 </div>
                 <div className='col-auto'>
@@ -87,6 +108,20 @@ const Order = ({indexOrder, dataOrder}) => {
               </div>
           </div>
         </div>
+      { dataOrder.status === "completed" || dataOrder.status === "cancelled" ?
+        <></>
+        :
+        <div className='d-flex gap-2 my-2'>
+          <button className='btn btn-outline-success rounded-pill'
+          onClick={() => {
+            handleUpdateOrderDetail("completed")
+          }}>Đã nhận đơn hàng</button>
+          <button className='btn btn-outline-danger rounded-pill'
+          onClick={() => {
+            handleUpdateOrderDetail("cancelled")
+          }}>Hủy đơn hàng</button>
+        </div> 
+      }               
       </div>
     </>
     :
@@ -98,6 +133,7 @@ const Order = ({indexOrder, dataOrder}) => {
       }
     </>
     } 
+
     <button className='btn rounded-pill hover-style my-2' style={{backgroundColor: '#FFD400'}}
           onClick={() => setShow(!show)}>
             {!show ?
@@ -105,7 +141,7 @@ const Order = ({indexOrder, dataOrder}) => {
             :
               "Ẩn chi tiết"
             }  
-      </button>
+    </button>
     </div>
     </>
   )
