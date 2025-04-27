@@ -19,13 +19,20 @@ const Header = () => {
                     <h2 className='mx-auto' style={{cursor: "pointer"}}
                     onClick={() => navigate("/")}>EShop</h2>
                 </div>
-                <div className='col-5 mx-auto'>
+                {/* <div className='col-5 mx-auto'>
                     <div className='input-group flex-nowrap bg-white rounded'>
                         <button className='btn'><i className="bi bi-search"></i></button>
                         <input type="text" placeholder='Bạn tìm gì...'
                         className='form-control border-0 shadow-none outline-none'/>
                     </div>
-                </div>
+                </div> */}
+                <div className="col-5 mx-auto">
+                    <div className="row align-items-center">
+                        <div className="col-12 col-md-6 mt-3 mt-md-0">
+                            <SearchBar />
+                        </div>
+                    </div>
+                </div>                
                 <div className='col-auto d-flex'>
                     {isLoggedIn ? 
                     (<>
@@ -60,13 +67,7 @@ const Header = () => {
                     </>)}
                 </div>
             </div>
-            <div className="container">
-                <div className="row align-items-center">
-                    <div className="col-12 col-md-6 mt-3 mt-md-0">
-                        <SearchBar />
-                    </div>
-                </div>
-            </div>
+
         </div>
     );
 }

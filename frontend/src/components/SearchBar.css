@@ -96,10 +96,49 @@
     color: #333;
 }
 
+/* Filter styling */
+.tgdd-filter-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    margin-top: 1px;
+    padding: 15px;
+}
+
+.filter-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-header h6 {
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-form label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .tgdd-search-input {
         height: 35px;
         font-size: 13px;
+    }
+    
+    .tgdd-filter-container {
+        padding: 10px;
     }
 } 

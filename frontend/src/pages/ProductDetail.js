@@ -23,7 +23,7 @@ const ProductDetail = () => {
         productError,
         fetchProduct
     } = useContext(AppContext);
-
+    
     // Initialize state with null values
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -114,7 +114,7 @@ const ProductDetail = () => {
                 id: product._id,
                 price: product.price
             }, { withCredentials: true });
-
+            
             toast.success("Added to cart");
         } catch (error) {
             toast.error("Failed to add to cart");
@@ -124,96 +124,96 @@ const ProductDetail = () => {
     return (
         <div>
             <Header />
-            <Container className="py-4">
-                <Row>
-                    {/* Left Column - Images */}
-                    <Col md={6} className="mb-4">
-                        <div className="product-images">
-                            <div className="main-image-container mb-3 border rounded p-3">
-                                <img
-                                    src={selectedImage}
-                                    alt={product.productName}
-                                    className="img-fluid"
-                                    style={{
-                                        maxHeight: '400px',
-                                        width: '100%',
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            </div>
+        <Container className="py-4">
+            <Row>
+                {/* Left Column - Images */}
+                <Col md={6} className="mb-4">
+                    <div className="product-images">
+                        <div className="main-image-container mb-3 border rounded p-3">
+                            <img 
+                                src={selectedImage} 
+                                alt={product.productName}
+                                className="img-fluid"
+                                style={{ 
+                                    maxHeight: '400px', 
+                                    width: '100%', 
+                                    objectFit: 'contain' 
+                                }}
+                            />
+                        </div>
                             {product.images?.length > 1 && (
+                            <div className="d-flex gap-2 flex-wrap">
+                                {product.images.map((image, index) => (
+                                    <div
+                                        key={index}
+                                        onClick={() => setSelectedImage(image)}
+                                        className={`thumbnail-container border rounded p-1 ${selectedImage === image ? 'border-primary' : ''}`}
+                                        style={{ cursor: 'pointer', width: '70px', height: '70px' }}
+                                    >
+                                        <img 
+                                            src={image}
+                                            alt={`${product.productName} ${index + 1}`}
+                                            className="w-100 h-100"
+                                            style={{ objectFit: 'contain' }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </Col>
+
+                {/* Right Column - Product Info */}
+                <Col md={6}>
+                    <div className="product-info">
+                        {/* Categories */}
+                        <div className="mb-2">
+                                {product.category?.map((cat, index) => (
+                                <Badge 
+                                    key={index} 
+                                    bg="light" 
+                                    text="dark"
+                                    className="me-2"
+                                >
+                                    {cat}
+                                </Badge>
+                            ))}
+                        </div>
+
+                        {/* Product Name */}
+                        <h1 className="h3 mb-2">{product.productName}</h1>
+
+                        {/* Brand */}
+                        {product.brand && (
+                            <div className="text-muted mb-3">{product.brand}</div>
+                        )}
+
+                            {/* Stock Status */}
+                        <div className="stock-info mb-3">
+                                <span className="fw-bold me-2">Stock:</span>
+                            <span className={product.stocks > 0 ? 'text-success' : 'text-danger'}>
+                                    {product.stocks > 0 ? `In Stock (${product.stocks})` : 'Out of Stock'}
+                            </span>
+                        </div>
+
+                        {/* Colors */}
+                            {product.color?.length > 0 && (
+                            <div className="colors-section mb-3">
+                                    <div className="fw-bold mb-2">Colors</div>
                                 <div className="d-flex gap-2 flex-wrap">
-                                    {product.images.map((image, index) => (
+                                    {product.color.map((color) => (
                                         <div
-                                            key={index}
-                                            onClick={() => setSelectedImage(image)}
-                                            className={`thumbnail-container border rounded p-1 ${selectedImage === image ? 'border-primary' : ''}`}
-                                            style={{ cursor: 'pointer', width: '70px', height: '70px' }}
+                                            key={color}
+                                            onClick={() => setSelectedColor(color)}
+                                                className={`color-option p-2 border rounded ${selectedColor === color ? 'border-primary' : ''}`}
+                                            style={{ cursor: 'pointer' }}
                                         >
-                                            <img
-                                                src={image}
-                                                alt={`${product.productName} ${index + 1}`}
-                                                className="w-100 h-100"
-                                                style={{ objectFit: 'contain' }}
-                                            />
+                                            <div className="small">{color}</div>
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                        </div>
-                    </Col>
-
-                    {/* Right Column - Product Info */}
-                    <Col md={6}>
-                        <div className="product-info">
-                            {/* Categories */}
-                            <div className="mb-2">
-                                {product.category?.map((cat, index) => (
-                                    <Badge
-                                        key={index}
-                                        bg="light"
-                                        text="dark"
-                                        className="me-2"
-                                    >
-                                        {cat}
-                                    </Badge>
-                                ))}
                             </div>
-
-                            {/* Product Name */}
-                            <h1 className="h3 mb-2">{product.productName}</h1>
-
-                            {/* Brand */}
-                            {product.brand && (
-                                <div className="text-muted mb-3">{product.brand}</div>
-                            )}
-
-                            {/* Stock Status */}
-                            <div className="stock-info mb-3">
-                                <span className="fw-bold me-2">Stock:</span>
-                                <span className={product.stocks > 0 ? 'text-success' : 'text-danger'}>
-                                    {product.stocks > 0 ? `In Stock (${product.stocks})` : 'Out of Stock'}
-                                </span>
-                            </div>
-
-                            {/* Colors */}
-                            {product.color?.length > 0 && (
-                                <div className="colors-section mb-3">
-                                    <div className="fw-bold mb-2">Colors</div>
-                                    <div className="d-flex gap-2 flex-wrap">
-                                        {product.color.map((color) => (
-                                            <div
-                                                key={color}
-                                                onClick={() => setSelectedColor(color)}
-                                                className={`color-option p-2 border rounded ${selectedColor === color ? 'border-primary' : ''}`}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                <div className="small">{color}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                        )}
 
                             {/* Description */}
                             <div className="mb-4">
@@ -232,38 +232,38 @@ const ProductDetail = () => {
                                             {typeof product.price === 'number' ? product.price.toLocaleString() : '0'}{product?.currency || '$'}
                                         </span>
                                         <span className="text-danger">-{product.discount}%</span>
-                                    </div>
-                                )}
                             </div>
-
-                            {/* Action Buttons */}
-                            <div className="d-grid gap-2">
-                                <Button
-                                    variant="danger"
-                                    size="lg"
-                                    disabled={product.stocks <= 0}
-                                    onClick={handleAddToCart}
-                                >
-                                    <FaShoppingCart className="me-2" />
-                                    Add to Cart
-                                </Button>
-                                <Button
-                                    variant="outline-primary"
-                                    size="lg"
-                                    onClick={() => navigate('/')}
-                                >
-                                    Continue Shopping
-                                </Button>
-                            </div>
+                        )}
                         </div>
-                    </Col>
-                </Row>
+
+                        {/* Action Buttons */}
+                        <div className="d-grid gap-2">
+                            <Button 
+                                variant="danger" 
+                                size="lg"
+                                disabled={product.stocks <= 0}
+                                onClick={handleAddToCart}
+                            >
+                                <FaShoppingCart className="me-2" />
+                                    Add to Cart
+                            </Button>
+                            <Button 
+                                variant="outline-primary" 
+                                size="lg"
+                                onClick={() => navigate('/')}
+                            >
+                                    Continue Shopping
+                            </Button>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
 
                 {/* Rating Section */}
                 <Row className="mt-4">
                     <Col md={12}>
-                        <Rating
-                            productId={product._id}
+                    <Rating 
+                        productId={product._id} 
                             ratingsAvg={product.ratingsAvg}
                             ratingsCount={product.ratingsCount}
                             isLoggedIn={isLoggedIn}
@@ -277,11 +277,11 @@ const ProductDetail = () => {
                         <ProductComments 
                             productId={product._id}
                             onCommentAdded={() => {}}
-                        />
-                    </Col>
-                </Row>
-            </Container>
-            <Footer />
+                    />
+                </Col>
+            </Row>
+        </Container>
+        <Footer />
         </div>
     );
 };
