@@ -3,7 +3,8 @@ const {
     createProduct,
     findProduct,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    pageInfo
 } = require("../services/productServices")
 const mongoose = require('mongoose')
 
@@ -34,6 +35,22 @@ const findProductControl = async (req, res) => {
         }
         else{
             res.status(200).json({message:"Success", product})
+        }
+    }
+    catch(err){
+        res.status(500).json({message:err.message, err});
+    }
+}
+const findPageControl = async (req, res) => {
+    try{
+        const data = req.query
+
+        const page = await pageInfo(data)
+        if(!page){
+            res.status(404).json({message:"Can not find product page"})
+        }
+        else{
+            res.status(200).json({message:"Success", page})
         }
     }
     catch(err){
@@ -96,5 +113,6 @@ module.exports = {
     findProductControl,
     deleteProductControl,
     updateProductControl,
-    findOneProductControl
+    findOneProductControl,
+    findPageControl
 }

@@ -4,7 +4,8 @@ const {
     findProductControl,
     deleteProductControl,
     updateProductControl,
-    findOneProductControl
+    findOneProductControl,
+    findPageControl
 } = require("../controllers/productController");
 const {findBrandControl,findCategoryControl}= require("../controllers/indexController")
 const { verifyUser, verifyRole} = require('../middleware/authMiddleware');
@@ -31,10 +32,14 @@ router.post('/', verifyUser, verifyRole('admin'), createProductControl);
 // Gọi ra brand và category
 router.get("/brand", findBrandControl)
 router.get("/category", findCategoryControl)
+router.get("/page", findPageControl)
+//Trả về số lượng sản phẩm và số lượng page được chia (mỗi page 5 cái) các 
+//Lưu ý: Dùng để tạo thanh trang. B1: Áp filter để tìm sản phẩm để tìm page trước
+//B2: Sử dụng để tạo thanh trang sau đó mới dùng filter đó tìm sản phẩm theo trang
 
 router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các trường thông tin của sản phẩm như
 //search(tên),  category, features(một số chức năng), brand, dir(desc hoặc asc theo cột trong order),order, priceMax, priceMin
-// VD: product/?search=iphone&features=choi-game&dir=desc&order=price?priceMax=20000000?priceMin=5000000
+// VD: product/?search=iphone&features=choi-game&dir=desc&order=price?priceMax=20000000?priceMin=5000000?page=11
 
 //Done
 router.get("/:_id", findOneProductControl) // Tìm kiếm duy nhất 1 sản phẩm dựa theo id
