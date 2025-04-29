@@ -5,7 +5,7 @@ import PlacedOrderCard from './PlacedOrderCard'
 import { toast } from 'react-toastify'
 import axiosInstance from '../utils/axiosInstance'
 
-const Order = ({indexOrder, dataOrder}) => {
+const Order = ({indexOrder, dataOrder, page}) => {
     const {backendUrl} = useContext(AppContext)
     const [orderDetail, setOrderDetail] = useState([])
     const [show, setShow] = useState(false)
@@ -54,11 +54,11 @@ const Order = ({indexOrder, dataOrder}) => {
     <div className='mb-5 shadow rounded p-3'>
     <div className='row mb-2'>
             <div className='col-auto me-auto'>
-              <b>Đơn hàng: </b><span className=''>{dataOrder._id}</span>
+              <b>Đơn hàng {(page-1)*20 + indexOrder + 1}: </b><span className=''>{dataOrder._id}</span>
             </div>
             <div className='col-auto me-0'>
-              <b className='dangGiao'>{dataOrder.status === "processing" && "Đang giao hàng"}</b>
-              <b className='daNhan'>{dataOrder.status === "completed" && "Đã giao hàng"}</b>
+              <b className='dangGiao'>{(dataOrder.status === "processing" && dataOrder.delivery === "delivery") && "Đang giao hàng"}</b>
+              <b className='daNhan'>{dataOrder.status === "completed" && "Đã nhận hàng"}</b>
               <b className='daHuy'>{dataOrder.status === "cancelled" && "Đã hủy đơn hàng"}</b>
             </div>
     </div>

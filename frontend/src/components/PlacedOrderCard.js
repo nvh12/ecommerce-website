@@ -12,11 +12,9 @@ const PlacedOrderCard = ({indexOrder, dataOrder}) => {
           </div>
           <hr />
           <div className='row mb-2'>
-            <div className='col-md-4 col-12' style={{height: '280px'}}>
-              <img src={dataOrder.images[0]} alt="" 
-              className='h-100 w-100 border'
-              style={{ objectFit: 'cover', borderRadius: '8px'}}/>
-            </div>
+            <img src={dataOrder.images[0]} alt="" 
+            className='col-md-4 col-12'
+            style={{ objectFit: 'cover', borderRadius: '8px'}}/>
             <div className='col-md-8 col-12'>
               <div className='row'>
                 <div className='col-auto me-auto'>

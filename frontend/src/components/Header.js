@@ -13,10 +13,10 @@ const Header = () => {
     // console.log("isLoggedIn:", isLoggedIn);
 
     return (
-        <div>
-            <div className='container-fluid row d-flex shadow p-3 rounded' style={{backgroundColor: '#FFD400'}}>
-                <div className='col-2 d-flex me-auto'>
-                    <h2 className='mx-auto' style={{cursor: "pointer"}}
+        <div className='rounded shadow' style={{backgroundColor: '#FFD400'}}>
+            <div className='container-fluid row d-flex p-3'>
+                <div className='col-2 d-flex me-5 align-items-center'>
+                    <h2 className='mx-auto mb-0' style={{cursor: "pointer"}}
                     onClick={() => navigate("/")}>EShop</h2>
                 </div>
                 {/* <div className='col-5 mx-auto'>
@@ -26,25 +26,21 @@ const Header = () => {
                         className='form-control border-0 shadow-none outline-none'/>
                     </div>
                 </div> */}
-                <div className="col-5 mx-auto">
-                    <div className="row align-items-center">
-                        <div className="col-12 col-md-6 mt-3 mt-md-0">
-                            <SearchBar />
-                        </div>
-                    </div>
+                <div className="col-5 ms-md-2 ms-0 me-auto d-flex align-items-center justify-content-center"> 
+                    <SearchBar />
                 </div>                
-                <div className='col-auto d-flex'>
+                <div className='col-md-auto col-3 d-flex'>
                     {isLoggedIn ? 
                     (<>
                         <button className='bg-transparent btn rounded-pill hover-style'
                         onClick={() => navigate('/user')}>
                             <i className="bi bi-person-circle me-1"></i>
-                            <span className='d-none d-sm-inline'>{userData.name}</span>
+                            <span className='d-none d-lg-inline'>{userData.name}</span>
                         </button>
                         <button className='bg-transparent btn rounded-pill hover-style'
                         onClick={() => navigate('/cart')}>
                             <i className="bi bi-cart3 me-1"></i>
-                            <span className='d-none d-sm-inline'>Giỏ hàng</span>
+                            <span className='d-none d-lg-inline'>Giỏ hàng</span>
                             {cartItems?.length > 0 && (
                                 <span className="badge bg-danger ms-1">
                                     {cartItems.length}

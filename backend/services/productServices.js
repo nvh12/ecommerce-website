@@ -16,14 +16,19 @@ const createProduct = async (info) => {
         throw err;
     }
 };
-
-const findProduct = async (info) => {
-    try {
-        const { _id, search, category, features, brand, dir, order, priceMax, priceMin } = info;
+const pageInfo = async(info) =>{
+    const { _id, search, category, features, brand, dir, order, priceMax, priceMin, limit = 5 } = info;
         let filter = {};
 
         if (_id) filter._id = new mongoose.Types.ObjectId(`${_id}`);
-        if (search) filter.productName = { $regex: search, $options: 'i' };
+        if (search) {
+            filter.$or = [
+                { productName: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } },
+                { category: { $elemMatch: { $regex: search, $options: 'i' } } },
+                {features:{ $elemMatch: { $regex: search, $options: 'i' } }}
+            ];
+        }
         if (category) filter.category = category;
         if (features) {
             filter.features = Array.isArray(features) ? { $all: features } : features;
@@ -40,8 +45,53 @@ const findProduct = async (info) => {
             if (priceMin) filter.price.$gte = priceMin;
             if (priceMax) filter.price.$lte = priceMax;
         }
+        const total =await Product.countDocuments(filter)
+        return { 
+            total,
+            totalPages: Math.ceil(total / limit),
+        };
+}
 
-        return await Product.find(filter).sort(sort);
+const findProduct = async (info) => {
+    try {
+        const { _id, search, category, features, brand, dir, order, priceMax, priceMin, page=1, limit = 5 } = info;
+        let filter = {};
+
+        if (_id) filter._id = new mongoose.Types.ObjectId(`${_id}`);
+
+        // if (search) filter.productName = { $regex: search, $options: 'i' };
+        if (search) {
+            filter.$or = [
+                { productName: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } },
+                { category: { $elemMatch: { $regex: search, $options: 'i' } } },
+                {features:{ $elemMatch: { $regex: search, $options: 'i' } }}
+            ];
+        }
+        if (category) filter.category = category;
+        if (features) {
+            filter.features = Array.isArray(features) ? { $all: features } : features;
+        }
+        if (brand) filter.brand = brand;
+
+        let sort = {};
+        if (order) {
+            sort[order] = dir === 'desc' ? -1 : 1;
+        }
+
+        if (priceMin || priceMax) {
+            filter.price = {};
+            if (priceMin) filter.price.$gte = priceMin;
+            if (priceMax) filter.price.$lte = priceMax;
+        }
+        const total =await Product.countDocuments(filter)
+
+
+        return  await Product.find(filter)
+                    .sort(sort)
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+        
     } catch (err) {
         throw err;
     }
@@ -88,4 +138,5 @@ module.exports = {
     findProduct,
     deleteProduct,
     updateProduct,
+    pageInfo
 };

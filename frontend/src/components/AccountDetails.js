@@ -39,18 +39,18 @@ const AccountDetails = () => {
             <div className="my-3">
                 <p className="fs-4 bold">Tên: </p>
                 <input type="text" className="fs-5 text-muted border rounded form-control shadow-none outline-none"
-                    value={name} onChange={(e) => setName(e.target.value)} />
+                    value={name} />
             </div>
             <div className="row my-3">
-                <div className="col-6">
+                <div className="col-md-6 col-12">
                     <p className="fs-4 bold">Địa chỉ Email: </p>
                     <input type="email" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
-                        value={email} onChange={(e) => setEmail(e.target.value)} />
+                        value={email}/>
                 </div>
-                <div className="col-6">
+                <div className="col-md-6 col-12">
                     <p className="fs-4 bold">Mật khẩu mới: </p>
                     <input type="password" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
-                        value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Để trống nếu không đổi" />
+                        value={password}  placeholder="Nhập mật khẩu mới" />
                 </div>
             </div>
             <button className='btn rounded-pill hover-style mt-4' style={{ backgroundColor: '#FFD400' }}
