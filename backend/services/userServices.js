@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const { deleteRating } = require('../services/ratingServices');
 const { deleteComment } = require('../services/commentServices');
-const { deleteRating } = require('../services/ratingServices');
-const { deleteComment } = require('../services/commentServices');
 
 
 async function getUsers(name = null, page = 1, limit = 20) {
