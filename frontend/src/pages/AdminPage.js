@@ -5,6 +5,7 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import axiosInstance from '../utils/axiosInstance';
+import Pagination from '../components/Pagination';
 // Dashboard Component
 const Dashboard = ({ stats }) => {
   return (
@@ -47,6 +48,7 @@ const Dashboard = ({ stats }) => {
 
 // UserList Component
 const UserList = ({ backendUrl }) => {
+  const {usersForAdmin} = useContext(AppContext)
   const [users, setUsers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -126,7 +128,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {usersForAdmin.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -156,6 +158,7 @@ const UserList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
+      <Pagination pageName="usersForAdmin" />
 
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -218,6 +221,7 @@ const UserList = ({ backendUrl }) => {
 
 // ProductList Component
 const ProductList = ({ backendUrl }) => {
+  const {productItems} = useContext(AppContext)
   const [products, setProducts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -394,7 +398,7 @@ const ProductList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {productItems.map((product) => (
             <tr key={product._id}>
               <td>{product._id}</td>
               <td>{product.productName}</td>
@@ -425,6 +429,7 @@ const ProductList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
+      <Pagination pageName="productsPage" />
 
       {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">

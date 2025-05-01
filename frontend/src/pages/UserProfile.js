@@ -46,7 +46,7 @@ const UserProfile = () => {
   }
 
   const fetchUserOrders = async () => {
-    console.log("page", page)
+    // console.log("page", page)
     try {
       const res = await axiosInstance.get(backendUrl + "/user/order", 
         {
@@ -55,7 +55,7 @@ const UserProfile = () => {
         }
       )
       const temp = res.data.data
-      console.log("don hang", temp.length) 
+      // console.log("don hang", temp.length) 
       setUserOrders(temp)
     } catch (error) {
       toast.error("Lỗi lấy đơn hàng")
@@ -122,20 +122,25 @@ const UserProfile = () => {
                 </div>
                 <div className='col-12 col-md-9 d-flex flex-column  p-3 border rounded'>
                       <UserProfileComponent activeSection={activeSection} userOrders={userOrders} userCart={userCart} page={page}/>
-                      <div className='row'>
-                        <button className='col-auto me-auto btn rounded-pill border ms-2'
-                        onClick={() => {
-                          setPage(page => page - 1)
-                        }}
-                        disabled={page === 1}>
-                          Trang trước</button>
-                        <button className='col-auto btn rounded-pill border me-2'
-                        onClick={() => {
-                          setPage(page => page + 1)
-                        }}
-                        disabled={userOrders.length < 20}>
-                          Trang sau </button>
-                      </div>
+                      {activeSection === "orders" && userData.role === "user" &&
+                      <>
+                        <div className='row'>
+                          <button className='col-auto me-auto btn rounded-pill border ms-2'
+                          onClick={() => {
+                            setPage(page => page - 1)
+                          }}
+                          disabled={page === 1}>
+                            Trang trước</button>
+                          <button className='col-auto btn rounded-pill border me-2'
+                          onClick={() => {
+                            setPage(page => page + 1)
+                          }}
+                          disabled={userOrders.length < 20}
+                          >
+                            Trang sau </button>
+                        </div>
+                      </>
+                      }
                 </div>
             </div>
         </div>
