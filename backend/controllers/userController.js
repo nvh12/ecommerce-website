@@ -16,6 +16,21 @@ async function user(req, res) {
     }
 }
 
+async function updateAccount(req, res) {
+    try {
+        const { updateData }  = req.body;
+        const token = req.cookies.accessToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userObject = await userServices.getUserByObjectId(decoded.id);
+        if (!userObject) return res.status(404).json({ message: 'User not found' });
+        const updated = await userServices.updateUser(decoded.id, updateData);
+        const { password: _, ...user } = updated.toObject();
+        res.status(200).json({ data: user, status: 'success' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 async function userOrders(req, res) {
     try {
         const token = req.cookies.accessToken;
@@ -83,6 +98,7 @@ async function updateOrder(req, res) {
 
 module.exports = {
     user,
+    updateAccount,
     userOrders,
     singleOrder,
     updateOrder

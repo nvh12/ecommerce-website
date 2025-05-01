@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 const User = require('../models/user');
-const {deleteRating} = require('../services/ratingServices');
-const {deleteComment}= require('../services/commentServices');
+const { deleteRating } = require('../services/ratingServices');
+const { deleteComment } = require('../services/commentServices');
 
-async function getUsers(name = null) {
+async function getUsers(name = null, page = 1, limit = 20) {
     try {
         const query = name ? { name: new RegExp(name, 'i') } : {};
-        return await User.find(query);
+        const [users, total] = await Promise.all([
+            User.find(query).skip((page - 1) * limit).limit(limit),
+            User.countDocuments(query)
+        ]);
+        return { users, total };
     } catch (error) {
         throw error;
     }
@@ -23,7 +27,14 @@ async function getUserByObjectId(id) {
 
 async function updateUser(id, updateData) {
     try {
-        return await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+        const objectId = new mongoose.Types.ObjectId(`${id}`);
+        const user = await User.findById(objectId);
+        if (!user) throw new Error('User not found');
+        const data = { ...updateData };
+        if (!('password' in updateData)) {
+            Object.defineProperty(data, "password", { value: user.password });
+        }
+        return await User.findByIdAndUpdate(objectId, data, { new: true, runValidators: true });
     } catch (error) {
         throw error;
     }
@@ -32,11 +43,11 @@ async function updateUser(id, updateData) {
 async function deleteUser(id) {
     try {
         const userFound = await User.findByIdAndDelete(id);
-        if(userFound){
+        if (userFound) {
             deleteRating(id, "user")
             deleteComment(id, "user")
         }
-        else{
+        else {
             throw new Error("Chua tim duoc user hoac khong the xoa user")
         }
     } catch (error) {

@@ -19,6 +19,7 @@ const AppContextProvider = (props) => {
     const [product, setProduct] = useState(null)
     const [isLoadingProduct, setIsLoadingProduct] = useState(false)
     const [productError, setProductError] = useState(null)
+    const [usersForAdmin, setUsersForAdmin] = useState([])
 
     // const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const backendUrl = "http://localhost:5000"
@@ -127,6 +128,7 @@ const AppContextProvider = (props) => {
 
     const value = {
         productItems,
+        setProductItems,
         userData,
         setUserData,
         backendUrl,
@@ -143,7 +145,8 @@ const AppContextProvider = (props) => {
         isLoadingProduct,
         productError,
         fetchProduct,
-        clearProduct
+        clearProduct,
+        usersForAdmin, setUsersForAdmin
     }
 
     return (

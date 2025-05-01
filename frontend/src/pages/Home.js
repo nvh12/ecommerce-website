@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import SalesCarousel from '../components/SalesCarousel.js'
 import RecommendationGrid from '../components/RecommendationGrid.js'
 import AdvertisementCarousel from '../components/AdvertisementCarousel.js'
 import Header from '../components/Header.js'
 import Footer from '../components/Footer.js'
 import { Link } from 'react-router-dom'
+import Pagination from '../components/Pagination.js'
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
             <RecommendationGrid />
         </div>
         <AdvertisementCarousel />
+        <Pagination pageName="productsPage"/>
       <Footer />
     </div>
   )

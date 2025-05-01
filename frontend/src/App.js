@@ -22,6 +22,7 @@ import LaptopPage from './components/LaptopPage.js';
 import AdminPage from './pages/AdminPage';
 import SearchResults from './pages/SearchResults';
 import AdminDemo from './pages/AdminDemo';
+import Pagination from './components/Pagination.js';
 
 function App() {
   return (
