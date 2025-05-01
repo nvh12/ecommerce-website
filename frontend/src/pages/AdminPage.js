@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Nav, Tab } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import axiosInstance from '../utils/axiosInstance';
 import Pagination from '../components/Pagination';
+import '../styles/AdminPage.css';
 // Dashboard Component
 const Dashboard = ({ stats }) => {
   return (
@@ -634,7 +635,7 @@ const ProductList = ({ backendUrl }) => {
 };
 
 const AdminPage = () => {
-  const { backendUrl, isLoggedIn, user } = useContext(AppContext);
+  const { backendUrl, isLoggedIn, user, setUserData, setIsLoggedIn } = useContext(AppContext);
   const navigate = useNavigate();
   const [activeKey, setActiveKey] = useState('dashboard');
   const [stats, setStats] = useState({
@@ -705,6 +706,16 @@ const AdminPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    localStorage.setItem('isLoggedIn', 'false');
+    setUserData({});
+    setIsLoggedIn(false);
+    toast.success('Đăng xuất thành công!');
+    navigate('/');
+  };
+
   return (
     <Container fluid className="admin-page-container py-4">
       <h1 className="mb-4 text-center">Admin Dashboard</h1>
@@ -738,6 +749,13 @@ const AdminPage = () => {
                     <div className="mb-2">Logged in as:</div>
                     <div className="fw-bold">{user?.name || 'Admin'}</div>
                     <div className="text-muted small">Administrator</div>
+                    <Button 
+                      variant="danger" 
+                      className="mt-3 w-100 logout-btn"
+                      onClick={handleLogout}
+                    >
+                      Đăng xuất
+                    </Button>
                   </Card.Body>
                 </Card>
               </div>
@@ -758,6 +776,15 @@ const AdminPage = () => {
           </Row>
         </Tab.Container>
       </Row>
+      
+      <Link to="/">
+        <Button 
+          variant="primary" 
+          className="fixed-nav-button"
+        >
+          Go to Home
+        </Button>
+      </Link>
     </Container>
   );
 };
