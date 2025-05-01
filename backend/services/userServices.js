@@ -5,15 +5,10 @@ const { deleteComment } = require('../services/commentServices');
 const { deleteRating } = require('../services/ratingServices');
 const { deleteComment } = require('../services/commentServices');
 
-async function getUsers(name = null, page = 1, limit = 20) {
+
 async function getUsers(name = null, page = 1, limit = 20) {
     try {
         const query = name ? { name: new RegExp(name, 'i') } : {};
-        const [users, total] = await Promise.all([
-            User.find(query).skip((page - 1) * limit).limit(limit),
-            User.countDocuments(query)
-        ]);
-        return { users, total };
         const [users, total] = await Promise.all([
             User.find(query).skip((page - 1) * limit).limit(limit),
             User.countDocuments(query)
@@ -50,11 +45,9 @@ async function deleteUser(id) {
     try {
         const userFound = await User.findByIdAndDelete(id);
         if (userFound) {
-        if (userFound) {
             deleteRating(id, "user")
             deleteComment(id, "user")
         }
-        else {
         else {
             throw new Error("Chua tim duoc user hoac khong the xoa user")
         }
