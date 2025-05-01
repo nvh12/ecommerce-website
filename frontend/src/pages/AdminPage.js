@@ -667,7 +667,31 @@ const AdminPage = () => {
       
       // Calculate total revenue from orders
       const orders = ordersRes.data.data || [];
-      const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      // Only include orders that are not cancelled (status is not "cancelled")
+      const validOrders = orders.filter(order => order.status !== "cancelled");
+      
+      // Calculate total revenue from valid orders
+      const totalRevenue = validOrders.reduce((sum, order) => {
+        // Calculate the final amount considering discounts
+        const orderItems = order.orderItems || [];
+        let orderTotal = 0;
+        
+        orderItems.forEach(item => {
+          const itemPrice = item.price || 0;
+          const itemQuantity = item.quantity || 1;
+          const itemDiscount = item.discount || 0;
+          
+          // Calculate discounted price if applicable
+          const finalPrice = itemDiscount > 0 
+            ? itemPrice - (itemPrice * (itemDiscount / 100)) 
+            : itemPrice;
+            
+          orderTotal += finalPrice * itemQuantity;
+        });
+        
+        return sum + (orderTotal || order.totalAmount || 0);
+      }, 0);
       
       setStats({
         totalProducts: productsRes.data.product?.length || 0,

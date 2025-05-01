@@ -14,6 +14,10 @@
 
 .sales-section {
   background: #fff;
+  margin-top: 2rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .sales-header {
@@ -42,4 +46,17 @@
 
 .section-header {
   border-bottom: 1px solid #eee;
+}
+
+.sale-badge {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.sales-section .product-card {
+  border: 1px solid #ffeeee !important;
+}
+
+.sales-section .product-card:hover {
+  border-color: #ff6b6b !important;
 } 
