@@ -40,9 +40,22 @@ async function updateOrder(req, res) {
 
 async function getUsers(req, res) {
     try {
-        const { name } = req.query;
-        const user = await userServices.getUsers(name);
-        res.status(200).json({ status: 'success', user: user })
+        const { name, page = 1 } = req.query;
+        const curPage = parseInt(page) || 1;
+        const { users, total } = await userServices.getUsers(name, curPage, 20);
+        if (total === 0) {
+            return res.status(200).json({
+                status: 'success',
+                message: 'No users found'
+            });
+        }
+        res.status(200).json({
+            status: 'success',
+            totalUsers: total,
+            totalPages: Math.ceil(total / 20),
+            page: page,
+            user: users
+        });
     } catch (error) {
         res.status(500).json({ status: 'error', error: error.message });
     }
@@ -77,5 +90,5 @@ module.exports = {
     getUsers,
     getOrders,
     updateOrder,
-    getUserOrders 
+    getUserOrders
 };
