@@ -23,7 +23,24 @@ userSchema.pre('save', async function (next) {
     } catch (error) {
         next(error);
     }
-})
+});
+
+userSchema.pre('findOneAndUpdate', async function (next) {
+    const update = this.getUpdate();
+    if (update.password) {
+        try {
+            const isHashed = typeof update.password === 'string' && update.password.startsWith('$2');
+            if (!isHashed) {
+                const salt = await bcrypt.genSalt(10);
+                const hashed = await bcrypt.hash(update.password, salt);
+                this.setUpdate({ ...update, password: hashed });
+            }
+        } catch (err) {
+            return next(err);
+        }
+    }
+    next();
+});
 
 userSchema.methods.comparePassword = async function (password) {
     return await bcrypt.compare(password, this.password);

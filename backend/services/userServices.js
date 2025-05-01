@@ -30,8 +30,10 @@ async function updateUser(id, updateData) {
         const objectId = new mongoose.Types.ObjectId(`${id}`);
         const user = await User.findById(objectId);
         if (!user) throw new Error('User not found');
-        const data = { ...updateData, password: user.password };
-        if ('password' in updateData) delete updateData.password;
+        const data = { ...updateData };
+        if (!('password' in updateData)) {
+            Object.defineProperty(data, "password", { value: user.password });
+        }
         return await User.findByIdAndUpdate(objectId, data, { new: true, runValidators: true });
     } catch (error) {
         throw error;
