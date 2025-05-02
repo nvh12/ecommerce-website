@@ -1,0 +1,95 @@
+.admin-page-container {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.admin-page-container h1 {
+  color: #343a40;
+  font-weight: 600;
+}
+
+.admin-page-container .nav-pills .nav-link {
+  color: #495057;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+}
+
+.admin-page-container .nav-pills .nav-link.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.admin-page-container .nav-pills .nav-link:hover:not(.active) {
+  background-color: #e9ecef;
+}
+
+.admin-page-container .card {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: all 0.3s ease;
+}
+
+.admin-page-container .card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.admin-page-container .card-title {
+  font-weight: 600;
+  color: #495057;
+}
+
+.admin-page-container .display-4 {
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.admin-page-container .table th {
+  font-weight: 600;
+  background-color: #f1f3f5;
+}
+
+.admin-page-container .table td, 
+.admin-page-container .table th {
+  vertical-align: middle;
+}
+
+.admin-page-container .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.admin-page-container .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.admin-page-container .btn-info {
+  background-color: #0dcaf0;
+  border-color: #0dcaf0;
+  color: #fff;
+}
+
+/* Fixed navigation button */
+.fixed-nav-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Logout button styling */
+.logout-btn {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #bb2d3b;
+  border-color: #bb2d3b;
+} 

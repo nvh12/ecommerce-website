@@ -22,3 +22,8 @@ Thì tự động lấy thông tin hàng như ở home
 -------------- User Profile ------------ 
 Phần tab giỏ hàng trong page này chưa link với giỏ hàng thực tế. 
 Xem xét bỏ luôn vì đã có giỏ hàng ở Header
+-------Pagination---------
+Trong phần AdminPage:(thanh đổi theo pagination)
+-   products sửa thành productItems(product management)
+-   users sửa thành usersForAdmin(user management)
+(kiểm tra xem có ảnh hưởng tới các tính năng thêm, sửa, xóa không ?)

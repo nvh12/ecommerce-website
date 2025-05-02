@@ -1,0 +1,124 @@
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import { AppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
+
+const Pagination = ({pageName}) => {
+    const {backendUrl, productItems, setProductItems, setUsersForAdmin} = useContext(AppContext)
+    const [totalPages, setTotalPages] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
+    const navigate = useNavigate()
+    // console.log(pageName)
+    const fetchTotalPages = async () => {
+        switch (pageName) {
+            case "productsPage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product/page`)
+                    setTotalPages(res.data.page.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "usersForAdmin":
+                try {
+                    const res1 = await axios.get(`${backendUrl}/admin/user`, {withCredentials: true})
+                    setTotalPages(res1.data.totalPages)
+                    console.log("totalPages", res1.data.totalPages)                
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            default:
+                break
+        } 
+    }
+    const fetchDataByPage = async () => {
+        switch (pageName) {
+            case "productsPage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product`, {
+                        params: {page: currentPage}
+                    })
+                    setProductItems(res.data.product)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "usersForAdmin":
+                try {
+                    const res1 = await axios.get(`${backendUrl}/admin/user`, {
+                        params: {page: currentPage},
+                        withCredentials: true})
+                    setUsersForAdmin(res1.data.user)
+                    console.log(res1.data.user)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            default:
+                break
+        }
+        // // console.log("productItmes", productItems)
+        console.log("currentpage" ,currentPage)
+    }
+
+    useEffect(() => {
+        fetchTotalPages()
+    }, [])
+    useEffect(() => {
+        fetchDataByPage()
+    }, [currentPage])
+  return (
+    <>
+        <div className='d-flex justify-content-center p-3 my-3'>
+            <button className='btn rounded'
+            onClick={() => {
+                setCurrentPage(1)
+            }} 
+            disabled={currentPage===1}
+            ><i className="bi bi-chevron-double-left"></i></button>
+            <button className='btn rounded'
+            onClick={() => {
+                setCurrentPage(currentPage => currentPage - 1)
+            }}
+            disabled={currentPage===1}
+            ><i className="bi bi-chevron-left"></i>
+            </button>
+
+
+            {totalPages == 1 && <button className='btn rounded' style={{backgroundColor: "#FFD400"}}>1</button>}
+            {totalPages == 2 && 
+            <>
+                <button className='btn rounded' style={currentPage == 1 ? {backgroundColor: "#FFD400"} : {}} onClick={() => setCurrentPage(1)}>1</button>
+                <button className='btn rounded' style={currentPage == 2 ? {backgroundColor: "#FFD400"} : {}} onClick={() => setCurrentPage(2)}>2</button>
+            </>}
+            {totalPages > 2 && 
+            <>
+                <button className='btn rounded' onClick={() => setCurrentPage(currentPage)} style={{backgroundColor: "#FFD400"}}>{currentPage}</button>
+                <button className='btn rounded' onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}>{currentPage + 1}</button>
+                <button className='btn rounded' onClick={() => setCurrentPage(currentPage + 2)}
+                    disabled={currentPage >= totalPages - 1}>{currentPage + 2}</button>
+            </>}
+
+
+            <button className='btn rounded'
+            onClick={() => {
+                setCurrentPage(currentPage => currentPage + 1)
+            }}
+            disabled={currentPage >= totalPages}
+            ><i className="bi bi-chevron-right"></i>
+            </button>
+            <button className='btn rounded'
+            onClick={() => {
+                setCurrentPage(totalPages)
+            }}
+            disabled={currentPage >= totalPages}
+            ><i className="bi bi-chevron-double-right"></i>
+            </button>
+        </div>
+    </>
+  )
+}
+
+export default Pagination
