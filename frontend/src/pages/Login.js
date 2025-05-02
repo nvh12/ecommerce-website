@@ -50,8 +50,8 @@ const Login = () => {
             <div className="card bg-light text-black" style={{ borderRadius: "1rem" }}>
               <div className="card-body p-5 text-center">
                 <div className="mb-md-5 mt-md-4 pb-5">
-                  <h2 className="fw-bold mb-2 text-uppercase">Đăng Nhập</h2>
-                  <p className="text-black-50 mb-5">Vui lòng nhập email và mật khẩu!</p>
+                  <h2 className="fw-bold mb-2 text-uppercase">Đăng nhập</h2>
+                  <p className="text-black-50 mb-5">Vui lòng nhập mật khẩu và email!</p>
 
                   <div className="form-outline form-white mb-4">
                     <input type="email" id="typeEmailX" className="form-control form-control-lg" placeholder="Email" 
@@ -59,13 +59,17 @@ const Login = () => {
                   </div>
 
                   <div className="form-outline form-white mb-4">
-                    <input type="password" id="typePasswordX" className="form-control form-control-lg" placeholder="Mật khẩu" 
+                    <input type="password" id="typePasswordX" className="form-control form-control-lg" placeholder="Password" 
                     onChange={(e) => setPassword(e.target.value)}/>
                   </div>
 
+                  {/* <p className="small mb-5 pb-lg-2">
+                    <a className="text-black-50" href="#!">Quên mật khẩu?</a>
+                  </p> */}
+
                   <button className="btn btn-lg px-5 hover-style" type="submit" style={{backgroundColor: '#FFD400'}}
                   onClick={onSubmitHandler}>
-                    Đăng Nhập
+                    Đăng nhập
                   </button>
                 </div>
 
@@ -73,7 +77,7 @@ const Login = () => {
                   <p className="mb-0">
                     Bạn chưa có tài khoản?{" "}
                       <button className="btn btn-link text-black-50 fw-bold p-0" onClick={goToRegister}>
-                        Đăng Ký
+                        Đăng kí
                       </button>
                   </p>
                 </div>

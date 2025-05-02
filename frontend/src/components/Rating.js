@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { FaStar } from 'react-icons/fa';
-import { Card, Form, Button, Spinner } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { AppContext } from '../context/AppContext';
-import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import axiosInstance from '../utils/axiosInstance';
 
 const Rating = ({ 
@@ -13,10 +14,8 @@ const Rating = ({
 }) => {
     const { backendUrl, user, fetchProduct } = useContext(AppContext);
     const [rating, setRating] = useState(0);
-    const [hover, setHover] = useState(0);
-    const [comment, setComment] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [ratingDistribution, setRatingDistribution] = useState([]);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [userRating, setUserRating] = useState(null);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -30,155 +29,181 @@ const Rating = ({
                 withCredentials: true
             });
             
+            // Check if response.data.ratings exists and is an array
             if (response.data && Array.isArray(response.data.ratings)) {
+                // Find the current user's rating
                 const userRating = response.data.ratings.find(r => r.fromUser);
-                if (userRating) {
+            if (userRating) {
                     setRating(userRating.rate);
-                    setComment(userRating.comment || '');
+                    setUserRating(userRating);
                 } else {
                     setRating(0);
-                    setComment('');
+                    setUserRating(null);
                 }
-                setRatingDistribution(response.data.ratingDistribution || []);
             } else {
                 setRating(0);
-                setComment('');
-                setRatingDistribution([]);
+                setUserRating(null);
             }
         } catch (error) {
             console.error('Error fetching user rating:', error);
+            toast.error('Failed to load your rating');
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!isLoggedIn) return;
+    const handleRatingSubmit = async (newRating) => {
+        if (!isLoggedIn) {
+            toast.error('Please login to rate this product');
+            return;
+        }
 
-        setIsSubmitting(true);
+        if (newRating < 1 || newRating > 5) {
+            toast.error('Rating must be between 1 and 5');
+            return;
+        }
+
         try {
-            await axiosInstance.post(`${backendUrl}/rating/create`, {
-                productId,
-                rate: rating,
-                comment
-            }, { withCredentials: true });
+            if (userRating) {
+                // Update existing rating
+                await axiosInstance.put(`${backendUrl}/rating/update/${userRating._id}`, {
+                    rate: newRating
+                }, { withCredentials: true });
+            } else {
+                // Create new rating
+                await axiosInstance.post(`${backendUrl}/rating/create`, {
+                        productId,
+                    rate: newRating
+                }, { withCredentials: true });
+            }
             
+            // Fetch fresh product data to update ratings
             await fetchProduct(productId);
             await fetchUserRating();
+            
+            toast.success('Rating submitted successfully');
         } catch (error) {
             console.error('Error submitting rating:', error);
-        } finally {
-            setIsSubmitting(false);
+            toast.error(error.response?.data?.message || 'Failed to submit rating');
         }
+    };
+
+    const handleDeleteRating = async () => {
+        if (!userRating) return;
+        
+        try {
+            await axiosInstance.delete(`${backendUrl}/rating/delete/${userRating._id}`, {
+                withCredentials: true
+            });
+            
+            // Fetch fresh product data to update ratings
+            await fetchProduct(productId);
+            setRating(0);
+            setUserRating(null);
+            
+            toast.success('Rating deleted successfully');
+        } catch (error) {
+            console.error('Error deleting rating:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete rating');
+        }
+    };
+
+    const StarRating = ({ value, onHover, onClick, size = 24, interactive = true }) => {
+        return (
+            <div className="d-flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                        key={star}
+                        size={size}
+                        style={{ 
+                            cursor: interactive ? 'pointer' : 'default',
+                            marginRight: '4px',
+                            transition: 'color 0.2s ease'
+                        }}
+                        color={star <= (hoverRating || value) ? "#ffc107" : "#e4e5e9"}
+                        onMouseEnter={() => interactive && onHover(star)}
+                        onMouseLeave={() => interactive && onHover(0)}
+                        onClick={() => interactive && onClick(star)}
+                    />
+                ))}
+            </div>
+        );
     };
 
     return (
-        <div className="rating-section mb-4">
-            <Card>
-                <Card.Body>
-                    <h4 className="mb-4">Đánh Giá Sản Phẩm</h4>
-                    <div className="rating-summary d-flex align-items-center mb-4">
-                        <div className="rating-average text-center me-4">
-                            <h2 className="mb-0">{ratingsAvg?.toFixed(1) || '0.0'}</h2>
-                            <div className="stars">
-                                {Array.from({ length: 5 }).map((_, index) => (
-                                    <FaStar
-                                        key={index}
-                                        className={index < ratingsAvg ? 'text-warning' : 'text-muted'}
-                                    />
-                                ))}
-                            </div>
-                            <small className="text-muted">
-                                ({ratingsCount?.total || 0} đánh giá)
-                            </small>
-                        </div>
-                        <div className="rating-bars flex-grow-1">
-                            {[5, 4, 3, 2, 1].map((star, index) => (
-                                <div key={star} className="rating-bar-row d-flex align-items-center mb-1">
-                                    <div className="stars me-2">
-                                        {star} <FaStar className="text-warning ms-1" />
-                                    </div>
-                                    <div className="progress flex-grow-1" style={{ height: '8px' }}>
-                                        <div
-                                            className="progress-bar bg-warning"
-                                            style={{
-                                                width: `${(ratingDistribution[index] || 0) / (ratingsCount?.total || 1) * 100}%`
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="count ms-2">
-                                        {ratingDistribution[index] || 0}
-                                    </div>
-                                </div>
-                            ))}
+        <Card className="mb-4">
+            <Card.Body>
+                <h3>Product Ratings</h3>
+                <div className="d-flex align-items-center mb-3">
+                    <div className="me-3">
+                        <h2 className="mb-0">{ratingsAvg?.toFixed(1) || '0.0'}</h2>
+                        <div className="text-muted">
+                            {ratingsCount?.total || 0} {ratingsCount?.total === 1 ? 'rating' : 'ratings'}
                         </div>
                     </div>
+                    <div>
+                        <StarRating
+                            value={ratingsAvg || 0}
+                            onHover={() => {}}
+                            onClick={() => {}}
+                            size={24}
+                            interactive={false}
+                        />
+                    </div>
+                </div>
 
-                    {isLoggedIn ? (
-                        <div className="rating-form">
-                            <h5 className="mb-3">Viết đánh giá của bạn</h5>
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-3">
-                                    <div className="d-flex align-items-center mb-2">
-                                        <Form.Label className="me-3 mb-0">Chọn số sao:</Form.Label>
-                                        <div className="star-rating">
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <FaStar
-                                                    key={star}
-                                                    className={`star ${
-                                                        star <= (hover || rating) ? 'active' : ''
-                                                    }`}
-                                                    onClick={() => setRating(star)}
-                                                    onMouseEnter={() => setHover(star)}
-                                                    onMouseLeave={() => setHover(0)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Nhận xét của bạn:</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-                                        required
+                {/* Rating Distribution */}
+                <div className="mt-3">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                        <div key={star} className="d-flex align-items-center mb-2">
+                            <div className="me-2" style={{ width: '30px' }}>
+                                {star} <FaStar style={{ color: '#F8C146' }} />
+                            </div>
+                            <div className="flex-grow-1">
+                                <div className="progress" style={{ height: '8px' }}>
+                                    <div
+                                        className="progress-bar"
+                                        role="progressbar"
+                                        style={{
+                                            width: `${(ratingsCount?.[star] || 0) / (ratingsCount?.total || 1) * 100}%`,
+                                            backgroundColor: '#F8C146'
+                                        }}
                                     />
-                                </Form.Group>
+                                </div>
+                            </div>
+                            <div className="ms-2" style={{ width: '40px' }}>
+                                {ratingsCount?.[star] || 0}
+                            </div>
+                                        </div>
+                    ))}
+                                            </div>
 
-                                <Button
-                                    type="submit"
-                                    variant="primary"
-                                    disabled={isSubmitting || !rating}
+                {/* Rating Input (if user is logged in) */}
+                {isLoggedIn && (
+                    <div className="mt-4">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h5 className="mb-0">Your Rating</h5>
+                            {userRating && (
+                                <button 
+                                    className="btn btn-link text-danger p-0"
+                                    onClick={handleDeleteRating}
                                 >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Spinner
-                                                as="span"
-                                                animation="border"
-                                                size="sm"
-                                                role="status"
-                                                className="me-2"
-                                            />
-                                            Đang gửi...
-                                        </>
-                                    ) : (
-                                        'Gửi đánh giá'
+                                    Delete Rating
+                                </button>
                                     )}
-                                </Button>
-                            </Form>
                         </div>
-                    ) : (
-                        <div className="alert alert-info">
-                            Vui lòng <Link to="/login">đăng nhập</Link> để viết đánh giá
-                        </div>
-                    )}
-                </Card.Body>
-            </Card>
-        </div>
+                        <StarRating
+                            value={rating}
+                            onHover={setHoverRating}
+                            onClick={(newRating) => {
+                                setRating(newRating);
+                                handleRatingSubmit(newRating);
+                            }}
+                            size={24}
+                        />
+                    </div>
+                )}
+            </Card.Body>
+        </Card>
     );
 };
 
-export default Rating;
+export default Rating; 

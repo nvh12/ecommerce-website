@@ -47,7 +47,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
             }
         } catch (error) {
             console.error('Error fetching comments:', error);
-            toast.error('Không thể tải bình luận');
+            toast.error('Failed to load comments');
         } finally {
             setIsLoading(false);
         }
@@ -69,7 +69,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
             );
 
             if (response.data.message === 'Success') {
-                toast.success('Đánh giá đã được thêm thành công');
+                toast.success('Comment added successfully');
                 setNewComment('');
                 
                 // Create a new comment object with the current user's information
@@ -91,7 +91,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
             }
         } catch (error) {
             console.error('Error adding comment:', error);
-            toast.error(error.response?.data?.message || 'Không thể thêm đánh giá');
+            toast.error(error.response?.data?.message || 'Failed to add comment');
         } finally {
             setIsSubmitting(false);
         }
@@ -120,11 +120,11 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                     )
                 );
                 
-                toast.success('Đánh giá đã được cập nhật thành công');
+                toast.success('Comment updated successfully');
             }
         } catch (error) {
             console.error('Error updating comment:', error);
-            toast.error(error.response?.data?.message || 'Không thể cập nhật đánh giá');
+            toast.error(error.response?.data?.message || 'Failed to update comment');
         } finally {
             setEditingComment(null);
         }
@@ -143,13 +143,13 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                 if (onCommentAdded) {
                     onCommentAdded(null, commentId);
                 }
-                toast.success('Đánh giá đã được xóa thành công');
+                toast.success('Comment deleted successfully');
             } else {
-                toast.error('Không thể xóa đánh giá');
+                toast.error('Failed to delete comment');
             }
         } catch (error) {
             console.error('Error deleting comment:', error);
-            toast.error(error.response?.data?.message || 'Không thể xóa đánh giá');
+            toast.error(error.response?.data?.message || 'Failed to delete comment');
         }
     };
 
@@ -178,7 +178,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
     return (
         <Card className="mb-4">
             <Card.Header>
-                <h5 className="mb-0">Bình Luận ({comments.length})</h5>
+                <h5 className="mb-0">Comments ({comments.length})</h5>
             </Card.Header>
             <Card.Body>
                 {isLoggedIn && userData?._id ? (
@@ -187,7 +187,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                             <Form.Control
                                 as="textarea"
                                 rows={3}
-                                placeholder="Viết bình luận của bạn..."
+                                placeholder="Write your comment..."
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 disabled={isSubmitting}
@@ -199,12 +199,12 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                             className="mt-2"
                             disabled={isSubmitting || !newComment.trim()}
                         >
-                            {isSubmitting ? 'Đang gửi...' : 'Gửi Bình Luận'}
+                            {isSubmitting ? 'Posting...' : 'Post Comment'}
                         </Button>
                     </Form>
                 ) : (
                     <div className="text-center p-3">
-                        <p>Vui lòng <a href="/login">đăng nhập</a> để bình luận</p>
+                        <p>Please <a href="/login">login</a> to leave a comment</p>
                     </div>
                 )}
 
@@ -227,14 +227,14 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                                             onClick={() => handleUpdate(comment._id)}
                                             disabled={!editText.trim()}
                                         >
-                                            Lưu
+                                            Save
                                         </Button>
                                         <Button 
                                             variant="secondary" 
                                             size="sm"
                                             onClick={cancelEditing}
                                         >
-                                            Hủy
+                                            Cancel
                                         </Button>
                                     </div>
                                 </div>
@@ -242,14 +242,14 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                                 <div className="d-flex justify-content-between align-items-start">
                                     <div>
                                         <div className="d-flex align-items-center mb-1">
-                                            <h6 className="mb-0 me-2">{comment.user?.name || 'Người dùng ẩn danh'}</h6>
+                                            <h6 className="mb-0 me-2">{comment.user?.name || 'Anonymous'}</h6>
                                             {comment.fromUser && (
-                                                <Badge bg="primary" className="ms-2">Bạn</Badge>
+                                                <Badge bg="primary" className="ms-2">You</Badge>
                                             )}
                                         </div>
                                         <p className="mb-1">{comment.context}</p>
                                         <small className="text-muted">
-                                            {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Vừa xong'}
+                                            {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Just now'}
                                         </small>
                                     </div>
                                     {(comment.fromUser || userData?._id === comment.user?._id) && (
@@ -269,13 +269,13 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                                                         onClick={() => startEditing(comment)}
                                                         className="d-flex align-items-center"
                                                     >
-                                                        <BsPencil className="me-2" /> <span className="text-primary">Sửa</span>
+                                                        <BsPencil className="me-2" /> <span className="text-primary">Edit</span>
                                                     </Dropdown.Item>
                                                     <Dropdown.Item 
                                                         onClick={() => handleDelete(comment._id)}
                                                         className="d-flex align-items-center"
                                                     >
-                                                        <BsTrash className="me-2" /> <span className="text-danger">Xóa</span>
+                                                        <BsTrash className="me-2" /> <span className="text-danger">Delete</span>
                                                     </Dropdown.Item>
                                                 </Dropdown.Menu>
                                             </Dropdown>
@@ -287,7 +287,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                     ))}
                     {comments.length === 0 && (
                         <ListGroup.Item className="text-center text-muted">
-                            Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
+                            No comments yet. Be the first to comment!
                         </ListGroup.Item>
                     )}
                 </ListGroup>
@@ -296,4 +296,4 @@ const ProductComments = ({ productId, onCommentAdded }) => {
     );
 };
 
-export default ProductComments;
+export default ProductComments; 

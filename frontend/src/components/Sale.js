@@ -12,9 +12,9 @@ const Sale = () => {
   return (
     <div className="sales-section mb-4">
       <div className="section-header p-3 d-flex justify-content-between align-items-center">
-        <h3 className="mb-0 text-danger">Giảm Giá Sốc</h3>
+        <h3 className="mb-0 text-danger">SALE OFF</h3>
         <div className="sale-badge bg-danger text-white px-3 py-1 rounded-pill">
-          Ưu Đãi Nóng
+          Hot Deals
         </div>
       </div>
       
@@ -34,4 +34,4 @@ const Sale = () => {
   );
 };
 
-export default Sale;
+export default Sale; 

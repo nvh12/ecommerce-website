@@ -2,7 +2,7 @@ import React from 'react';
 import AccountDetails from './AccountDetails';
 import Order from './Order';
 
-const UserProfileComponent = ({ activeSection, userOrders =[], userCart, page }) => {
+const UserProfileComponent = ({ activeSection, userOrders, userCart, page }) => {
     switch (activeSection) {
         case "orders":
             return (

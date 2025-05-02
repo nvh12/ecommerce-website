@@ -8,261 +8,48 @@ import axiosInstance from '../utils/axiosInstance';
 import Pagination from '../components/Pagination';
 import '../styles/AdminPage.css';
 // Dashboard Component
-const Dashboard = ({ stats, ordersForAdmin }) => {
-  // Calculate revenue metrics directly from orders
-  const calculateRevenueMetrics = (orders) => {
-    const validOrders = orders.filter(order => order.status !== "cancelled");
-    
-    // Calculate total revenue
-    const totalRevenue = validOrders.reduce((sum, order) => sum + (order.total_price || 0), 0);
-    
-    // Calculate revenue by day/week/month
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    
-    const dailyRevenue = validOrders
-      .filter(order => new Date(order.createdAt) >= oneDayAgo)
-      .reduce((sum, order) => sum + (order.total_price || 0), 0);
-      
-    const weeklyRevenue = validOrders
-      .filter(order => new Date(order.createdAt) >= oneWeekAgo)
-      .reduce((sum, order) => sum + (order.total_price || 0), 0);
-      
-    const monthlyRevenue = validOrders
-      .filter(order => new Date(order.createdAt) >= oneMonthAgo)
-      .reduce((sum, order) => sum + (order.total_price || 0), 0);
-    
-    return {
-      totalRevenue,
-      dailyRevenue,
-      weeklyRevenue,
-      monthlyRevenue
-    };
-  };
-  
-  // Calculate order metrics
-  const calculateOrderMetrics = (orders) => {
-    // Count orders by status
-    const processingOrders = orders.filter(order => order.status === "processing").length;
-    const completedOrders = orders.filter(order => order.status === "completed").length;
-    const cancelledOrders = orders.filter(order => order.status === "cancelled").length;
-    
-    // Count orders by delivery method
-    const deliveryOrders = orders.filter(order => order.delivery === "delivery").length;
-    const storePickupOrders = orders.filter(order => order.delivery === "store").length;
-    
-    // Count orders by time period
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    
-    const todayOrders = orders.filter(order => new Date(order.createdAt) >= oneDayAgo).length;
-    const weekOrders = orders.filter(order => new Date(order.createdAt) >= oneWeekAgo).length;
-    
-    return {
-      total: orders.length,
-      processing: processingOrders,
-      completed: completedOrders,
-      cancelled: cancelledOrders,
-      delivery: deliveryOrders,
-      storePickup: storePickupOrders,
-      today: todayOrders,
-      week: weekOrders
-    };
-  };
-  
-  const revenueMetrics = calculateRevenueMetrics(ordersForAdmin);
-  const orderMetrics = calculateOrderMetrics(ordersForAdmin);
-  
-  // Format currency function
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { 
-      style: 'currency', 
-      currency: 'VND',
-      maximumFractionDigits: 0 
-    }).format(amount);
-  };
-
+const Dashboard = ({ stats }) => {
   return (
-    <div>
-      <Row className="mt-4">
-        <Col md={3}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Tổng Sản Phẩm</Card.Title>
-              <Card.Text className="display-4">{stats.totalProducts}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Tổng Đơn Hàng</Card.Title>
-              <Card.Text className="display-4">{orderMetrics.total}</Card.Text>
-              <div className="text-muted small">
-                Đang xử lý: {orderMetrics.processing} | Hoàn thành: {orderMetrics.completed} | Đã hủy: {orderMetrics.cancelled}
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Tổng Người Dùng</Card.Title>
-              <Card.Text className="display-4">{stats.totalUsers}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Tổng Doanh Thu</Card.Title>
-              <Card.Text className="display-4">{formatCurrency(revenueMetrics.totalRevenue)}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-      
-      <h3 className="mt-4 mb-3">Thống Kê Doanh Thu</h3>
-      <Row>
-        <Col md={4}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Doanh Thu Hôm Nay</Card.Title>
-              <Card.Text className="display-5 text-primary">{formatCurrency(revenueMetrics.dailyRevenue)}</Card.Text>
-              <div className="text-muted">Đơn hàng: {orderMetrics.today}</div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Doanh Thu Tuần Này</Card.Title>
-              <Card.Text className="display-5 text-success">{formatCurrency(revenueMetrics.weeklyRevenue)}</Card.Text>
-              <div className="text-muted">Đơn hàng: {orderMetrics.week}</div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body className="text-center">
-              <Card.Title>Doanh Thu Tháng Này</Card.Title>
-              <Card.Text className="display-5 text-info">{formatCurrency(revenueMetrics.monthlyRevenue)}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-      
-      <h3 className="mt-4 mb-3">Thống Kê Đơn Hàng</h3>
-      <Row>
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="card-title mb-3">Theo Trạng Thái</h5>
-              <div className="d-flex justify-content-between mb-2">
-                <div>Đang xử lý:</div>
-                <div className="fw-bold">{orderMetrics.processing}</div>
-              </div>
-              <div className="progress mb-3">
-                <div 
-                  className="progress-bar bg-warning" 
-                  role="progressbar" 
-                  style={{ width: `${orderMetrics.total ? (orderMetrics.processing / orderMetrics.total * 100) : 0}%` }}
-                  aria-valuenow={orderMetrics.processing} 
-                  aria-valuemin="0" 
-                  aria-valuemax={orderMetrics.total}
-                ></div>
-              </div>
-              
-              <div className="d-flex justify-content-between mb-2">
-                <div>Hoàn thành:</div>
-                <div className="fw-bold">{orderMetrics.completed}</div>
-              </div>
-              <div className="progress mb-3">
-                <div 
-                  className="progress-bar bg-success" 
-                  role="progressbar" 
-                  style={{ width: `${orderMetrics.total ? (orderMetrics.completed / orderMetrics.total * 100) : 0}%` }}
-                  aria-valuenow={orderMetrics.completed} 
-                  aria-valuemin="0" 
-                  aria-valuemax={orderMetrics.total}
-                ></div>
-              </div>
-              
-              <div className="d-flex justify-content-between mb-2">
-                <div>Đã hủy:</div>
-                <div className="fw-bold">{orderMetrics.cancelled}</div>
-              </div>
-              <div className="progress">
-                <div 
-                  className="progress-bar bg-danger" 
-                  role="progressbar" 
-                  style={{ width: `${orderMetrics.total ? (orderMetrics.cancelled / orderMetrics.total * 100) : 0}%` }}
-                  aria-valuenow={orderMetrics.cancelled} 
-                  aria-valuemin="0" 
-                  aria-valuemax={orderMetrics.total}
-                ></div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <h5 className="card-title mb-3">Phương Thức Nhận Hàng</h5>
-              <div className="d-flex justify-content-between mb-2">
-                <div>Giao hàng tận nơi:</div>
-                <div className="fw-bold">{orderMetrics.delivery}</div>
-              </div>
-              <div className="progress mb-3">
-                <div 
-                  className="progress-bar bg-info" 
-                  role="progressbar" 
-                  style={{ width: `${orderMetrics.total ? (orderMetrics.delivery / orderMetrics.total * 100) : 0}%` }}
-                  aria-valuenow={orderMetrics.delivery} 
-                  aria-valuemin="0" 
-                  aria-valuemax={orderMetrics.total}
-                ></div>
-              </div>
-              
-              <div className="d-flex justify-content-between mb-2">
-                <div>Nhận tại cửa hàng:</div>
-                <div className="fw-bold">{orderMetrics.storePickup}</div>
-              </div>
-              <div className="progress">
-                <div 
-                  className="progress-bar bg-primary" 
-                  role="progressbar" 
-                  style={{ width: `${orderMetrics.total ? (orderMetrics.storePickup / orderMetrics.total * 100) : 0}%` }}
-                  aria-valuenow={orderMetrics.storePickup} 
-                  aria-valuemin="0" 
-                  aria-valuemax={orderMetrics.total}
-                ></div>
-              </div>
-              
-              <div className="mt-4">
-                <h6>Thống kê theo thời gian</h6>
-                <div className="d-flex justify-content-between mt-3">
-                  <div>Đơn hàng hôm nay:</div>
-                  <div className="fw-bold">{orderMetrics.today}</div>
-                </div>
-                <div className="d-flex justify-content-between mt-2">
-                  <div>Đơn hàng tuần này:</div>
-                  <div className="fw-bold">{orderMetrics.week}</div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </div>
+    <Row className="mt-4">
+      <Col md={3}>
+        <Card className="mb-4 shadow-sm">
+          <Card.Body className="text-center">
+            <Card.Title>Total Products</Card.Title>
+            <Card.Text className="display-4">{stats.totalProducts}</Card.Text>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={3}>
+        <Card className="mb-4 shadow-sm">
+          <Card.Body className="text-center">
+            <Card.Title>Total Orders</Card.Title>
+            <Card.Text className="display-4">{stats.totalOrders}</Card.Text>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={3}>
+        <Card className="mb-4 shadow-sm">
+          <Card.Body className="text-center">
+            <Card.Title>Total Users</Card.Title>
+            <Card.Text className="display-4">{stats.totalUsers}</Card.Text>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={3}>
+        <Card className="mb-4 shadow-sm">
+          <Card.Body className="text-center">
+            <Card.Title>Total Revenue</Card.Title>
+            <Card.Text className="display-4">${stats.totalRevenue}</Card.Text>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 
 // UserList Component
 const UserList = ({ backendUrl }) => {
+  const {usersForAdmin} = useContext(AppContext)
   const [users, setUsers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -279,7 +66,7 @@ const UserList = ({ backendUrl }) => {
         },
         withCredentials: true
       };
-      const { data } = await axios.get(`${backendUrl}/admin/user`, config);
+      const { data } = await axiosInstance.get(`${backendUrl}/admin/user`, config);
       setUsers(data.user || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -328,21 +115,21 @@ const UserList = ({ backendUrl }) => {
   return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản Lý Người Dùng</h2>
+        <h2>User Management</h2>
       </div>
 
       <Table striped bordered hover responsive className="shadow-sm">
         <thead className="bg-light">
           <tr>
             <th>ID</th>
-            <th>Tên</th>
+            <th>Name</th>
             <th>Email</th>
-            <th>Vai Trò</th>
-            <th>Thao Tác</th>
+            <th>Role</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {usersForAdmin.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -358,14 +145,14 @@ const UserList = ({ backendUrl }) => {
                     setShowEditModal(true);
                   }}
                 >
-                  Chỉnh Sửa
+                  Edit
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleDeleteUser(user._id)}
                 >
-                  Xóa
+                  Delete
                 </Button>
               </td>
             </tr>
@@ -377,13 +164,13 @@ const UserList = ({ backendUrl }) => {
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Chỉnh sửa thông tin người dùng</Modal.Title>
+          <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedUser && (
             <Form onSubmit={handleEditUser}>
               <Form.Group className="mb-3">
-                <Form.Label>Tên</Form.Label>
+                <Form.Label>Name</Form.Label>
                 <Form.Control
                   type="text"
                   value={selectedUser.name}
@@ -405,7 +192,7 @@ const UserList = ({ backendUrl }) => {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Vai Trò</Form.Label>
+                <Form.Label>Role</Form.Label>
                 <Form.Select
                   value={selectedUser.role}
                   onChange={(e) =>
@@ -413,16 +200,16 @@ const UserList = ({ backendUrl }) => {
                   }
                   required
                 >
-                  <option value="user">Người Dùng</option>
-                  <option value="admin">Quản Trị Viên</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
                 </Form.Select>
               </Form.Group>
               <div className="d-flex justify-content-end">
                 <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
-                  Hủy
+                  Cancel
                 </Button>
                 <Button variant="primary" type="submit">
-                  Lưu Thay Đổi
+                  Save Changes
                 </Button>
               </div>
             </Form>
@@ -435,6 +222,7 @@ const UserList = ({ backendUrl }) => {
 
 // ProductList Component
 const ProductList = ({ backendUrl }) => {
+  const {productItems} = useContext(AppContext)
   const [products, setProducts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -447,14 +235,8 @@ const ProductList = ({ backendUrl }) => {
     brand: '',
     stocks: '',
     color: [],
-    images: [],
-    currency: 'VND', // Default currency
-    discount: 0,     // Default discount
-    features: []     // Features array
+    images: []
   });
-  
-  // Currencies available for selection
-  const currencies = ['VND', 'USD', 'EUR', 'GBP'];
 
   useEffect(() => {
     fetchProducts();
@@ -496,11 +278,7 @@ const ProductList = ({ backendUrl }) => {
         images: Array.isArray(newProduct.images) 
           ? newProduct.images 
           : [newProduct.images].filter(Boolean),
-        currency: newProduct.currency,
-        discount: Number(newProduct.discount),
-        features: typeof newProduct.features === 'string' 
-          ? newProduct.features.split(',').map(feature => feature.trim()) 
-          : newProduct.features
+        currency: 'USD'
       };
 
       const config = {
@@ -522,10 +300,7 @@ const ProductList = ({ backendUrl }) => {
         brand: '',
         stocks: '',
         color: [],
-        images: [],
-        currency: 'VND', 
-        discount: 0,
-        features: []
+        images: []
       });
       fetchProducts();
     } catch (error) {
@@ -553,11 +328,7 @@ const ProductList = ({ backendUrl }) => {
         images: Array.isArray(selectedProduct.images) 
           ? selectedProduct.images 
           : [selectedProduct.images].filter(Boolean),
-        currency: selectedProduct.currency,
-        discount: Number(selectedProduct.discount),
-        features: typeof selectedProduct.features === 'string' 
-          ? selectedProduct.features.split(',').map(feature => feature.trim()) 
-          : selectedProduct.features
+        currency: 'USD'
       };
 
       console.log('Sending product data:', productData);
@@ -569,7 +340,7 @@ const ProductList = ({ backendUrl }) => {
         },
         withCredentials: true
       };
-      
+      console.log(selectedProduct._id)
       await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
       toast.success('Product updated successfully');
       setShowEditModal(false);
@@ -603,17 +374,16 @@ const ProductList = ({ backendUrl }) => {
     return {
       ...product,
       category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
-      color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
-      features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
+      color: Array.isArray(product.color) ? product.color.join(', ') : product.color
     };
   };
 
   return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản Lý Sản Phẩm</h2>
+        <h2>Product Management</h2>
         <Button variant="primary" onClick={() => setShowAddModal(true)}>
-          Thêm Sản Phẩm Mới
+          Add New Product
         </Button>
       </div>
 
@@ -621,23 +391,19 @@ const ProductList = ({ backendUrl }) => {
         <thead className="bg-light">
           <tr>
             <th>ID</th>
-            <th>Tên</th>
-            <th>Giá</th>
-            <th>Tiền tệ</th>
-            <th>Giảm giá</th>
-            <th>Danh Mục</th>
-            <th>Tồn Kho</th>
-            <th>Thao Tác</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Stock</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {productItems.map((product) => (
             <tr key={product._id}>
               <td>{product._id}</td>
               <td>{product.productName}</td>
-              <td>{product.price}</td>
-              <td>{product.currency || 'VND'}</td>
-              <td>{product.discount || 0}%</td>
+              <td>${product.price}</td>
               <td>{Array.isArray(product.category) ? product.category.join(', ') : product.category}</td>
               <td>{product.stocks}</td>
               <td>
@@ -650,14 +416,14 @@ const ProductList = ({ backendUrl }) => {
                     setShowEditModal(true);
                   }}
                 >
-                  Chỉnh Sửa
+                  Edit
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleDeleteProduct(product._id)}
                 >
-                  Xóa
+                  Delete
                 </Button>
               </td>
             </tr>
@@ -669,14 +435,14 @@ const ProductList = ({ backendUrl }) => {
       {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Thêm Sản Phẩm Mới</Modal.Title>
+          <Modal.Title>Add New Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddProduct}>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tên Sản Phẩm</Form.Label>
+                  <Form.Label>Product Name</Form.Label>
                   <Form.Control
                     type="text"
                     value={newProduct.productName}
@@ -685,9 +451,9 @@ const ProductList = ({ backendUrl }) => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={3}>
+              <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Giá</Form.Label>
+                  <Form.Label>Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={newProduct.price}
@@ -696,27 +462,11 @@ const ProductList = ({ backendUrl }) => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tiền tệ</Form.Label>
-                  <Form.Select
-                    value={newProduct.currency}
-                    onChange={(e) => setNewProduct({ ...newProduct, currency: e.target.value })}
-                    required
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
             </Row>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Thương Hiệu</Form.Label>
+                  <Form.Label>Brand</Form.Label>
                   <Form.Control
                     type="text"
                     value={newProduct.brand}
@@ -724,9 +474,9 @@ const ProductList = ({ backendUrl }) => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={3}>
+              <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tồn Kho</Form.Label>
+                  <Form.Label>Stock</Form.Label>
                   <Form.Control
                     type="number"
                     value={newProduct.stocks}
@@ -735,49 +485,28 @@ const ProductList = ({ backendUrl }) => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Giảm giá (%)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={newProduct.discount}
-                    onChange={(e) => setNewProduct({ ...newProduct, discount: e.target.value })}
-                  />
-                </Form.Group>
-              </Col>
             </Row>
             <Form.Group className="mb-3">
-              <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
+              <Form.Label>Categories (comma separated)</Form.Label>
               <Form.Control
                 type="text"
                 value={newProduct.category}
                 onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                placeholder="Điện tử, Đồ gia dụng, ..."
+                placeholder="Electronics, Gadgets, ..."
                 required
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
+              <Form.Label>Colors (comma separated)</Form.Label>
               <Form.Control
                 type="text"
                 value={newProduct.color}
                 onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
-                placeholder="Đỏ, Xanh, ..."
+                placeholder="Red, Blue, ..."
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-              <Form.Control
-                type="text"
-                value={newProduct.features}
-                onChange={(e) => setNewProduct({ ...newProduct, features: e.target.value })}
-                placeholder="Chống nước, Bluetooth, ..."
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>URL Hình Ảnh</Form.Label>
+              <Form.Label>Image URL</Form.Label>
               <Form.Control
                 type="text"
                 value={newProduct.images}
@@ -786,7 +515,7 @@ const ProductList = ({ backendUrl }) => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Mô Tả</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -797,10 +526,10 @@ const ProductList = ({ backendUrl }) => {
             </Form.Group>
             <div className="d-flex justify-content-end">
               <Button variant="secondary" className="me-2" onClick={() => setShowAddModal(false)}>
-                Hủy
+                Cancel
               </Button>
               <Button variant="primary" type="submit">
-                Thêm Sản Phẩm
+                Add Product
               </Button>
             </div>
           </Form>
@@ -810,7 +539,7 @@ const ProductList = ({ backendUrl }) => {
       {/* Edit Product Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Chỉnh Sửa Sản Phẩm</Modal.Title>
+          <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedProduct && (
@@ -818,7 +547,7 @@ const ProductList = ({ backendUrl }) => {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Tên Sản Phẩm</Form.Label>
+                    <Form.Label>Product Name</Form.Label>
                     <Form.Control
                       type="text"
                       value={selectedProduct.productName}
@@ -827,9 +556,9 @@ const ProductList = ({ backendUrl }) => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={3}>
+                <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Giá</Form.Label>
+                    <Form.Label>Price</Form.Label>
                     <Form.Control
                       type="number"
                       value={selectedProduct.price}
@@ -838,27 +567,11 @@ const ProductList = ({ backendUrl }) => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tiền tệ</Form.Label>
-                    <Form.Select
-                      value={selectedProduct.currency || 'VND'}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, currency: e.target.value })}
-                      required
-                    >
-                      {currencies.map((currency) => (
-                        <option key={currency} value={currency}>
-                          {currency}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
               </Row>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Thương Hiệu</Form.Label>
+                    <Form.Label>Brand</Form.Label>
                     <Form.Control
                       type="text"
                       value={selectedProduct.brand}
@@ -866,9 +579,9 @@ const ProductList = ({ backendUrl }) => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={3}>
+                <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Tồn Kho</Form.Label>
+                    <Form.Label>Stock</Form.Label>
                     <Form.Control
                       type="number"
                       value={selectedProduct.stocks}
@@ -877,21 +590,9 @@ const ProductList = ({ backendUrl }) => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Giảm giá (%)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={selectedProduct.discount || 0}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, discount: e.target.value })}
-                    />
-                  </Form.Group>
-                </Col>
               </Row>
               <Form.Group className="mb-3">
-                <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
+                <Form.Label>Categories (comma separated)</Form.Label>
                 <Form.Control
                   type="text"
                   value={selectedProduct.category}
@@ -900,7 +601,7 @@ const ProductList = ({ backendUrl }) => {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
+                <Form.Label>Colors (comma separated)</Form.Label>
                 <Form.Control
                   type="text"
                   value={selectedProduct.color}
@@ -908,16 +609,7 @@ const ProductList = ({ backendUrl }) => {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={selectedProduct.features}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, features: e.target.value })}
-                  placeholder="Chống nước, Bluetooth, ..."
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Mô Tả</Form.Label>
+                <Form.Label>Description</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
@@ -928,10 +620,10 @@ const ProductList = ({ backendUrl }) => {
               </Form.Group>
               <div className="d-flex justify-content-end">
                 <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
-                  Hủy
+                  Cancel
                 </Button>
                 <Button variant="primary" type="submit">
-                  Lưu Thay Đổi
+                  Save Changes
                 </Button>
               </div>
             </Form>
@@ -1007,7 +699,7 @@ const OrderList = ({ backendUrl }) => {
   return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản Lý Đơn Hàng</h2>
+        <h2>Order Management</h2>
       </div>
 
       <Table striped bordered hover responsive className="shadow-sm">
@@ -1133,6 +825,7 @@ const OrderList = ({ backendUrl }) => {
   );
 };
 
+
 const AdminPage = () => {
   const { backendUrl, isLoggedIn, user, setUserData, setIsLoggedIn } = useContext(AppContext);
   const navigate = useNavigate();
@@ -1143,29 +836,14 @@ const AdminPage = () => {
     totalUsers: 0,
     totalRevenue: 0
   });
-  const [ordersForAdmin, setOrdersForAdmin] = useState([]);
 
   useEffect(() => {
+    // if (!isLoggedIn || user?.role !== 'admin') {
+    //   navigate('/');
+    //   return;
+    // }
     fetchStats();
-    fetchOrders();
   }, [isLoggedIn, user, navigate]);
-
-  const fetchOrders = async () => {
-    try {
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        withCredentials: true
-      };
-      
-      const { data } = await axiosInstance.get(`${backendUrl}/admin/order`, config);
-      setOrdersForAdmin(data.data || []);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast.error('Lỗi khi tải đơn hàng');
-    }
-  };
 
   const fetchStats = async () => {
     try {
@@ -1178,15 +856,45 @@ const AdminPage = () => {
       
       const productsRes = await axios.get(`${backendUrl}/product`, config);
       const usersRes = await axiosInstance.get(`${backendUrl}/admin/user`, config);
+      const ordersRes = await axiosInstance.get(`${backendUrl}/admin/order`, config);
+      
+      // Calculate total revenue from orders
+      const orders = ordersRes.data.data || [];
+      
+      // Only include orders that are not cancelled (status is not "cancelled")
+      const validOrders = orders.filter(order => order.status !== "cancelled");
+      
+      // Calculate total revenue from valid orders
+      const totalRevenue = validOrders.reduce((sum, order) => {
+        // Calculate the final amount considering discounts
+        const orderItems = order.orderItems || [];
+        let orderTotal = 0;
+        
+        orderItems.forEach(item => {
+          const itemPrice = item.price || 0;
+          const itemQuantity = item.quantity || 1;
+          const itemDiscount = item.discount || 0;
+          
+          // Calculate discounted price if applicable
+          const finalPrice = itemDiscount > 0 
+            ? itemPrice - (itemPrice * (itemDiscount / 100)) 
+            : itemPrice;
+            
+          orderTotal += finalPrice * itemQuantity;
+        });
+        
+        return sum + (orderTotal || order.totalAmount || 0);
+      }, 0);
       
       setStats({
         totalProducts: productsRes.data.product?.length || 0,
-        totalOrders: ordersForAdmin.length,
+        totalOrders: orders.length,
         totalUsers: usersRes.data.user?.length || 0,
+        totalRevenue: totalRevenue.toFixed(2)
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
-      toast.error('Lỗi khi tải thống kê');
+      toast.error('Failed to fetch statistics');
     }
   };
 
@@ -1202,7 +910,7 @@ const AdminPage = () => {
 
   return (
     <Container fluid className="admin-page-container py-4">
-      <h1 className="mb-4 text-center">Quản lý cửa hàng</h1>
+      <h1 className="mb-4 text-center">Admin Dashboard</h1>
       <Row>
         <Tab.Container id="admin-tabs" activeKey={activeKey} onSelect={setActiveKey}>
           <Row>
@@ -1211,40 +919,40 @@ const AdminPage = () => {
                 <Nav.Item>
                   <Nav.Link eventKey="dashboard" className="mb-2">
                     <i className="bi bi-speedometer2 me-2"></i>
-                    Tổng quan
+                    Dashboard
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
                   <Nav.Link eventKey="users" className="mb-2">
                     <i className="bi bi-people me-2"></i>
-                    Người Dùng
+                    Users
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
                   <Nav.Link eventKey="products" className="mb-2">
                     <i className="bi bi-box me-2"></i>
-                    Sản Phẩm
+                    Products
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
                   <Nav.Link eventKey="orders" className="mb-2">
-                    <i className="bi bi-cart-check me-2"></i>
-                    Đơn Hàng
+                    <i className="bi bi-box me-2"></i>
+                    Orders
                   </Nav.Link>
                 </Nav.Item>
               </Nav>
               <div className="text-center mt-4">
                 <Card className="bg-light">
                   <Card.Body>
-                    <div className="mb-2">Đăng nhập với:</div>
+                    <div className="mb-2">Logged in as:</div>
                     <div className="fw-bold">{user?.name || 'Admin'}</div>
-                    <div className="text-muted small">Quản Trị Viên</div>
+                    <div className="text-muted small">Administrator</div>
                     <Button 
                       variant="danger" 
                       className="mt-3 w-100 logout-btn"
                       onClick={handleLogout}
                     >
-                      Đăng Xuất
+                      Đăng xuất
                     </Button>
                   </Card.Body>
                 </Card>
@@ -1253,7 +961,7 @@ const AdminPage = () => {
             <Col md={9} lg={10}>
               <Tab.Content>
                 <Tab.Pane eventKey="dashboard">
-                  <Dashboard stats={stats} ordersForAdmin={ordersForAdmin} />
+                  <Dashboard stats={stats} />
                 </Tab.Pane>
                 <Tab.Pane eventKey="users">
                   <UserList backendUrl={backendUrl} />
@@ -1275,11 +983,11 @@ const AdminPage = () => {
           variant="primary" 
           className="fixed-nav-button"
         >
-          Về Trang Chủ
+          Go to Home
         </Button>
       </Link>
     </Container>
   );
 };
 
-export default AdminPage;
+export default AdminPage; 

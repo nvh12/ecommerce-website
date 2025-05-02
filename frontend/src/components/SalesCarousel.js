@@ -19,7 +19,14 @@ const SalesCarousel = () => {
     <div className="sales-section mb-4">
       <div className="sales-header bg-light p-3 d-flex justify-content-between align-items-center mb-3">
         <div className="d-flex align-items-center">
-          <h3 className="mb-0 text-danger me-4">KHUYẾN MÃI HOT</h3>
+          <h3 className="mb-0 text-danger me-4">FLASH SALE</h3>
+          {/* <div className="countdown d-flex align-items-center">
+            <FaClock className="me-2" />
+            <span>Còn: </span>
+            <div className="time-box bg-white mx-1 px-2">04</div>:
+            <div className="time-box bg-white mx-1 px-2">46</div>:
+            <div className="time-box bg-white mx-1 px-2">43</div>
+          </div> */}
         </div>
         <div>
           <span className="text-muted">Sắp diễn ra 21:00 - 21:10</span>
@@ -64,4 +71,4 @@ const SalesCarousel = () => {
   );
 };
 
-export default SalesCarousel;
+export default SalesCarousel; 
