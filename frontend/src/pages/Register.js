@@ -38,12 +38,12 @@ const Register = () => {
                 style={{ borderRadius: 15 }}
                 >
                 <div className="card-body p-4 p-md-5">
-                    <h2 className="fw-bold text-uppercase mb-4">Sign up</h2>
+                    <h2 className="fw-bold text-uppercase mb-4">Đăng Ký</h2>
                     <form onSubmit={onsubmitHandler}>
                         <div className="row">
                             <div className="col-12 mb-4 pb-2">
                                 <div className="form-outline">
-                                <input type="text" id="name" className="form-control form-control-lg" placeholder="Name" 
+                                <input type="text" id="name" className="form-control form-control-lg" placeholder="Họ tên" 
                                 onChange={(e) => setName(e.target.value)}/>
                             </div>
                         </div>
@@ -58,7 +58,7 @@ const Register = () => {
                         </div>
                         <div className="row">
                         <div className="col-12 mb-4 pb-2">
-                            <input type="password" id="typePassword" className="form-control form-control-lg" placeholder="Password" 
+                            <input type="password" id="typePassword" className="form-control form-control-lg" placeholder="Mật khẩu" 
                             onChange={(e) => setPassword(e.target.value)}/>
                         </div>
                         </div>
@@ -69,7 +69,7 @@ const Register = () => {
                             </p>
                         </div>                        
                         <div className="mt-4 pt-2">
-                        <button className="btn btn-lg px-5 hover-style" style={{backgroundColor: '#FFD400'}} type="submit">Đăng kí</button>
+                        <button className="btn btn-lg px-5 hover-style" style={{backgroundColor: '#FFD400'}} type="submit">Đăng ký</button>
                         </div>
                     </form>
                 </div>

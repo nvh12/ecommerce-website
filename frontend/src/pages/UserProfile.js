@@ -41,7 +41,7 @@ const UserProfile = () => {
       navigate('/')
     } catch (error) {
       console.log("Logout error:", error)
-  toast.error("Lỗi đăng xuất: " + (error.response?.data?.error || error.message))
+      toast.error("Lỗi đăng xuất: " + (error.response?.data?.error || error.message))
     }
   }
 
@@ -55,10 +55,10 @@ const UserProfile = () => {
         }
       )
       const temp = res.data.data
-      // console.log("don hang", temp.length) 
+      console.log("don hang", temp.length) // nếu không có dòng này thì code của của tôi lỗi runtime
       setUserOrders(temp)
     } catch (error) {
-      toast.error("Lỗi lấy đơn hàng")
+      // toast.error("Lỗi lấy đơn hàng")
     }
   }
 

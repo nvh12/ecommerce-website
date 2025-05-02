@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Form, InputGroup, Button, Dropdown } from 'react-bootstrap';
+import { Form, InputGroup, Button, Dropdown, Spinner } from 'react-bootstrap';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
@@ -42,12 +42,8 @@ const SearchBar = () => {
                 //Fetch categories
                 const categoryResponse = await axios.get(`${backendUrl}/product/category`);
                 if (categoryResponse.data && categoryResponse.data.message === "Success") {
-<<<<<<< HEAD
                     setCategories(categoryResponse.data.categoryFound || []);
-=======
-                    setCategories(categoryResponse.data.categoryFound|| []);
-                    console.log(categoryResponse.data.categoryFound);
->>>>>>> 2fab0a8ce4fd2e0a43043a23a468f6b987f772d5
+
                 }
                 
             } catch (error) {
@@ -153,121 +149,66 @@ const SearchBar = () => {
     };
 
     return (
-        <div className="tgdd-search-container">
-            <div className="search-input-wrapper" ref={searchInputRef}>
-                <InputGroup className="tgdd-search-input-group">
+        <div className="search-bar">
+            <Form onSubmit={(e) => e.preventDefault()}>
+                <InputGroup>
                     <Form.Control
-                        placeholder="Bạn tìm gì..."
+                        type="text"
+                        placeholder="Tìm kiếm sản phẩm..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        onKeyDown={handleKeyDown}
                         onFocus={handleInputFocus}
-                        className="tgdd-search-input"
                     />
-                    <div className="search-icon-wrapper" onClick={handleSearch}>
-                        <FaSearch className="search-icon" />
-                    </div>
+                    <Button variant="primary" type="button" onClick={handleSearch}>
+                        <i className="bi bi-search"></i>
+                    </Button>
                 </InputGroup>
+            </Form>
 
-                {/* Suggestions dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
-                    <div className="tgdd-suggestions-container" ref={suggestionRef}>
-                        {suggestions.map((suggestion, index) => (
-                            <div 
-                                key={index} 
-                                className="tgdd-suggestion-item"
-                                onClick={() => handleSelectSuggestion(suggestion)}
-                            >
-                                <FaSearch className="suggestion-icon" />
-                                <span className="suggestion-text">
-                                    {suggestion.text}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {/* Filter dropdown */}
-                {showFilters && (
-                    <div className="tgdd-filter-container" ref={filterRef}>
-                        <div className="filter-header">
-                            <h6><FaFilter /> Bộ lọc tìm kiếm</h6>
+            {showSuggestions && searchTerm && (
+                <div className="search-suggestions">
+                    {loading ? (
+                        <div className="text-center py-3">
+                            <Spinner animation="border" size="sm" />
+                            <span className="ms-2">Đang tìm kiếm...</span>
                         </div>
-                        <Form className="filter-form">
-                            <Form.Group className="mb-3">
-                                <Form.Label>Danh mục</Form.Label>
-                                <Form.Select 
-                                    value={category} 
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    disabled={loading}
+                    ) : suggestions.length > 0 ? (
+                        <>
+                            <div className="suggestion-header">
+                                <small className="text-muted">Gợi ý tìm kiếm</small>
+                            </div>
+                            {suggestions.map((product, index) => (
+                                <div
+                                    key={index}
+                                    className="suggestion-item"
+                                    onClick={() => handleSelectSuggestion(product)}
                                 >
-                                    <option value="">Tất cả danh mục</option>
-                                    {categories.map((cat, index) => (
-                                        <option key={index} value={cat.name}>{cat.name}</option>
-                                    ))}
-                                </Form.Select>
-                            </Form.Group>
-                            
-                            <Form.Group className="mb-3">
-                                <Form.Label>Thương hiệu</Form.Label>
-                                <Form.Select 
-                                    value={brand} 
-                                    onChange={(e) => setBrand(e.target.value)}
-                                    disabled={loading}
-                                >
-                                    <option value="">Tất cả thương hiệu</option>
-                                    {brands.map((b, index) => (
-                                        <option key={b._id} value={b.name}>{b.name}</option>
-                                    ))}
-                                </Form.Select>
-                            </Form.Group>
-                            
-                            <Form.Group className="mb-3">
-                                <Form.Label>Khoảng giá</Form.Label>
-                                <div className="d-flex gap-2">
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Từ"
-                                        value={priceMin}
-                                        onChange={(e) => setPriceMin(e.target.value)}
-                                    />
-                                    <span className="align-self-center">-</span>
-                                    <Form.Control
-                                        type="number"
-                                        placeholder="Đến"
-                                        value={priceMax}
-                                        onChange={(e) => setPriceMax(e.target.value)}
-                                    />
+                                    <div className="suggestion-details">
+                                        <div className="suggestion-name">
+                                            {product.text}
+                                        </div>
+                                    </div>
                                 </div>
-                            </Form.Group>
-                            
-                            <div className="d-flex justify-content-end gap-2">
-                                <Button 
-                                    variant="outline-secondary" 
-                                    size="sm"
-                                    onClick={() => {
-                                        setCategory('');
-                                        setBrand('');
-                                        setPriceMin('');
-                                        setPriceMax('');
-                                    }}
-                                >
-                                    Xóa bộ lọc
-                                </Button>
-                                <Button 
-                                    variant="primary" 
-                                    size="sm"
+                            ))}
+                            <div className="suggestion-footer">
+                                <Button
+                                    variant="link"
+                                    className="w-100"
                                     onClick={handleSearch}
                                 >
-                                    Áp dụng
+                                    Xem tất cả kết quả
                                 </Button>
                             </div>
-                        </Form>
-                    </div>
-                )}
-            </div>
+                        </>
+                    ) : (
+                        <div className="no-suggestions">
+                            Không tìm thấy sản phẩm nào phù hợp
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
 
-export default SearchBar; 
+export default SearchBar;
