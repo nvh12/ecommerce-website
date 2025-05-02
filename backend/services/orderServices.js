@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Order = require('../models/order');
+const Product = require('../models/product');
 
 async function getOrder(id) {
     try {
@@ -61,6 +62,17 @@ async function getOrderNumber(userId='') {
 async function updateOrder(id, updateData) {
     try {
         const orderId = new mongoose.Types.ObjectId(`${id}`);
+        const order = await Order.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+        if (updateData.status === 'cancelled' && order.status !== 'cancelled') {
+            for (const item of order.items) {
+                const product = await Product.findById(item.product);
+                product.stocks += item.quantity;
+                await product.save();
+            }
+        }
         return await Order.findOneAndUpdate(
             { _id: orderId },         
             updateData,

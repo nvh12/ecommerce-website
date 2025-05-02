@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Nav, Tab } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import axiosInstance from '../utils/axiosInstance';
+import Pagination from '../components/Pagination';
+import '../styles/AdminPage.css';
 // Dashboard Component
 const Dashboard = ({ stats }) => {
   return (
@@ -47,6 +49,7 @@ const Dashboard = ({ stats }) => {
 
 // UserList Component
 const UserList = ({ backendUrl }) => {
+  const {usersForAdmin} = useContext(AppContext)
   const [users, setUsers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -126,7 +129,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {usersForAdmin.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -156,6 +159,7 @@ const UserList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
+      <Pagination pageName="usersForAdmin" />
 
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -218,6 +222,7 @@ const UserList = ({ backendUrl }) => {
 
 // ProductList Component
 const ProductList = ({ backendUrl }) => {
+  const {productItems} = useContext(AppContext)
   const [products, setProducts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -284,7 +289,7 @@ const ProductList = ({ backendUrl }) => {
         withCredentials: true
       };
       
-      await axiosInstance.post(`${backendUrl}/product/create`, productData, config);
+      await axiosInstance.post(`${backendUrl}/product/`, productData, config);
       toast.success('Product added successfully');
       setShowAddModal(false);
       setNewProduct({
@@ -355,7 +360,7 @@ const ProductList = ({ backendUrl }) => {
           },
           withCredentials: true
         };
-        await axiosInstance.delete(`${backendUrl}/product/delete/${productId}`, config);
+        await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
         toast.success('Product deleted successfully');
         fetchProducts();
       } catch (error) {
@@ -394,7 +399,7 @@ const ProductList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {productItems.map((product) => (
             <tr key={product._id}>
               <td>{product._id}</td>
               <td>{product.productName}</td>
@@ -425,6 +430,7 @@ const ProductList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
+      <Pagination pageName="productsPage" />
 
       {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
@@ -629,7 +635,7 @@ const ProductList = ({ backendUrl }) => {
 };
 
 const AdminPage = () => {
-  const { backendUrl, isLoggedIn, user } = useContext(AppContext);
+  const { backendUrl, isLoggedIn, user, setUserData, setIsLoggedIn } = useContext(AppContext);
   const navigate = useNavigate();
   const [activeKey, setActiveKey] = useState('dashboard');
   const [stats, setStats] = useState({
@@ -662,7 +668,31 @@ const AdminPage = () => {
       
       // Calculate total revenue from orders
       const orders = ordersRes.data.data || [];
-      const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      // Only include orders that are not cancelled (status is not "cancelled")
+      const validOrders = orders.filter(order => order.status !== "cancelled");
+      
+      // Calculate total revenue from valid orders
+      const totalRevenue = validOrders.reduce((sum, order) => {
+        // Calculate the final amount considering discounts
+        const orderItems = order.orderItems || [];
+        let orderTotal = 0;
+        
+        orderItems.forEach(item => {
+          const itemPrice = item.price || 0;
+          const itemQuantity = item.quantity || 1;
+          const itemDiscount = item.discount || 0;
+          
+          // Calculate discounted price if applicable
+          const finalPrice = itemDiscount > 0 
+            ? itemPrice - (itemPrice * (itemDiscount / 100)) 
+            : itemPrice;
+            
+          orderTotal += finalPrice * itemQuantity;
+        });
+        
+        return sum + (orderTotal || order.totalAmount || 0);
+      }, 0);
       
       setStats({
         totalProducts: productsRes.data.product?.length || 0,
@@ -674,6 +704,16 @@ const AdminPage = () => {
       console.error('Error fetching stats:', error);
       toast.error('Failed to fetch statistics');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    localStorage.setItem('isLoggedIn', 'false');
+    setUserData({});
+    setIsLoggedIn(false);
+    toast.success('Đăng xuất thành công!');
+    navigate('/');
   };
 
   return (
@@ -709,6 +749,13 @@ const AdminPage = () => {
                     <div className="mb-2">Logged in as:</div>
                     <div className="fw-bold">{user?.name || 'Admin'}</div>
                     <div className="text-muted small">Administrator</div>
+                    <Button 
+                      variant="danger" 
+                      className="mt-3 w-100 logout-btn"
+                      onClick={handleLogout}
+                    >
+                      Đăng xuất
+                    </Button>
                   </Card.Body>
                 </Card>
               </div>
@@ -729,6 +776,15 @@ const AdminPage = () => {
           </Row>
         </Tab.Container>
       </Row>
+      
+      <Link to="/">
+        <Button 
+          variant="primary" 
+          className="fixed-nav-button"
+        >
+          Go to Home
+        </Button>
+      </Link>
     </Container>
   );
 };

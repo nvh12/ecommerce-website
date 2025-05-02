@@ -42,7 +42,12 @@ const SearchBar = () => {
                 //Fetch categories
                 const categoryResponse = await axios.get(`${backendUrl}/product/category`);
                 if (categoryResponse.data && categoryResponse.data.message === "Success") {
+<<<<<<< HEAD
                     setCategories(categoryResponse.data.categoryFound || []);
+=======
+                    setCategories(categoryResponse.data.categoryFound|| []);
+                    console.log(categoryResponse.data.categoryFound);
+>>>>>>> 2fab0a8ce4fd2e0a43043a23a468f6b987f772d5
                 }
                 
             } catch (error) {
@@ -198,7 +203,7 @@ const SearchBar = () => {
                                 >
                                     <option value="">Tất cả danh mục</option>
                                     {categories.map((cat, index) => (
-                                        <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                        <option key={index} value={cat.name}>{cat.name}</option>
                                     ))}
                                 </Form.Select>
                             </Form.Group>

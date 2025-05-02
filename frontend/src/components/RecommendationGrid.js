@@ -5,7 +5,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 const RecommendationGrid = () => {
   const { productItems } = useContext(AppContext);
-  // console.log("Product items:", productItems);
+  console.log("Product items:", productItems);
   return (
     <div className="recommendation-section mb-4">
       <div className="section-header p-3">

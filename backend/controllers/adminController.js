@@ -27,6 +27,19 @@ async function getOrders(req, res) {
     }
 }
 
+async function getSingleOrder(req, res) {
+    try {
+        const { id } = req.params;
+        const order = await orderServices.getOrder(id);
+        if (!order) {
+            return res.status(404).json({ status: 'error', error: 'Order not found' });
+        }
+        res.status(200).json({ status: 'success', order: order });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message || 'Something went wrong' });
+    }
+}
+
 async function updateOrder(req, res) {
     try {
         const { id } = req.params;
@@ -40,9 +53,35 @@ async function updateOrder(req, res) {
 
 async function getUsers(req, res) {
     try {
-        const { name } = req.query;
-        const user = await userServices.getUsers(name);
-        res.status(200).json({ status: 'success', user: user })
+        const { name, page = 1 } = req.query;
+        const curPage = parseInt(page) || 1;
+        const { users, total } = await userServices.getUsers(name, curPage, 20);
+        if (total === 0) {
+            return res.status(200).json({
+                status: 'success',
+                message: 'No users found'
+            });
+        }
+        res.status(200).json({
+            status: 'success',
+            totalUsers: total,
+            totalPages: Math.ceil(total / 20),
+            page: page,
+            user: users
+        });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
+async function getSingleUser(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await userServices.getUserByObjectId(id);
+        if (!user) {
+            return res.status(404).json({ status: 'error', error: 'User not found' });
+        } 
+        res.status(200).json({ status: 'success', user: user });
     } catch (error) {
         res.status(500).json({ status: 'error', error: error.message });
     }
@@ -75,7 +114,9 @@ async function getUserOrders(req, res) {
 
 module.exports = {
     getUsers,
+    getSingleUser,
     getOrders,
+    getSingleOrder,
     updateOrder,
-    getUserOrders 
+    getUserOrders
 };
