@@ -20,6 +20,7 @@ const AppContextProvider = (props) => {
     const [isLoadingProduct, setIsLoadingProduct] = useState(false)
     const [productError, setProductError] = useState(null)
     const [usersForAdmin, setUsersForAdmin] = useState([])
+    const [ordersForAdmin, setOrdersForAdmin] = useState([])
 
     // const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const backendUrl = "http://localhost:5000"
@@ -146,7 +147,8 @@ const AppContextProvider = (props) => {
         productError,
         fetchProduct,
         clearProduct,
-        usersForAdmin, setUsersForAdmin
+        usersForAdmin, setUsersForAdmin,
+        ordersForAdmin, setOrdersForAdmin
     }
 
     return (

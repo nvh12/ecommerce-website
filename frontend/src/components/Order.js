@@ -8,11 +8,15 @@ import axiosInstance from '../utils/axiosInstance'
 const Order = ({indexOrder, dataOrder, page}) => {
     const {backendUrl} = useContext(AppContext)
     const [orderDetail, setOrderDetail] = useState([])
+    const [quantityList, setQuantityList] = useState([])
     const [show, setShow] = useState(false)
 
     const fetchOrderDetail = async () => {
-        //console.log("dataOrder", dataOrder) //thông tin 1 đơn hàng
+        console.log("dataOrder", dataOrder) //thông tin 1 đơn hàng
         const idList = dataOrder.items.map(item => item.product)
+        const quantityListTest = dataOrder.items.map(item => item.quantity)
+        setQuantityList(quantityListTest)
+        // console.log("quantityList",quantityList)
         //console.log("idList", idList) //danh sách id sản phẩm được mua của 1 đơn
         const dataList = await Promise.all( 
             idList.map(id =>
@@ -60,6 +64,7 @@ const Order = ({indexOrder, dataOrder, page}) => {
               <b className='dangGiao'>{(dataOrder.status === "processing" && dataOrder.delivery === "delivery") && "Đang giao hàng"}</b>
               <b className='daNhan'>{dataOrder.status === "completed" && "Đã nhận hàng"}</b>
               <b className='daHuy'>{dataOrder.status === "cancelled" && "Đã hủy đơn hàng"}</b>
+              <b className='nhanTaiCuaHang'>{dataOrder.delivery === "store" && dataOrder.status === "processing" && "Nhận tại cửa hàng"}</b>
             </div>
     </div>
     <div className='d-flex gap-2 mb-1'>
@@ -99,7 +104,10 @@ const Order = ({indexOrder, dataOrder, page}) => {
               <div className='row'>
                 <div className='col-auto me-auto'>
                     {orderDetail.map((item, index) => 
-                        <p key={index}>{item.productName}</p>
+                        <div className='mb-3'>
+                          <p key={index} className='my-0'>{item.productName}</p>
+                          <small className=''>Số lượng: {quantityList[index]}</small>
+                        </div>
                     )}
                 </div>
                 <div className='col-auto'>
@@ -128,9 +136,13 @@ const Order = ({indexOrder, dataOrder, page}) => {
     <>
       {
         orderDetail.map((dataOrder, index) => (
-            <PlacedOrderCard key={index} indexOrder={index} dataOrder={dataOrder} />
+            <PlacedOrderCard key={index} indexOrder={index} dataOrder={dataOrder} quantity={quantityList[index]}/>
         ))
       }
+      <div className='row justify-content-end me-2 my-3'>
+        <div className='col-auto'>
+          <p className='my-0'>Tổng tiền: </p><span>{`${dataOrder.total_price.toLocaleString('vi-VN')} VND`}</span></div>
+      </div>
     </>
     } 
 

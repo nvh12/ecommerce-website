@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Nav, Tab } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
@@ -634,6 +634,198 @@ const ProductList = ({ backendUrl }) => {
   );
 };
 
+// OrderList Component
+const OrderList = ({ backendUrl }) => {
+  const { ordersForAdmin } = useContext(AppContext);
+  const [expandedRows, setExpandedRows] = useState([]);
+  const [productData, setProductData] = useState({});
+
+  const handleUpdateOrderDetail = async (status, orderId) => {
+    const message =
+      status === "completed"
+        ? "Bạn chắc chắn đã giao đơn hàng này?"
+        : "Bạn chắc chắn muốn hủy đơn hàng này?";
+
+    if (!window.confirm(message)) return;
+
+    try {
+      await axiosInstance.put(
+        `${backendUrl}/admin/order/${orderId}`,
+        { updateData: { status } },
+        { withCredentials: true }
+      );
+      toast.success("Cập nhật đơn hàng thành công");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      toast.error("Lỗi cập nhật đơn hàng");
+      console.log(error.message);
+    }
+  };
+
+  const toggleRow = (orderId) => {
+    setExpandedRows((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const fetchProductInfo = async (productId) => {
+    if (productData[productId]) return;
+
+    try {
+      const res = await axios.get(`${backendUrl}/product/${productId}`);
+      const product = res.data.product[0]; 
+      setProductData((prev) => ({
+        ...prev,
+        [productId]: {
+          name: product.productName,
+          price: product.price,
+        },
+      }));
+    } catch (err) {
+      console.error("Lỗi khi tải thông tin sản phẩm:", err);
+    }
+  };
+
+  useEffect(() => {
+    ordersForAdmin.forEach((order) => {
+      (order.items || []).forEach((item) => {
+        fetchProductInfo(item.product);
+      });
+    });
+  }, [ordersForAdmin]);
+
+  return (
+    <div className="mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Order Management</h2>
+      </div>
+
+      <Table striped bordered hover responsive className="shadow-sm">
+        <thead className="bg-light">
+          <tr>
+            <th>ID Đơn hàng</th>
+            <th>Khách hàng</th>
+            <th>Email</th>
+            <th>Tổng tiền</th>
+            <th>Ngày đặt</th>
+            <th>Trạng thái</th>
+            <th>Cập nhật trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ordersForAdmin.map((order) => (
+            <Fragment key={order._id}>
+              <tr>
+                <td>
+                  <div className="d-flex align-items-center">
+                    {order._id}
+                    <button
+                      className="btn ms-auto"
+                      onClick={() => toggleRow(order._id)}
+                    >
+                      <i
+                        className={`bi ${
+                          expandedRows.includes(order._id)
+                            ? "bi-caret-up-fill"
+                            : "bi-caret-down-fill"
+                        }`}
+                      ></i>
+                    </button>
+                  </div>
+                </td>
+                <td>{order.user.user.name}</td>
+                <td>{order.user.user.email}</td>
+                <td>{`${order.total_price.toLocaleString("vi-VN")} VND`}</td>
+                <td>{new Date(order.createdAt).toLocaleString("vi-VN")}</td>
+                <td>
+                  {order.status === "processing" &&
+                    order.delivery === "delivery" && (
+                      <p className="dangGiao">Đang giao hàng</p>
+                    )}
+                  {order.status === "completed" && (
+                    <p className="daNhan">Đã nhận hàng</p>
+                  )}
+                  {order.status === "cancelled" && (
+                    <p className="daHuy">Đã hủy đơn hàng</p>
+                  )}
+                  {order.delivery === "store" &&
+                    order.status === "processing" && (
+                      <p className="nhanTaiCuaHang">Nhận tại cửa hàng</p>
+                    )}
+                </td>
+                <td>
+                  <Button
+                    variant="info"
+                    size="sm"
+                    className="me-2"
+                    onClick={() =>
+                      handleUpdateOrderDetail("completed", order._id)
+                    }
+                    disabled={
+                      order.status === "completed" ||
+                      order.status === "cancelled"
+                    }
+                  >
+                    Đã giao
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() =>
+                      handleUpdateOrderDetail("cancelled", order._id)
+                    }
+                    disabled={
+                      order.status === "completed" ||
+                      order.status === "cancelled"
+                    }
+                  >
+                    Hủy đơn
+                  </Button>
+                </td>
+              </tr>
+
+              {expandedRows.includes(order._id) && (
+                <tr>
+                  <td colSpan={7}>
+                  <div className="mt-2">
+                    <strong>Chi tiết đơn hàng:</strong>
+                    {(order.items || []).map((item, index) => {
+                      const product = productData[item.product];
+                      return (
+                        <div className="row mb-2" key={index}>
+                          <div className="col-md-5">
+                            {product
+                              ? `${product.name}`
+                              : "(Đang tải...)"}
+                          </div>
+                          <div className="col-md-4">
+                            {product
+                              ? `Đơn giá: ${product.price.toLocaleString("vi-VN")} VND`
+                              : ""}
+                          </div>
+                          <div className="col-md-3">
+                            Số lượng: {item.quantity}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  </td>
+                </tr>
+              )}
+            </Fragment>
+          ))}
+        </tbody>
+      </Table>
+
+      <Pagination pageName="ordersForAdmin" />
+    </div>
+  );
+};
+
+
 const AdminPage = () => {
   const { backendUrl, isLoggedIn, user, setUserData, setIsLoggedIn } = useContext(AppContext);
   const navigate = useNavigate();
@@ -742,6 +934,12 @@ const AdminPage = () => {
                     Products
                   </Nav.Link>
                 </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="orders" className="mb-2">
+                    <i className="bi bi-box me-2"></i>
+                    Orders
+                  </Nav.Link>
+                </Nav.Item>
               </Nav>
               <div className="text-center mt-4">
                 <Card className="bg-light">
@@ -770,6 +968,9 @@ const AdminPage = () => {
                 </Tab.Pane>
                 <Tab.Pane eventKey="products">
                   <ProductList backendUrl={backendUrl} />
+                </Tab.Pane>
+                <Tab.Pane eventKey="orders">
+                  <OrderList backendUrl={backendUrl} />
                 </Tab.Pane>
               </Tab.Content>
             </Col>

@@ -2,9 +2,10 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import axiosInstance from '../utils/axiosInstance'
 
 const Pagination = ({pageName}) => {
-    const {backendUrl, productItems, setProductItems, setUsersForAdmin} = useContext(AppContext)
+    const {backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin} = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const navigate = useNavigate()
@@ -21,13 +22,20 @@ const Pagination = ({pageName}) => {
                 break
             case "usersForAdmin":
                 try {
-                    const res1 = await axios.get(`${backendUrl}/admin/user`, {withCredentials: true})
+                    const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {withCredentials: true})
                     setTotalPages(res1.data.totalPages)
-                    console.log("totalPages", res1.data.totalPages)                
+                    // console.log("totalPages", res1.data.totalPages)                
                 } catch (error) {
                     console.log(error.message)
                 }
                 break
+            case "ordersForAdmin":
+                try {
+                    const res2 = await axiosInstance.get(`${backendUrl}/admin/order`, {withCredentials: true})
+                    setTotalPages(res2.data.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
             default:
                 break
         } 
@@ -46,20 +54,49 @@ const Pagination = ({pageName}) => {
                 break
             case "usersForAdmin":
                 try {
-                    const res1 = await axios.get(`${backendUrl}/admin/user`, {
+                    const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
                         params: {page: currentPage},
                         withCredentials: true})
                     setUsersForAdmin(res1.data.user)
-                    console.log(res1.data.user)
+                    // console.log(res1.data.user)
                 } catch (error) {
                     console.log(error.message)
                 }
                 break
+            case "ordersForAdmin":
+                try {
+                    const res2 = await axiosInstance.get(`${backendUrl}/admin/order`, {
+                        params: {page: currentPage},
+                        withCredentials: true
+                    })
+                    const temp = res2.data.data
+                    const fetchOrdersWithUser = async () => {
+                        const ordersWithUser = await Promise.all(
+                          temp.map(async (order) => {
+                            const userRes = await axiosInstance.get(`${backendUrl}/admin/user/${order.user}`, {
+                                withCredentials: true
+                            })
+                            return {
+                              ...order,
+                              user: userRes.data
+                            }
+                          })
+                        )
+                        console.log("orderwithuser",ordersWithUser)
+                        setOrdersForAdmin(ordersWithUser)
+                    }
+                    fetchOrdersWithUser()
+                    
+                    // setOrdersForAdmin(temp)
+                    // console.log(temp)
+                } catch (error) {
+                    console.log(error.message)
+                }
             default:
                 break
         }
         // // console.log("productItmes", productItems)
-        console.log("currentpage" ,currentPage)
+        // console.log("currentpage" ,currentPage)
     }
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const PlacedOrderCard = ({indexOrder, dataOrder}) => {
+const PlacedOrderCard = ({indexOrder, dataOrder, quantity}) => {
   return (
     <>
       <div className='my-2'>
@@ -19,6 +19,7 @@ const PlacedOrderCard = ({indexOrder, dataOrder}) => {
               <div className='row'>
                 <div className='col-auto me-auto'>
                   <p>{dataOrder.productName}</p>
+                  <small>Số lượng: {quantity}</small>
                 </div>
                 <div className='col-auto'>
                   <p>Giá sản phẩm: </p><span>{dataOrder.price.toLocaleString('vi-VN')} {dataOrder.currency}</span>
