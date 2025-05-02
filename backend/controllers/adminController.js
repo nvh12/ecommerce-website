@@ -27,6 +27,19 @@ async function getOrders(req, res) {
     }
 }
 
+async function getSingleOrder(req, res) {
+    try {
+        const { id } = req.params;
+        const order = await orderServices.getOrder(id);
+        if (!order) {
+            return res.status(404).json({ status: 'error', error: 'Order not found' });
+        }
+        res.status(200).json({ status: 'success', order: order });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message || 'Something went wrong' });
+    }
+}
+
 async function updateOrder(req, res) {
     try {
         const { id } = req.params;
@@ -61,6 +74,19 @@ async function getUsers(req, res) {
     }
 }
 
+async function getSingleUser(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await userServices.getUserByObjectId(id);
+        if (!user) {
+            return res.status(404).json({ status: 'error', error: 'User not found' });
+        } 
+        res.status(200).json({ status: 'success', user: user });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
 async function getUserOrders(req, res) {
     try {
         let { id, page = 1, sortBy = null, order } = req.query;
@@ -88,7 +114,9 @@ async function getUserOrders(req, res) {
 
 module.exports = {
     getUsers,
+    getSingleUser,
     getOrders,
+    getSingleOrder,
     updateOrder,
     getUserOrders
 };

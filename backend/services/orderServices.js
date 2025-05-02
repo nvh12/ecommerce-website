@@ -68,8 +68,8 @@ async function updateOrder(id, updateData) {
         }
         if (updateData.status === 'cancelled' && order.status !== 'cancelled') {
             for (const item of order.items) {
-                const product = Product.findById(item.product);
-                product.stock +- item.quantity;
+                const product = await Product.findById(item.product);
+                product.stocks += item.quantity;
                 await product.save();
             }
         }
