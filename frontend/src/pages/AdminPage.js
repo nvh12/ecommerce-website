@@ -14,7 +14,11 @@ const Dashboard = ({ stats, ordersForAdmin }) => {
     const validOrders = orders.filter(order => order.status !== "cancelled");
     
     // Calculate total revenue
-    const totalRevenue = validOrders.reduce((sum, order) => sum + (order.total_price || 0), 0);
+    const totalRevenue = validOrders.reduce((sum, order) => {
+      // Ensure we're working with numbers
+      const orderPrice = order.total_price ? Number(order.total_price) : 0;
+      return sum + orderPrice;
+    }, 0);
     
     // Calculate revenue by day/week/month
     const now = new Date();
@@ -119,7 +123,7 @@ const Dashboard = ({ stats, ordersForAdmin }) => {
           <Card className="mb-4 shadow-sm">
             <Card.Body className="text-center">
               <Card.Title>Tổng Doanh Thu</Card.Title>
-              <Card.Text className="display-4">{formatCurrency(revenueMetrics.totalRevenue)}</Card.Text>
+              <Card.Text className="display-4">{formatCurrency(revenueMetrics.totalRevenue || 0)}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
@@ -435,86 +439,11 @@ const UserList = ({ backendUrl }) => {
 
 // ProductList Component
 const ProductList = ({ backendUrl }) => {
-  const [products, setProducts] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [newProduct, setNewProduct] = useState({
-    productName: '',
-    price: '',
-    description: '',
-    category: [],
-    brand: '',
-    stocks: '',
-    color: [],
-    images: [],
-    currency: 'VND', // Default currency
-    discount: 0,     // Default discount
-    features: []     // Features array
-  });
-  
-  // Currencies available for selection
-  const currencies = ['VND', 'USD', 'EUR', 'GBP'];
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        withCredentials: true
-      };
-      const { data } = await axios.get(`${backendUrl}/product`, config);
-      setProducts(data.product || []);
-      console.log(data.product);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to fetch products');
-    }
-  };
-
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    try {
-      // Prepare the data
-      const productData = {
-        productName: newProduct.productName,
-        price: Number(newProduct.price),
-        description: newProduct.description,
-        category: typeof newProduct.category === 'string' 
-          ? newProduct.category.split(',').map(cat => cat.trim()) 
-          : newProduct.category,
-        brand: newProduct.brand,
-        stocks: Number(newProduct.stocks),
-        color: typeof newProduct.color === 'string'
-          ? newProduct.color.split(',').map(col => col.trim())
-          : newProduct.color,
-        images: Array.isArray(newProduct.images) 
-          ? newProduct.images 
-          : [newProduct.images].filter(Boolean),
-        currency: newProduct.currency,
-        discount: Number(newProduct.discount),
-        features: typeof newProduct.features === 'string' 
-          ? newProduct.features.split(',').map(feature => feature.trim()) 
-          : newProduct.features
-      };
-
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      };
-      
-      await axiosInstance.post(`${backendUrl}/product/`, productData, config);
-      toast.success('Product added successfully');
-      setShowAddModal(false);
-      setNewProduct({
+    const { productItems, setProductItems } = useContext(AppContext);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [newProduct, setNewProduct] = useState({
         productName: '',
         price: '',
         description: '',
@@ -523,423 +452,553 @@ const ProductList = ({ backendUrl }) => {
         stocks: '',
         color: [],
         images: [],
-        currency: 'VND', 
-        discount: 0,
-        features: []
-      });
-      fetchProducts();
-    } catch (error) {
-      console.error('Error adding product:', error);
-      toast.error(`Failed to add product: ${error.response?.data?.message || error.message}`);
-    }
-  };
+        currency: 'VND', // Default currency
+        discount: 0,     // Default discount
+        features: []     // Features array
+    });
+  
+    // Currencies available for selection
+    const currencies = ['VND', 'USD', 'EUR', 'GBP'];
 
-  const handleEditProduct = async (e) => {
-    e.preventDefault();
-    try {
-      // Prepare the data
-      const productData = {
-        productName: selectedProduct.productName,
-        price: Number(selectedProduct.price),
-        description: selectedProduct.description,
-        category: typeof selectedProduct.category === 'string' 
-          ? selectedProduct.category.split(',').map(cat => cat.trim()) 
-          : selectedProduct.category,
-        brand: selectedProduct.brand,
-        stocks: Number(selectedProduct.stocks),
-        color: typeof selectedProduct.color === 'string'
-          ? selectedProduct.color.split(',').map(col => col.trim())
-          : selectedProduct.color,
-        images: Array.isArray(selectedProduct.images) 
-          ? selectedProduct.images 
-          : [selectedProduct.images].filter(Boolean),
-        currency: selectedProduct.currency,
-        discount: Number(selectedProduct.discount),
-        features: typeof selectedProduct.features === 'string' 
-          ? selectedProduct.features.split(',').map(feature => feature.trim()) 
-          : selectedProduct.features
-      };
+    // We'll display either the locally fetched products or the products from context
+    const [products, setProducts] = useState([]);
 
-      console.log('Sending product data:', productData);
-
-      const config = {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      };
-      
-      await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
-      toast.success('Product updated successfully');
-      setShowEditModal(false);
-      fetchProducts();
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error(`Failed to update product: ${error.response?.data?.message || error.message}`);
-    }
-  };
-
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          withCredentials: true
-        };
-        await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
-        toast.success('Product deleted successfully');
-        fetchProducts();
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        toast.error(`Failed to delete product: ${error.response?.data?.message || error.message}`);
-      }
-    }
-  };
-
-  const prepareProductForEdit = (product) => {
-    return {
-      ...product,
-      category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
-      color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
-      features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
+    // Keep the original fetchProducts function for CRUD operations
+    const fetchProducts = async () => {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                withCredentials: true
+            };
+            const { data } = await axios.get(`${backendUrl}/product`, config);
+            setProducts(data.product || []);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            toast.error('Failed to fetch products');
+        }
     };
-  };
 
-  return (
-    <div className="mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản Lý Sản Phẩm</h2>
-        <Button variant="primary" onClick={() => setShowAddModal(true)}>
-          Thêm Sản Phẩm Mới
-        </Button>
-      </div>
+    // When productItems changes (e.g., through pagination), update our local state
+    useEffect(() => {
+        if (productItems && productItems.length > 0) {
+            setProducts(productItems);
+        }
+    }, [productItems]);
 
-      <Table striped bordered hover responsive className="shadow-sm">
-        <thead className="bg-light">
-          <tr>
-            <th>ID</th>
-            <th>Tên</th>
-            <th>Giá</th>
-            <th>Tiền tệ</th>
-            <th>Giảm giá</th>
-            <th>Danh Mục</th>
-            <th>Tồn Kho</th>
-            <th>Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product._id}>
-              <td>{product._id}</td>
-              <td>{product.productName}</td>
-              <td>{product.price}</td>
-              <td>{product.currency || 'VND'}</td>
-              <td>{product.discount || 0}%</td>
-              <td>{Array.isArray(product.category) ? product.category.join(', ') : product.category}</td>
-              <td>{product.stocks}</td>
-              <td>
-                <Button
-                  variant="info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => {
-                    setSelectedProduct(prepareProductForEdit(product));
-                    setShowEditModal(true);
-                  }}
-                >
-                  Chỉnh Sửa
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDeleteProduct(product._id)}
-                >
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Pagination pageName="productsPage" />
+    // On initial load, fetch products directly
+    useEffect(() => {
+        fetchProducts();
+    }, []);
 
-      {/* Add Product Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Thêm Sản Phẩm Mới</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleAddProduct}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tên Sản Phẩm</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={newProduct.productName}
-                    onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Giá</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tiền tệ</Form.Label>
-                  <Form.Select
-                    value={newProduct.currency}
-                    onChange={(e) => setNewProduct({ ...newProduct, currency: e.target.value })}
-                    required
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Thương Hiệu</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={newProduct.brand}
-                    onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tồn Kho</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={newProduct.stocks}
-                    onChange={(e) => setNewProduct({ ...newProduct, stocks: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Giảm giá (%)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={newProduct.discount}
-                    onChange={(e) => setNewProduct({ ...newProduct, discount: e.target.value })}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
-              <Form.Control
-                type="text"
-                value={newProduct.category}
-                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                placeholder="Điện tử, Đồ gia dụng, ..."
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
-              <Form.Control
-                type="text"
-                value={newProduct.color}
-                onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
-                placeholder="Đỏ, Xanh, ..."
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-              <Form.Control
-                type="text"
-                value={newProduct.features}
-                onChange={(e) => setNewProduct({ ...newProduct, features: e.target.value })}
-                placeholder="Chống nước, Bluetooth, ..."
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>URL Hình Ảnh</Form.Label>
-              <Form.Control
-                type="text"
-                value={newProduct.images}
-                onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
-                placeholder="https://example.com/image.jpg"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Mô Tả</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={newProduct.description}
-                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                required
-              />
-            </Form.Group>
-            <div className="d-flex justify-content-end">
-              <Button variant="secondary" className="me-2" onClick={() => setShowAddModal(false)}>
-                Hủy
-              </Button>
-              <Button variant="primary" type="submit">
-                Thêm Sản Phẩm
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
+    // Helper function to refresh the current pagination page
+    const refreshCurrentPage = async () => {
+        try {
+            // Get the current page number from the pagination UI
+            // Find button with yellow background (current page) or default to page 1
+            const paginationButtons = document.querySelectorAll('.pagination button');
+            let pageNumber = 1;
+            
+            for (let button of paginationButtons) {
+                if (button.style.backgroundColor === '#FFD400' || 
+                    button.style.backgroundColor === 'rgb(255, 212, 0)') {
+                    const buttonText = button.textContent;
+                    if (!isNaN(buttonText)) {
+                        pageNumber = parseInt(buttonText);
+                        break;
+                    }
+                }
+            }
+            
+            const response = await axios.get(`${backendUrl}/product`, {
+                params: { page: pageNumber }
+            });
+            
+            if (response.data && response.data.product) {
+                // Update both local state and context
+                setProducts(response.data.product);
+                setProductItems(response.data.product);
+            }
+        } catch (error) {
+            console.error('Error refreshing current page:', error);
+        }
+    };
 
-      {/* Edit Product Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Chỉnh Sửa Sản Phẩm</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedProduct && (
-            <Form onSubmit={handleEditProduct}>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tên Sản Phẩm</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={selectedProduct.productName}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, productName: e.target.value })}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Giá</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={selectedProduct.price}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tiền tệ</Form.Label>
-                    <Form.Select
-                      value={selectedProduct.currency || 'VND'}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, currency: e.target.value })}
-                      required
-                    >
-                      {currencies.map((currency) => (
-                        <option key={currency} value={currency}>
-                          {currency}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Thương Hiệu</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={selectedProduct.brand}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, brand: e.target.value })}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tồn Kho</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={selectedProduct.stocks}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, stocks: e.target.value })}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Giảm giá (%)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={selectedProduct.discount || 0}
-                      onChange={(e) => setSelectedProduct({ ...selectedProduct, discount: e.target.value })}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Form.Group className="mb-3">
-                <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={selectedProduct.category}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={selectedProduct.color}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, color: e.target.value })}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={selectedProduct.features}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, features: e.target.value })}
-                  placeholder="Chống nước, Bluetooth, ..."
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Mô Tả</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  value={selectedProduct.description}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, description: e.target.value })}
-                  required
-                />
-              </Form.Group>
-              <div className="d-flex justify-content-end">
-                <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
-                  Hủy
-                </Button>
-                <Button variant="primary" type="submit">
-                  Lưu Thay Đổi
-                </Button>
-              </div>
-            </Form>
-          )}
-        </Modal.Body>
-      </Modal>
-    </div>
-  );
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+        try {
+            // Prepare the data
+            const productData = {
+                productName: newProduct.productName,
+                price: Number(newProduct.price),
+                description: newProduct.description,
+                category: typeof newProduct.category === 'string' 
+                    ? newProduct.category.split(',').map(cat => cat.trim()) 
+                    : newProduct.category,
+                brand: newProduct.brand,
+                stocks: Number(newProduct.stocks),
+                color: typeof newProduct.color === 'string'
+                    ? newProduct.color.split(',').map(col => col.trim())
+                    : newProduct.color,
+                images: Array.isArray(newProduct.images) 
+                    ? newProduct.images 
+                    : [newProduct.images].filter(Boolean),
+                currency: newProduct.currency,
+                discount: Number(newProduct.discount),
+                features: typeof newProduct.features === 'string' 
+                    ? newProduct.features.split(',').map(feature => feature.trim()) 
+                    : newProduct.features
+            };
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            };
+      
+            await axiosInstance.post(`${backendUrl}/product/`, productData, config);
+            toast.success('Product added successfully');
+            setShowAddModal(false);
+            setNewProduct({
+                productName: '',
+                price: '',
+                description: '',
+                category: [],
+                brand: '',
+                stocks: '',
+                color: [],
+                images: [],
+                currency: 'VND', 
+                discount: 0,
+                features: []
+            });
+            
+            // First fetch all products to update the local state
+            fetchProducts();
+            
+            // Then refresh the current pagination page to keep UI consistent
+            refreshCurrentPage();
+        } catch (error) {
+            console.error('Error adding product:', error);
+            toast.error(`Failed to add product: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleEditProduct = async (e) => {
+        e.preventDefault();
+        try {
+            // Prepare the data
+            const productData = {
+                productName: selectedProduct.productName,
+                price: Number(selectedProduct.price),
+                description: selectedProduct.description,
+                category: typeof selectedProduct.category === 'string' 
+                    ? selectedProduct.category.split(',').map(cat => cat.trim()) 
+                    : selectedProduct.category,
+                brand: selectedProduct.brand,
+                stocks: Number(selectedProduct.stocks),
+                color: typeof selectedProduct.color === 'string'
+                    ? selectedProduct.color.split(',').map(col => col.trim())
+                    : selectedProduct.color,
+                images: Array.isArray(selectedProduct.images) 
+                    ? selectedProduct.images 
+                    : [selectedProduct.images].filter(Boolean),
+                currency: selectedProduct.currency,
+                discount: Number(selectedProduct.discount),
+                features: typeof selectedProduct.features === 'string' 
+                    ? selectedProduct.features.split(',').map(feature => feature.trim()) 
+                    : selectedProduct.features
+            };
+
+            console.log('Sending product data:', productData);
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            };
+      
+            await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
+            toast.success('Product updated successfully');
+            setShowEditModal(false);
+            fetchProducts();
+            
+            // Also refresh the current pagination page to keep UI consistent
+            refreshCurrentPage();
+        } catch (error) {
+            console.error('Error updating product:', error);
+            toast.error(`Failed to update product: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (window.confirm('Are you sure you want to delete this product?')) {
+            try {
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    withCredentials: true
+                };
+                await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
+                toast.success('Product deleted successfully');
+                fetchProducts();
+                
+                // Also refresh the current pagination page to keep UI consistent
+                refreshCurrentPage();
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                toast.error(`Failed to delete product: ${error.response?.data?.message || error.message}`);
+            }
+        }
+    };
+    
+    const prepareProductForEdit = (product) => {
+        return {
+            ...product,
+            category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
+            color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
+            features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
+        };
+    };
+
+    return (
+        <div className="mt-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2>Quản Lý Sản Phẩm</h2>
+                            <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                    Thêm Sản Phẩm Mới
+                            </Button>
+                        </div>
+
+            <Table striped bordered hover responsive className="shadow-sm">
+                <thead className="bg-light">
+                                <tr>
+                                    <th>ID</th>
+                        <th>Tên</th>
+                        <th>Giá</th>
+                        <th>Tiền tệ</th>
+                        <th>Giảm giá</th>
+                        <th>Danh Mục</th>
+                        <th>Tồn Kho</th>
+                        <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {products.map((product) => (
+                                    <tr key={product._id}>
+                                        <td>{product._id}</td>
+                                        <td>{product.productName}</td>
+                            <td>{product.price}</td>
+                            <td>{product.currency || 'VND'}</td>
+                            <td>{product.discount || 0}%</td>
+                            <td>{Array.isArray(product.category) ? product.category.join(', ') : product.category}</td>
+                                        <td>{product.stocks}</td>
+                                        <td>
+                                            <Button
+                                                variant="info"
+                                                size="sm"
+                                                className="me-2"
+                                                onClick={() => {
+                                        setSelectedProduct(prepareProductForEdit(product));
+                                                    setShowEditModal(true);
+                                                }}
+                                            >
+                                    Chỉnh Sửa
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                onClick={() => handleDeleteProduct(product._id)}
+                                            >
+                                    Xóa
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+            <Pagination pageName="productsPage" />
+
+            {/* Add Product Modal */}
+            <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Thêm Sản Phẩm Mới</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddProduct}>
+                        <Row>
+                            <Col md={6}>
+                        <Form.Group className="mb-3">
+                                    <Form.Label>Tên Sản Phẩm</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newProduct.productName}
+                                onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                        <Form.Group className="mb-3">
+                                    <Form.Label>Giá</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newProduct.price}
+                                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                        <Form.Group className="mb-3">
+                                    <Form.Label>Tiền tệ</Form.Label>
+                                    <Form.Select
+                                        value={newProduct.currency}
+                                        onChange={(e) => setNewProduct({ ...newProduct, currency: e.target.value })}
+                                        required
+                                    >
+                                        {currencies.map((currency) => (
+                                            <option key={currency} value={currency}>
+                                                {currency}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Thương Hiệu</Form.Label>
+                            <Form.Control
+                                        type="text"
+                                        value={newProduct.brand}
+                                        onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Tồn Kho</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={newProduct.stocks}
+                                        onChange={(e) => setNewProduct({ ...newProduct, stocks: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                        <Form.Group className="mb-3">
+                                    <Form.Label>Giảm giá (%)</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={newProduct.discount}
+                                        onChange={(e) => setNewProduct({ ...newProduct, discount: e.target.value })}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newProduct.category}
+                                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                                placeholder="Điện tử, Đồ gia dụng, ..."
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newProduct.color}
+                                onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
+                                placeholder="Đỏ, Xanh, ..."
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newProduct.features}
+                                onChange={(e) => setNewProduct({ ...newProduct, features: e.target.value })}
+                                placeholder="Chống nước, Bluetooth, ..."
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>URL Hình Ảnh</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newProduct.images}
+                                onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
+                                placeholder="https://example.com/image.jpg"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Mô Tả</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newProduct.description}
+                                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                        <div className="d-flex justify-content-end">
+                            <Button variant="secondary" className="me-2" onClick={() => setShowAddModal(false)}>
+                                Hủy
+                            </Button>
+                        <Button variant="primary" type="submit">
+                                Thêm Sản Phẩm
+                        </Button>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+
+            {/* Edit Product Modal */}
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Chỉnh Sửa Sản Phẩm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedProduct && (
+                        <Form onSubmit={handleEditProduct}>
+                            <Row>
+                                <Col md={6}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Tên Sản Phẩm</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={selectedProduct.productName}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, productName: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                                </Col>
+                                <Col md={3}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Giá</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={selectedProduct.price}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                                </Col>
+                                <Col md={3}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Tiền tệ</Form.Label>
+                                        <Form.Select
+                                            value={selectedProduct.currency || 'VND'}
+                                            onChange={(e) => setSelectedProduct({ ...selectedProduct, currency: e.target.value })}
+                                    required
+                                        >
+                                            {currencies.map((currency) => (
+                                                <option key={currency} value={currency}>
+                                                    {currency}
+                                                </option>
+                                            ))}
+                                        </Form.Select>
+                            </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Thương Hiệu</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                            value={selectedProduct.brand}
+                                            onChange={(e) => setSelectedProduct({ ...selectedProduct, brand: e.target.value })}
+                                />
+                            </Form.Group>
+                                </Col>
+                                <Col md={3}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Tồn Kho</Form.Label>
+                                <Form.Control
+                                            type="number"
+                                            value={selectedProduct.stocks}
+                                            onChange={(e) => setSelectedProduct({ ...selectedProduct, stocks: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                                </Col>
+                                <Col md={3}>
+                            <Form.Group className="mb-3">
+                                        <Form.Label>Giảm giá (%)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                            min="0"
+                                            max="100"
+                                            value={selectedProduct.discount || 0}
+                                            onChange={(e) => setSelectedProduct({ ...selectedProduct, discount: e.target.value })}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Danh Mục (cách nhau bằng dấu phẩy)</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={selectedProduct.category}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={selectedProduct.color}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, color: e.target.value })}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={selectedProduct.features}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, features: e.target.value })}
+                                    placeholder="Chống nước, Bluetooth, ..."
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Mô Tả</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    value={selectedProduct.description}
+                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, description: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                            <div className="d-flex justify-content-end">
+                                <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
+                                    Hủy
+                                </Button>
+                            <Button variant="primary" type="submit">
+                                    Lưu Thay Đổi
+                            </Button>
+                            </div>
+                        </Form>
+                    )}
+                </Modal.Body>
+            </Modal>
+        </div>
+    );
 };
 
 // OrderList Component
@@ -1146,8 +1205,12 @@ const AdminPage = () => {
   const [ordersForAdmin, setOrdersForAdmin] = useState([]);
 
   useEffect(() => {
-    fetchStats();
-    fetchOrders();
+    const loadData = async () => {
+      await fetchOrders();
+      await fetchStats();
+    };
+    
+    loadData();
   }, [isLoggedIn, user, navigate]);
 
   const fetchOrders = async () => {
@@ -1159,8 +1222,25 @@ const AdminPage = () => {
         withCredentials: true
       };
       
-      const { data } = await axiosInstance.get(`${backendUrl}/admin/order`, config);
-      setOrdersForAdmin(data.data || []);
+      // First, get the total pages
+      const totalPagesResponse = await axiosInstance.get(`${backendUrl}/admin/order`, config);
+      const totalPages = totalPagesResponse.data.totalPages || 1;
+      
+      // Fetch all orders from all pages
+      let allOrders = [];
+      
+      for (let page = 1; page <= totalPages; page++) {
+        const response = await axiosInstance.get(`${backendUrl}/admin/order`, {
+          ...config,
+          params: { page }
+        });
+        
+        if (response.data && response.data.data) {
+          allOrders = [...allOrders, ...response.data.data];
+        }
+      }
+      
+      setOrdersForAdmin(allOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Lỗi khi tải đơn hàng');
@@ -1176,13 +1256,62 @@ const AdminPage = () => {
         withCredentials: true
       };
       
-      const productsRes = await axios.get(`${backendUrl}/product`, config);
-      const usersRes = await axiosInstance.get(`${backendUrl}/admin/user`, config);
+      // Fetch total products (all pages)
+      const productPageRes = await axios.get(`${backendUrl}/product/page`);
+      const totalProductPages = productPageRes.data.page.totalPages || 1;
+      
+      let allProducts = [];
+      for (let page = 1; page <= totalProductPages; page++) {
+        const productsRes = await axios.get(`${backendUrl}/product`, {
+          ...config,
+          params: { page }
+        });
+        
+        if (productsRes.data && productsRes.data.product) {
+          allProducts = [...allProducts, ...productsRes.data.product];
+        }
+      }
+      
+      // Fetch total users (all pages)
+      const userPageRes = await axiosInstance.get(`${backendUrl}/admin/user`, {
+        ...config,
+        params: { page: 1 }
+      });
+      const totalUserPages = userPageRes.data.totalPages || 1;
+      
+      let allUsers = [];
+      for (let page = 1; page <= totalUserPages; page++) {
+        const usersRes = await axiosInstance.get(`${backendUrl}/admin/user`, {
+          ...config,
+          params: { page }
+        });
+        
+        if (usersRes.data && usersRes.data.user) {
+          allUsers = [...allUsers, ...usersRes.data.user];
+        }
+      }
+      
+      // Ensure we have the orders data before calculating revenue
+      if (!ordersForAdmin || ordersForAdmin.length === 0) {
+        console.log("No orders available for revenue calculation");
+      }
+      
+      // Calculate total revenue from all valid orders (non-cancelled)
+      const totalRevenue = ordersForAdmin
+        .filter(order => order.status !== "cancelled")
+        .reduce((sum, order) => {
+          // Ensure we're working with numbers
+          const orderPrice = order.total_price ? Number(order.total_price) : 0;
+          return sum + orderPrice;
+        }, 0);
+      
+      console.log(`Calculated total revenue: ${totalRevenue} from ${ordersForAdmin.length} orders`);
       
       setStats({
-        totalProducts: productsRes.data.product?.length || 0,
+        totalProducts: allProducts.length,
         totalOrders: ordersForAdmin.length,
-        totalUsers: usersRes.data.user?.length || 0,
+        totalUsers: allUsers.length,
+        totalRevenue: totalRevenue
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -1278,8 +1407,8 @@ const AdminPage = () => {
           Về Trang Chủ
         </Button>
       </Link>
-    </Container>
-  );
+        </Container>
+    );
 };
 
-export default AdminPage;
+export default AdminPage; 

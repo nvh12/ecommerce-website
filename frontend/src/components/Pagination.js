@@ -36,6 +36,27 @@ const Pagination = ({pageName}) => {
                 } catch (error) {
                     console.log(error.message)
                 }
+                break
+            case "phonePage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product/page`, {
+                        params: { category: 'Điện thoại' }
+                    })
+                    setTotalPages(res.data.page.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "laptopPage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product/page`, {
+                        params: { category: 'Laptop' }
+                    })
+                    setTotalPages(res.data.page.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
             default:
                 break
         } 
@@ -45,7 +66,10 @@ const Pagination = ({pageName}) => {
             case "productsPage":
                 try {
                     const res = await axios.get(`${backendUrl}/product`, {
-                        params: {page: currentPage}
+                        params: {
+                            page: currentPage,
+                            limit: 15
+                        }
                     })
                     setProductItems(res.data.product)
                 } catch (error) {
@@ -92,6 +116,35 @@ const Pagination = ({pageName}) => {
                 } catch (error) {
                     console.log(error.message)
                 }
+                break
+            case "phonePage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product`, {
+                        params: {
+                            page: currentPage,
+                            category: 'Điện thoại',
+                            limit: 18
+                        }
+                    })
+                    setProductItems(res.data.product)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "laptopPage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product`, {
+                        params: {
+                            page: currentPage,
+                            category: 'Laptop',
+                            limit: 18
+                        }
+                    })
+                    setProductItems(res.data.product)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
             default:
                 break
         }

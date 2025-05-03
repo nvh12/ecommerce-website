@@ -10,7 +10,7 @@ import Pagination from '../components/Pagination.js'
 import { AppContext } from '../context/AppContext.js'
 import { Button } from 'react-bootstrap'
 import '../styles/AdminPage.css'
-
+import Navbar from '../components/Navbar.js'
 const Home = () => {
   const { userData } = useContext(AppContext);
   const isAdmin = userData?.role === 'admin';
@@ -18,6 +18,7 @@ const Home = () => {
   return (
     <div>
       <Header />
+      <Navbar />
         <div className="container-fluid py-4">
             {/* <SalesCarousel /> */}
             <Sale />
@@ -33,7 +34,7 @@ const Home = () => {
             variant="danger" 
             className="fixed-nav-button"
           >
-            Admin Dashboard
+            Trang quản lý
           </Button>
         </Link>
       )}
