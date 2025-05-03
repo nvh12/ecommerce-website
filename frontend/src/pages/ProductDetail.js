@@ -10,6 +10,7 @@ import Footer from '../components/Footer';
 import ProductComments from '../components/ProductComments';
 import Rating from '../components/Rating';
 import axiosInstance from '../utils/axiosInstance';
+import Navbar from '../components/Navbar';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -125,6 +126,7 @@ const ProductDetail = () => {
     return (
         <div>
             <Header />
+            <Navbar />  
         <Container className="py-4">
             <Row>
                 {/* Left Column - Images */}

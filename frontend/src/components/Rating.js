@@ -4,6 +4,7 @@ import { Card, Form, Button, Spinner } from 'react-bootstrap';
 import { AppContext } from '../context/AppContext';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
+import '../styles/Rating.css';
 
 const Rating = ({ 
     productId,
@@ -14,9 +15,9 @@ const Rating = ({
     const { backendUrl, user, fetchProduct } = useContext(AppContext);
     const [rating, setRating] = useState(0);
     const [hover, setHover] = useState(0);
-    const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [ratingDistribution, setRatingDistribution] = useState([]);
+    const [userHasRated, setUserHasRated] = useState(false);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -34,15 +35,15 @@ const Rating = ({
                 const userRating = response.data.ratings.find(r => r.fromUser);
                 if (userRating) {
                     setRating(userRating.rate);
-                    setComment(userRating.comment || '');
+                    setUserHasRated(true);
                 } else {
                     setRating(0);
-                    setComment('');
+                    setUserHasRated(false);
                 }
                 setRatingDistribution(response.data.ratingDistribution || []);
             } else {
                 setRating(0);
-                setComment('');
+                setUserHasRated(false);
                 setRatingDistribution([]);
             }
         } catch (error) {
@@ -59,11 +60,11 @@ const Rating = ({
             await axiosInstance.post(`${backendUrl}/rating/create`, {
                 productId,
                 rate: rating,
-                comment
             }, { withCredentials: true });
             
             await fetchProduct(productId);
             await fetchUserRating();
+            setUserHasRated(true);
         } catch (error) {
             console.error('Error submitting rating:', error);
         } finally {
@@ -115,18 +116,25 @@ const Rating = ({
 
                     {isLoggedIn ? (
                         <div className="rating-form">
-                            <h5 className="mb-3">Viết đánh giá của bạn</h5>
+                            <h5 className="mb-3">
+                                {userHasRated ? (
+                                    <div className="user-rating-info">
+                                        Đánh giá của bạn: {rating} <FaStar className="ms-1" />
+                                    </div>
+                                ) : (
+                                    "Đánh giá của bạn"
+                                )}
+                            </h5>
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3">
                                     <div className="d-flex align-items-center mb-2">
-                                        <Form.Label className="me-3 mb-0">Chọn số sao:</Form.Label>
                                         <div className="star-rating">
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 <FaStar
                                                     key={star}
                                                     className={`star ${
                                                         star <= (hover || rating) ? 'active' : ''
-                                                    }`}
+                                                    } ${userHasRated && star <= rating ? 'user-selected' : ''}`}
                                                     onClick={() => setRating(star)}
                                                     onMouseEnter={() => setHover(star)}
                                                     onMouseLeave={() => setHover(0)}
@@ -134,18 +142,6 @@ const Rating = ({
                                             ))}
                                         </div>
                                     </div>
-                                </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Nhận xét của bạn:</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-                                        required
-                                    />
                                 </Form.Group>
 
                                 <Button
@@ -165,7 +161,7 @@ const Rating = ({
                                             Đang gửi...
                                         </>
                                     ) : (
-                                        'Gửi đánh giá'
+                                        userHasRated ? 'Cập nhật đánh giá' : 'Gửi đánh giá'
                                     )}
                                 </Button>
                             </Form>

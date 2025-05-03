@@ -82,11 +82,14 @@ const Dashboard = ({ stats, ordersForAdmin }) => {
   
   // Format currency function
   const formatCurrency = (amount) => {
+    // Ensure the amount is a valid number
+    const validAmount = isNaN(Number(amount)) ? 0 : Number(amount);
+    
     return new Intl.NumberFormat('vi-VN', { 
       style: 'currency', 
       currency: 'VND',
       maximumFractionDigits: 0 
-    }).format(amount);
+    }).format(validAmount);
   };
 
   return (
@@ -463,6 +466,39 @@ const ProductList = ({ backendUrl }) => {
     // We'll display either the locally fetched products or the products from context
     const [products, setProducts] = useState([]);
 
+    // Filter states
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterBrand, setFilterBrand] = useState('');
+    const [filterPriceMin, setFilterPriceMin] = useState('');
+    const [filterPriceMax, setFilterPriceMax] = useState('');
+    const [filterName, setFilterName] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [isFiltering, setIsFiltering] = useState(false);
+    
+    // Fetch categories and brands for filters
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                // Fetch brands
+                const brandResponse = await axios.get(`${backendUrl}/product/brand`);
+                if (brandResponse.data && brandResponse.data.message === "Success") {
+                    setBrands(brandResponse.data.brandFound || []);
+                }
+                
+                // Fetch categories
+                const categoryResponse = await axios.get(`${backendUrl}/product/category`);
+                if (categoryResponse.data && categoryResponse.data.message === "Success") {
+                    setCategories(categoryResponse.data.categoryFound || []);
+                }
+            } catch (error) {
+                console.error('Error fetching filter data:', error);
+            }
+        };
+        
+        fetchFilters();
+    }, [backendUrl]);
+
     // Keep the original fetchProducts function for CRUD operations
     const fetchProducts = async () => {
         try {
@@ -491,6 +527,42 @@ const ProductList = ({ backendUrl }) => {
     useEffect(() => {
         fetchProducts();
     }, []);
+
+    // Apply filters to products
+    const handleApplyFilters = async () => {
+        setIsFiltering(true);
+        try {
+            let params = { page: 1 };
+            
+            if (filterName) params.search = filterName;
+            if (filterCategory) params.category = filterCategory;
+            if (filterBrand) params.brand = filterBrand;
+            if (filterPriceMin) params.priceMin = filterPriceMin;
+            if (filterPriceMax) params.priceMax = filterPriceMax;
+            
+            const response = await axios.get(`${backendUrl}/product`, { params });
+            
+            if (response.data && response.data.product) {
+                setProducts(response.data.product);
+                // We don't update the context to avoid affecting pagination
+            }
+        } catch (error) {
+            console.error('Error applying filters:', error);
+            toast.error('Failed to filter products');
+        } finally {
+            setIsFiltering(false);
+        }
+    };
+
+    // Clear all filters
+    const handleClearFilters = () => {
+        setFilterName('');
+        setFilterCategory('');
+        setFilterBrand('');
+        setFilterPriceMin('');
+        setFilterPriceMax('');
+        fetchProducts(); // Reset to original list
+    };
 
     // Helper function to refresh the current pagination page
     const refreshCurrentPage = async () => {
@@ -523,6 +595,18 @@ const ProductList = ({ backendUrl }) => {
         } catch (error) {
             console.error('Error refreshing current page:', error);
         }
+    };
+
+    // Format currency for display
+    const formatCurrency = (amount, currency = 'VND') => {
+        // Validate currency code - use VND as fallback if invalid
+        const validCurrency = ['VND', 'USD', 'EUR', 'GBP'].includes(currency) ? currency : 'VND';
+        
+        return new Intl.NumberFormat('vi-VN', { 
+            style: 'currency', 
+            currency: validCurrency,
+            maximumFractionDigits: 0
+        }).format(amount);
     };
 
     const handleAddProduct = async (e) => {
@@ -669,60 +753,181 @@ const ProductList = ({ backendUrl }) => {
 
     return (
         <div className="mt-4">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Quản Lý Sản Phẩm</h2>
-                            <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                <Button variant="primary" onClick={() => setShowAddModal(true)}>
                     Thêm Sản Phẩm Mới
+                </Button>
+            </div>
+
+            {/* Filter Section */}
+            <Card className="mb-4 shadow-sm">
+                <Card.Body>
+                    <h5 className="mb-3">Lọc Sản Phẩm</h5>
+                    <Form>
+                        <Row>
+                            <Col md={3}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Tên Sản Phẩm</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Tìm kiếm theo tên"
+                                        value={filterName}
+                                        onChange={(e) => setFilterName(e.target.value)}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Danh Mục</Form.Label>
+                                    <Form.Select
+                                        value={filterCategory}
+                                        onChange={(e) => setFilterCategory(e.target.value)}
+                                    >
+                                        <option value="">Tất cả danh mục</option>
+                                        {categories.map((cat, index) => (
+                                            <option key={index} value={cat.name}>{cat.name}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Thương Hiệu</Form.Label>
+                                    <Form.Select
+                                        value={filterBrand}
+                                        onChange={(e) => setFilterBrand(e.target.value)}
+                                    >
+                                        <option value="">Tất cả thương hiệu</option>
+                                        {brands.map((brand, index) => (
+                                            <option key={index} value={brand.name}>{brand.name}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Khoảng Giá</Form.Label>
+                                    <div className="d-flex align-items-center">
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Từ"
+                                            className="me-2"
+                                            value={filterPriceMin}
+                                            onChange={(e) => setFilterPriceMin(e.target.value)}
+                                        />
+                                        <span>-</span>
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Đến"
+                                            className="ms-2"
+                                            value={filterPriceMax}
+                                            onChange={(e) => setFilterPriceMax(e.target.value)}
+                                        />
+                                    </div>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <div className="d-flex justify-content-end">
+                            <Button 
+                                variant="outline-secondary" 
+                                className="me-2"
+                                onClick={handleClearFilters}
+                            >
+                                Xóa Bộ Lọc
+                            </Button>
+                            <Button 
+                                variant="success" 
+                                onClick={handleApplyFilters}
+                                disabled={isFiltering}
+                            >
+                                {isFiltering ? 'Đang Lọc...' : 'Áp Dụng Bộ Lọc'}
                             </Button>
                         </div>
+                    </Form>
+                </Card.Body>
+            </Card>
 
-            <Table striped bordered hover responsive className="shadow-sm">
-                <thead className="bg-light">
-                                <tr>
-                                    <th>ID</th>
-                        <th>Tên</th>
-                        <th>Giá</th>
-                        <th>Tiền tệ</th>
-                        <th>Giảm giá</th>
-                        <th>Danh Mục</th>
-                        <th>Tồn Kho</th>
-                        <th>Thao Tác</th>
+            {/* Products Table */}
+            <Card className="shadow">
+                <Card.Body>
+                    <Table striped bordered hover responsive className="product-table">
+                        <thead className="bg-light">
+                            <tr>
+                                <th className="text-nowrap" width="5%">ID</th>
+                                <th width="20%">Tên Sản Phẩm</th>
+                                <th width="10%">Thương Hiệu</th>
+                                <th width="10%">Giá</th>
+                                <th width="15%">Danh Mục</th>
+                                <th width="10%">Tồn Kho</th>
+                                <th width="10%">Giảm Giá</th>
+                                <th width="20%">Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {products.map((product) => (
+                            {products.length > 0 ? (
+                                products.map((product) => (
                                     <tr key={product._id}>
-                                        <td>{product._id}</td>
+                                        <td className="text-truncate" style={{ maxWidth: '100px' }}>
+                                            {product._id}
+                                        </td>
                                         <td>{product.productName}</td>
-                            <td>{product.price}</td>
-                            <td>{product.currency || 'VND'}</td>
-                            <td>{product.discount || 0}%</td>
-                            <td>{Array.isArray(product.category) ? product.category.join(', ') : product.category}</td>
-                                        <td>{product.stocks}</td>
+                                        <td>{product.brand}</td>
+                                        <td className="text-nowrap">{formatCurrency(product.price, product.currency || 'VND')}</td>
+                                        <td>
+                                            {Array.isArray(product.category) ? 
+                                                product.category.map((cat, i) => (
+                                                    <span key={i} className="badge bg-info me-1 mb-1">{cat}</span>
+                                                )) : 
+                                                <span className="badge bg-info">{product.category}</span>
+                                            }
+                                        </td>
+                                        <td className="text-center">
+                                            <span className={`badge ${product.stocks > 10 ? 'bg-success' : product.stocks > 0 ? 'bg-warning' : 'bg-danger'}`}>
+                                                {product.stocks}
+                                            </span>
+                                        </td>
+                                        <td className="text-center">
+                                            {product.discount > 0 ? (
+                                                <span className="badge bg-danger">{product.discount}%</span>
+                                            ) : (
+                                                <span className="text-muted">Không</span>
+                                            )}
+                                        </td>
                                         <td>
                                             <Button
                                                 variant="info"
                                                 size="sm"
                                                 className="me-2"
                                                 onClick={() => {
-                                        setSelectedProduct(prepareProductForEdit(product));
+                                                    setSelectedProduct(prepareProductForEdit(product));
                                                     setShowEditModal(true);
                                                 }}
                                             >
-                                    Chỉnh Sửa
+                                                Chỉnh Sửa
                                             </Button>
                                             <Button
                                                 variant="danger"
                                                 size="sm"
                                                 onClick={() => handleDeleteProduct(product._id)}
                                             >
-                                    Xóa
+                                                Xóa
                                             </Button>
                                         </td>
                                     </tr>
-                                ))}
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-3">
+                                        {isFiltering ? 'Đang tải dữ liệu...' : 'Không tìm thấy sản phẩm nào'}
+                                    </td>
+                                </tr>
+                            )}
                             </tbody>
                         </Table>
+                </Card.Body>
+            </Card>
+
             <Pagination pageName="productsPage" />
 
             {/* Add Product Modal */}

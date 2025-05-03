@@ -1,0 +1,116 @@
+/* Rating Component Styles */
+.rating-section {
+  margin-bottom: 2rem;
+}
+
+/* Star Rating Styling */
+.star-rating {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin: 10px 0;
+}
+
+.star-rating .star {
+  cursor: pointer;
+  font-size: 2rem;
+  color: #e4e5e9; /* Default gray color for inactive stars */
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.star-rating .star.active {
+  color: #ffc107; /* Gold/yellow color for active stars */
+}
+
+.star-rating .star:hover {
+  color: #ffb300; /* Slightly darker gold for hover */
+  transform: scale(1.1);
+}
+
+/* User's selected rating - make it very visible */
+.star-rating .star.user-selected {
+  color: #ff6d00; /* Bright orange color for user's previous rating */
+  filter: drop-shadow(0 0 3px rgba(255, 109, 0, 0.5));
+  transform: scale(1.15);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+/* User rating info styles */
+.user-rating-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #ff6d00;
+  font-size: 1.1rem;
+}
+
+/* Rating distribution styling */
+.rating-bars .rating-bar-row {
+  margin-bottom: 0.75rem;
+}
+
+.rating-bars .progress {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.rating-bars .progress-bar {
+  background-color: #ffc107;
+}
+
+.rating-bars .stars {
+  min-width: 40px;
+}
+
+.rating-average {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.rating-average h2 {
+  color: #ff6d00;
+  font-weight: bold;
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Average rating stars */
+.rating-average .stars {
+  display: inline-flex;
+  gap: 0.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stars .text-muted {
+  color: #e4e5e9 !important;
+}
+
+.stars .text-warning {
+  color: #ffc107 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rating-average h2 {
+    font-size: 2rem;
+  }
+  
+  .star-rating .star {
+    font-size: 1.5rem;
+  }
+} 
