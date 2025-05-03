@@ -49,7 +49,7 @@ const AppContextProvider = (props) => {
                 toast.error("Lỗi lấy sản phẩm")
             }
         } catch (error) {
-            toast.error(error.message)
+            toast.error("Lỗi khi tải thông tin sản phẩm")
         }
     }
 

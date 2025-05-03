@@ -7,6 +7,7 @@ import SearchBar from '../components/SearchBar';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import '../styles/NavigationButtons.css';
 
 const SearchResults = () => {
     const { backendUrl } = useContext(AppContext);
@@ -93,10 +94,10 @@ const SearchResults = () => {
                         <Card.Body>
                             <Card.Title>{error}</Card.Title>
                             <Button 
-                                variant="primary" 
-                                className="mt-3"
+                                className="nav-button home-button mx-auto"
                                 onClick={() => navigate('/')}
                             >
+                                <i className="bi bi-house-door"></i>
                                 Quay về trang chủ
                             </Button>
                         </Card.Body>

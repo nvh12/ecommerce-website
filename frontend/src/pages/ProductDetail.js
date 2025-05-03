@@ -117,9 +117,9 @@ const ProductDetail = () => {
                 price: product.price
             }, { withCredentials: true });
             
-            toast.success("Added to cart");
+            toast.success("Đã thêm vào giỏ hàng");
         } catch (error) {
-            toast.error("Failed to add to cart");
+            toast.error("Không thể thêm vào giỏ hàng");
         }
     };
 
@@ -193,16 +193,16 @@ const ProductDetail = () => {
 
                             {/* Stock Status */}
                         <div className="stock-info mb-3">
-                                <span className="fw-bold me-2">Stock:</span>
+                                <span className="fw-bold me-2">Kho:</span>
                             <span className={product.stocks > 0 ? 'text-success' : 'text-danger'}>
-                                    {product.stocks > 0 ? `In Stock (${product.stocks})` : 'Out of Stock'}
+                                    {product.stocks > 0 ? `Còn hàng (${product.stocks})` : 'Hết hàng'}
                             </span>
                         </div>
 
                         {/* Colors */}
                             {product.color?.length > 0 && (
                             <div className="colors-section mb-3">
-                                    <div className="fw-bold mb-2">Colors</div>
+                                    <div className="fw-bold mb-2">Màu sắc</div>
                                 <div className="d-flex gap-2 flex-wrap">
                                     {product.color.map((color) => (
                                         <div
@@ -220,7 +220,7 @@ const ProductDetail = () => {
 
                             {/* Description */}
                             <div className="mb-4">
-                                <h4>Product Description</h4>
+                                <h4>Mô tả sản phẩm</h4>
                                 <p>{product.description}</p>
                             </div>
 
@@ -248,14 +248,14 @@ const ProductDetail = () => {
                                 onClick={handleAddToCart}
                             >
                                 <FaShoppingCart className="me-2" />
-                                    Add to Cart
+                                    Thêm vào giỏ hàng
                             </Button>
                             <Button 
                                 variant="outline-primary" 
                                 size="lg"
                                 onClick={() => navigate('/')}
                             >
-                                    Continue Shopping
+                                    Tiếp tục mua sắm
                             </Button>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import axiosInstance from '../utils/axiosInstance';
 import Pagination from '../components/Pagination';
 import '../styles/AdminPage.css';
+import '../styles/NavigationButtons.css';
 // Dashboard Component
 const Dashboard = ({ stats, ordersForAdmin }) => {
   // Calculate revenue metrics directly from orders
@@ -290,7 +291,7 @@ const UserList = ({ backendUrl }) => {
       setUsers(data.user || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to fetch users');
+      toast.error('Lỗi khi tải danh sách người dùng');
     }
   };
 
@@ -304,17 +305,17 @@ const UserList = ({ backendUrl }) => {
         withCredentials: true
       };
       await axiosInstance.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser, config);
-      toast.success('User updated successfully');
+      toast.success('Cập nhật thông tin người dùng thành công');
       setShowEditModal(false);
       fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      toast.error('Lỗi cập nhật thông tin người dùng');
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
       try {
         const config = {
           headers: {
@@ -323,11 +324,11 @@ const UserList = ({ backendUrl }) => {
           withCredentials: true
         };
         await axiosInstance.delete(`${backendUrl}/admin/user/${userId}`, config);
-        toast.success('User deleted successfully');
+        toast.success('Đã xóa người dùng thành công');
         fetchUsers();
       } catch (error) {
         console.error('Error deleting user:', error);
-        toast.error('Failed to delete user');
+        toast.error('Lỗi khi xóa người dùng');
       }
     }
   };
@@ -512,7 +513,7 @@ const ProductList = ({ backendUrl }) => {
             setProducts(data.product || []);
         } catch (error) {
             console.error('Error fetching products:', error);
-            toast.error('Failed to fetch products');
+            toast.error('Lỗi khi tải danh sách sản phẩm');
         }
     };
 
@@ -548,7 +549,7 @@ const ProductList = ({ backendUrl }) => {
             }
         } catch (error) {
             console.error('Error applying filters:', error);
-            toast.error('Failed to filter products');
+            toast.error('Lỗi khi lọc sản phẩm');
         } finally {
             setIsFiltering(false);
         }
@@ -644,7 +645,7 @@ const ProductList = ({ backendUrl }) => {
             };
       
             await axiosInstance.post(`${backendUrl}/product/`, productData, config);
-            toast.success('Product added successfully');
+            toast.success('Thêm sản phẩm thành công');
             setShowAddModal(false);
             setNewProduct({
                 productName: '',
@@ -667,7 +668,7 @@ const ProductList = ({ backendUrl }) => {
             refreshCurrentPage();
         } catch (error) {
             console.error('Error adding product:', error);
-            toast.error(`Failed to add product: ${error.response?.data?.message || error.message}`);
+            toast.error(`Lỗi khi thêm sản phẩm: ${error.response?.data?.message || error.message}`);
         }
     };
 
@@ -708,7 +709,7 @@ const ProductList = ({ backendUrl }) => {
             };
       
             await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
-            toast.success('Product updated successfully');
+            toast.success('Cập nhật sản phẩm thành công');
             setShowEditModal(false);
             fetchProducts();
             
@@ -716,12 +717,12 @@ const ProductList = ({ backendUrl }) => {
             refreshCurrentPage();
         } catch (error) {
             console.error('Error updating product:', error);
-            toast.error(`Failed to update product: ${error.response?.data?.message || error.message}`);
+            toast.error(`Lỗi khi cập nhật sản phẩm: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const handleDeleteProduct = async (productId) => {
-        if (window.confirm('Are you sure you want to delete this product?')) {
+        if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
             try {
                 const config = {
                     headers: {
@@ -730,14 +731,14 @@ const ProductList = ({ backendUrl }) => {
                     withCredentials: true
                 };
                 await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
-                toast.success('Product deleted successfully');
+                toast.success('Đã xóa sản phẩm thành công');
                 fetchProducts();
                 
                 // Also refresh the current pagination page to keep UI consistent
                 refreshCurrentPage();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                toast.error(`Failed to delete product: ${error.response?.data?.message || error.message}`);
+                toast.error(`Lỗi khi xóa sản phẩm: ${error.response?.data?.message || error.message}`);
             }
         }
     };
@@ -1606,9 +1607,9 @@ const AdminPage = () => {
       
       <Link to="/">
         <Button 
-          variant="primary" 
-          className="fixed-nav-button"
+          className="nav-button home-button"
         >
+          <i className="bi bi-house-door"></i>
           Về Trang Chủ
         </Button>
       </Link>

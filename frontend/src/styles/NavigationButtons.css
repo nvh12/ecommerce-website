@@ -1,0 +1,84 @@
+/* Navigation Buttons Styling */
+.nav-button {
+  position: fixed;
+  bottom: 20px;
+  z-index: 1000;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+  border: none;
+}
+
+.nav-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.nav-button i {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+/* Home button - positioned on the right side */
+.home-button {
+  right: 20px;
+  background-color: #0d6efd; /* Bootstrap primary color */
+  color: white;
+}
+
+.home-button:hover {
+  background-color: #0b5ed7; /* Slightly darker shade */
+}
+
+/* Admin button - positioned on the left side */
+.admin-button {
+  right: 20px;
+  background-color: #FFD500; /* Bootstrap secondary color */
+  color: white;
+}
+
+.admin-button:hover {
+  background-color: #bca001; /* Slightly darker shade */
+}
+
+/* Button in search results page */
+.mx-auto.nav-button {
+  position: relative;  /* Override the fixed position */
+  bottom: auto;
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .nav-button i {
+    font-size: 1rem;
+  }
+}
+
+/* Animation effect */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.nav-button:active {
+  animation: pulse 0.3s ease-in-out;
+} 

@@ -8,13 +8,13 @@ const AdvertisementCarousel = () => {
             id: 1,
             image: 'https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/3f/4f/3f4fdd417a1ccde2313e75d0724c7fc2.png',
             title: 'Iphone 16 series',
-            link: '/product/iphone-16-series'
+            link: '/product/67f63cab2c5de98b7b35c481'
         },
         {
             id: 2,
             image: 'https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/28/5a/285acf24bea6aadbcde301014fb1ce98.png',
             title: 'Samsung S22',
-            link: '/product/micro-thu-am'
+            link: '/product/680515042f5b77f60517ad47'
         },
         {
             id: 3,

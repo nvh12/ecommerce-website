@@ -10,7 +10,9 @@ import Pagination from '../components/Pagination.js'
 import { AppContext } from '../context/AppContext.js'
 import { Button } from 'react-bootstrap'
 import '../styles/AdminPage.css'
+import '../styles/NavigationButtons.css'
 import Navbar from '../components/Navbar.js'
+
 const Home = () => {
   const { userData } = useContext(AppContext);
   const isAdmin = userData?.role === 'admin';
@@ -31,9 +33,9 @@ const Home = () => {
       {isAdmin && (
         <Link to="/admin">
           <Button 
-            variant="danger" 
-            className="fixed-nav-button"
+            className="nav-button admin-button"
           >
+            <i className="bi bi-gear"></i>
             Trang quản lý
           </Button>
         </Link>

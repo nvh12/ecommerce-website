@@ -1,104 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, NavDropdown, Container, Form, FormControl, Button } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import '../styles/Navbar.css';
 
-const NavbarComponent = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const NavbarComponent = ({ onCategoryChange, activeCategory }) => {
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       // Replace with your actual API endpoint
-  //       const response = await axios.get('https://api.example.com/categories');
-  //       setCategories(response.data);
-  //       setLoading(false);
-  //     } catch (err) {
-  //       setError('Failed to fetch categories');
-  //       setLoading(false);
-  //     }
-  //   };
+  // Main categories for the compact navbar
+  const mainCategories = [
+    { id: 1, name: 'Điện thoại', path: '/category/phone', value: 'phone' },
+    { id: 2, name: 'Laptop', path: '/category/laptop', value: 'laptop' },
+    { id: 3, name: 'Phụ kiện', value: 'accessories', isDropdown: true, items: [
+      { name: 'Tai nghe', path: '/category/accessories/headphones' },
+      { name: 'Chuột', path: '/category/accessories/mouse' },
+      { name: 'Bàn phím', path: '/category/accessories/keyboard' },
+      { name: 'Bao da ốp lưng', path: '/category/accessories/cases' }
+    ]},
+    { id: 4, name: 'Smartwatch', path: '/category/smartwatch', value: 'smartwatch' },
+    { id: 5, name: 'Đồng hồ', path: '/category/watch', value: 'watch' },
+    { id: 6, name: 'Tablet', path: '/category/tablet', value: 'tablet' },
+    { id: 7, name: 'Máy cũ, Thủ cũ', value: 'old', isDropdown: true, items: [
+      { name: 'Điện thoại cũ', path: '/category/old/phones' },
+      { name: 'Laptop cũ', path: '/category/old/laptops' },
+      { name: 'Tablet cũ', path: '/category/old/tablets' },
+      { name: 'Phụ kiện cũ', path: '/category/old/accessories' }
+    ]},
+    { id: 8, name: 'Màn hình, Máy in', value: 'peripherals', isDropdown: true, items: [
+      { name: 'Màn hình', path: '/category/peripherals/monitors' },
+      { name: 'Máy in', path: '/category/peripherals/printers' },
+      { name: 'Máy quét', path: '/category/peripherals/scanners' }
+    ]},
+    { id: 9, name: 'Sim, Thẻ cào', value: 'sim', isDropdown: true, items: [
+      { name: 'Sim data', path: '/category/sim/data' },
+      { name: 'Sim thường', path: '/category/sim/regular' },
+      { name: 'Thẻ cào', path: '/category/sim/cards' }
+    ]},
+    { id: 10, name: 'Dịch vụ tiện ích', value: 'services', isDropdown: true, items: [
+      { name: 'Bảo hành', path: '/category/services/warranty' },
+      { name: 'Sửa chữa', path: '/category/services/repair' },
+      { name: 'Tư vấn', path: '/category/services/consulting' }
+    ]}
+  ];
 
-  //   fetchCategories();
-  // }, []);
+  // Handle category change without full page reload
+  const handleCategoryClick = (category, event) => {
+    if (onCategoryChange && !category.isDropdown) {
+      event.preventDefault();
+      onCategoryChange(category.value);
+      
+      // Update URL without page reload
+      navigate(`/category/${category.value}`, { replace: true });
+    }
+  };
 
-  // Static categories for demonstration
-  const staticCategories = {
-    tabs: [
-      { id: 1, name: 'Phone', path: '/phone' },
-      { id: 2, name: 'Laptop', path: '/laptop' },
-      { id: 3, name: 'Tablet', path: '/tablet' },
-      { id: 4, name: 'Smartwatch', path: '/smartwatch' },
-      { id: 5, name: 'Watch', path: '/watch' }
-    ],
-    dropdowns: [
-      {
-        id: 1,
-        title: 'Accessories',
-        items: ['Smartphones', 'Laptops', 'Tablets', 'Accessories']
-      },
-      {
-        id: 2,
-        title: 'Old Items',
-        items: ['Men', 'Women', 'Kids', 'Accessories']
-      },
-      {
-        id: 3,
-        title: 'Screens & Printers',
-        items: ['Furniture', 'Decor', 'Kitchen', 'Bath']
-      },
-      {
-        id: 4,
-        title: 'Services',
-        items: ['Fitness', 'Outdoor', 'Team Sports', 'Equipment']
-      },
-      {
-        id: 5,
-        title: 'Cards',
-        items: ['Fiction', 'Non-Fiction', 'Educational', 'Magazines']
-      }
-    ]
+  // Handle dropdown item click
+  const handleDropdownItemClick = (path, event) => {
+    // Allow normal link navigation for dropdown items
+    navigate(path);
   };
 
   return (
-    <Navbar bg="light" expand="lg" className="mb-4">
-      <Container>
-        {/* <Navbar.Brand as={Link} to="/">Your Store</Navbar.Brand> */}
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            {/* Tabs */}
-            {staticCategories.tabs.map(tab => (
-              <Nav.Link key={tab.id} as={Link} to={tab.path}>
-                {tab.name}
-              </Nav.Link>
-            ))}
-
-            {/* Dropdowns */}
-            {staticCategories.dropdowns.map(dropdown => (
-              <NavDropdown 
-                key={dropdown.id} 
-                title={dropdown.title} 
-                id={`nav-dropdown-${dropdown.id}`}
-                className="nav-dropdown"
-              >
-                {dropdown.items.map((item, index) => (
-                  <NavDropdown.Item 
-                    key={index} 
-                    as={Link} 
-                    to={`/category/${dropdown.title.toLowerCase()}/${item.toLowerCase()}`}
-                  >
-                    {item}
-                  </NavDropdown.Item>
-                ))}
-              </NavDropdown>
-            ))}
+    <Navbar bg="warning" expand="lg" className="compact-navbar py-0">
+      <Container fluid className="d-flex justify-content-center px-2">
+        <Navbar.Toggle aria-controls="basic-navbar-nav" className="d-lg-none" />
+        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-center">
+          <Nav className="compact-nav">
+            {mainCategories.map(category => 
+              category.isDropdown ? (
+                <NavDropdown 
+                  key={category.id} 
+                  title={category.name} 
+                  id={`nav-dropdown-${category.id}`}
+                  className="compact-dropdown"
+                  align="start"
+                >
+                  {category.items.map((item, index) => (
+                    <NavDropdown.Item 
+                      key={index} 
+                      as={Link} 
+                      to={item.path}
+                      onClick={(e) => handleDropdownItemClick(item.path, e)}
+                      active={false}
+                    >
+                      {item.name}
+                    </NavDropdown.Item>
+                  ))}
+                </NavDropdown>
+              ) : (
+                <Nav.Link 
+                  key={category.id} 
+                  as={Link} 
+                  to={category.path}
+                  className={activeCategory === category.value ? 'active' : ''}
+                  onClick={(e) => handleCategoryClick(category, e)}
+                >
+                  {category.name}
+                </Nav.Link>
+              )
+            )}
           </Nav>
-
         </Navbar.Collapse>
       </Container>
     </Navbar>

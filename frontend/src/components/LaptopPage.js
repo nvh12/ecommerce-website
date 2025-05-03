@@ -29,8 +29,6 @@ const LaptopPage = () => {
 
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
-      <Header />
-      <NavbarComponent />
       <Container className="py-4">
         <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
           <h2 className="mb-3 mb-md-0 fw-bold text-primary">Máy tính xách tay</h2>
