@@ -53,9 +53,10 @@ async function updateOrder(req, res) {
 
 async function getUsers(req, res) {
     try {
-        const { name, page = 1 } = req.query;
-        const curPage = parseInt(page) || 1;
-        const { users, total } = await userServices.getUsers(name, curPage, 20);
+        let { name, page = 1 } = req.query;
+        page = parseInt(page);
+        if (Number.isNaN(page) || page < 1) page = 1;
+        const { users, total } = await userServices.getUsers(name, page, 20);
         if (total === 0) {
             return res.status(200).json({
                 status: 'success',

@@ -38,11 +38,11 @@ async function login(req, res) {
         const refreshToken = generateRefreshToken(user._id);
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: false, 
+            secure: true, 
         })
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             maxAge: 6 * 60 * 60 * 1000
         })
         res.status(200).json({ message: 'Login successful' });
@@ -59,7 +59,7 @@ function refresh(req, res) {
         const accessToken = generateAccessToken(user.id); 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: false, 
+            secure: true, 
         })
         res.status(200).json({ message: 'Token refreshed successfully' });
     } catch (err) {
