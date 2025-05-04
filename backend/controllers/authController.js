@@ -38,11 +38,13 @@ async function login(req, res) {
         const refreshToken = generateRefreshToken(user._id);
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: true, 
+            secure: true,
+            sameSite: 'None'
         })
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
+            sameSite: 'None',
             maxAge: 6 * 60 * 60 * 1000
         })
         res.status(200).json({ message: 'Login successful' });
@@ -56,10 +58,11 @@ function refresh(req, res) {
     if (!refreshToken) return res.status(401).json({ message: 'No refresh token provided' });
     try {
         const user = jwt.verify(refreshToken, REFRESH_SECRET);
-        const accessToken = generateAccessToken(user.id); 
+        const accessToken = generateAccessToken(user.id);
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: true, 
+            secure: true,
+            sameSite: 'None'
         })
         res.status(200).json({ message: 'Token refreshed successfully' });
     } catch (err) {
