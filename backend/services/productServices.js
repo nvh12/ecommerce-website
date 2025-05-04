@@ -84,7 +84,7 @@ const findProduct = async (info) => {
             if (priceMin) filter.price.$gte = priceMin;
             if (priceMax) filter.price.$lte = priceMax;
         }
-        const total =await Product.countDocuments(filter)
+
 
 
         return  await Product.find(filter)
