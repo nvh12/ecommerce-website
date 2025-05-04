@@ -24,7 +24,6 @@ const AppContextProvider = (props) => {
 
     // const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const backendUrl = "http://localhost:5000"
-
     const fetchUserData = async () => {
         try {
             const {data} = await axios.get(backendUrl + "/user", {withCredentials: true})

@@ -2,6 +2,7 @@ import React, { useEffect, useContext } from 'react'
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import SearchBar from './SearchBar';
+import { toast } from 'react-toastify';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -56,7 +57,10 @@ const Header = () => {
                             <span className='d-none d-sm-inline'>Đăng nhập</span>
                         </button>
                         <button className='bg-transparent btn rounded-pill hover-style'
-                        onClick={() => navigate('/user')}>
+                        onClick={() => {
+                            navigate('/login')
+                            toast("Đăng nhập để xem giỏ hàng")
+                        }}>
                             <i className="bi bi-cart3 me-1"></i>
                             <span className='d-none d-sm-inline'>Giỏ hàng</span>
                         </button>

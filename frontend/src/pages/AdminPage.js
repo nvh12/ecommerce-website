@@ -372,6 +372,7 @@ const UserList = ({ backendUrl }) => {
                   variant="danger"
                   size="sm"
                   onClick={() => handleDeleteUser(user._id)}
+                  disabled={user.role === "admin"}
                 >
                   Xóa
                 </Button>
@@ -406,9 +407,10 @@ const UserList = ({ backendUrl }) => {
                 <Form.Control
                   type="email"
                   value={selectedUser.email}
-                  onChange={(e) =>
-                    setSelectedUser({ ...selectedUser, email: e.target.value })
-                  }
+                  // onChange={(e) =>
+                  //   setSelectedUser({ ...selectedUser, email: e.target.value })
+                  // }
+                  readOnly
                   required
                 />
               </Form.Group>
@@ -421,7 +423,7 @@ const UserList = ({ backendUrl }) => {
                   }
                   required
                 >
-                  <option value="user">Người Dùng</option>
+                  <option value="user" disabled={selectedUser.role === "admin"}>Người Dùng</option>
                   <option value="admin">Quản Trị Viên</option>
                 </Form.Select>
               </Form.Group>
