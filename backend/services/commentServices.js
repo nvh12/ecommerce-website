@@ -1,7 +1,7 @@
 const Comment = require("../models/comment")
 const Product = require("../models/product")
 const mongoose = require("mongoose")
-const { updateSearchIndex } = require("../models/rating")
+
 
 
 const createComment = async (userId, productId, comment)=> {
