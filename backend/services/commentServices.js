@@ -9,7 +9,7 @@ const createComment = async (userId, productId, comment)=> {
         const newCmt = await Comment.create({
             user:new mongoose.Types.ObjectId(userId),
             product: new mongoose.Types.ObjectId(productId),
-            context: comment
+            context: comment,
         })
         if (!newCmt){
             throw new Error("Khong the tao duoc comment")
@@ -29,7 +29,8 @@ const createAnswer = async (userId, productId, parentCommentId, replyContent) =>
         const replyComment = await Comment.create({
             user: new mongoose.Types.ObjectId(userId),
             product: new mongoose.Types.ObjectId(productId),
-            context: replyContent
+            context: replyContent,
+            reply: true
         });
 
         if (!replyComment) {
@@ -103,6 +104,13 @@ const deleteComment = async (objectId, objectType = "comment") => {
 
             // 2. Đệ quy xóa từng comment và các reply của nó
             for (const comment of comments) {
+                // Sau khi xóa reply
+                if (comment.reply && comment._id && comment.product) {
+                    await Comment.updateOne(
+                        { answer: comment._id },
+                        { $pull: { answer: comment._id } }
+                    );
+                }
                 await deleteComment(comment._id, "comment");
             }
 
@@ -120,6 +128,14 @@ const deleteComment = async (objectId, objectType = "comment") => {
                     await deleteComment(replyId, "comment");
                 }
             }
+            // Xóa id ở cmt chacha
+            if (comment.reply && comment._id && comment.product) {
+                await Comment.updateOne(
+                    { answer: comment._id },
+                    { $pull: { answer: comment._id } }
+                );
+            }
+
 
             // Xóa comment chính
             const deleted = await Comment.findByIdAndDelete(objectId);
@@ -132,7 +148,7 @@ const deleteComment = async (objectId, objectType = "comment") => {
 
 const getCommentById = async (commentId) => {
     try{
-        return await Comment.findById(new mongoose.Types.ObjectId(commentId))
+        return await Comment.findById(new mongoose.Types.ObjectId(commentId)).populate("user", "name _id")
     }
     catch(err){
         throw err
@@ -175,13 +191,15 @@ const getProductComment = async (productId, userId = null, page = 1, limit = 5) 
             // 1. Lấy comment của người dùng (nếu có)
             userComment = await Comment.findOne({
                 product: new mongoose.Types.ObjectId(productId),
-                user: new mongoose.Types.ObjectId(userId)
+                user: new mongoose.Types.ObjectId(userId),
+                reply:false
             }).populate("user", "name _id");
 
             // 2. Lấy các comment khác, loại trừ comment của user
             const query = {
                 product: new mongoose.Types.ObjectId(productId),
-                ...(userComment && { user: { $ne: new mongoose.Types.ObjectId(userId) } })
+                ...(userComment && { user: { $ne: new mongoose.Types.ObjectId(userId) } }),
+                reply:false
             };
 
             comments = await Comment.find(query)
@@ -193,7 +211,8 @@ const getProductComment = async (productId, userId = null, page = 1, limit = 5) 
             // Các trang khác: chỉ lấy các comment khác
             const query = {
                 product: new mongoose.Types.ObjectId(productId),
-                ...(userId && { user: { $ne: new mongoose.Types.ObjectId(userId) } })
+                ...(userId && { user: { $ne: new mongoose.Types.ObjectId(userId) } }),
+                reply:false
             };
 
             comments = await Comment.find(query)

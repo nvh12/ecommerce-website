@@ -9,10 +9,14 @@ const commentSchema = new mongoose.Schema({
         ref:'Product',
         required:true
     },
+    reply: {
+        type: Boolean,
+        default: false
+    },
     answer: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment',
-    default: []
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: []
     }]
 
 
