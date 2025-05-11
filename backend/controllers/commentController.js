@@ -131,11 +131,29 @@ const getCommentByIdControl = async (req, res) => {
         res.status(500).json({message:"Loi khong tim duoc cmt nay, controller", error: err.message})
     }
 }
+const findCommentPageControl = async(res, req) =>{
+    try{
+        const limit = req.query
+        const productId = req.params
+
+        const page = await commentServices.getCommentTotalPages({productId, limit})
+        if(!page){
+            res.status(404).json({message:"Can not find comment page"})
+        }
+        else{
+            res.status(200).json({message:"Success", page})
+        }
+    }
+    catch(err){
+        res.status(500).json({message:err.message, err});
+    }
+}
 module.exports ={
     getCommentProductControl,
     deleteCommentControl,
     updateCommentControl,
     createCommentControl,
     getCommentByIdControl,
-    createAnswerControl
+    createAnswerControl,
+    findCommentPageControl
 }

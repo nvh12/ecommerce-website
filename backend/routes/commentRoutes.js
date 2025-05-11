@@ -11,6 +11,11 @@ const router = express.Router()
 //Done
 router.get("/:productId", commentController.getCommentProductControl)
 
+//Lấy thông tin trang cmt dang total: số cmt, totalPages: số trang theo limit (lượng cmt 1 trang)
+//Đầu vào productId ở params và limit ở query
+router.get("/page/:productId", commentController.findCommentPageControl)
+
+
 //Update rating theo id
 // Yêu cầu đầu vào : productId ở params và newComment trong body
 //Done

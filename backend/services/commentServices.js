@@ -138,37 +138,107 @@ const getCommentById = async (commentId) => {
         throw err
     }
 }
-const getProductComment = async (productId, userId = null) => {
-    try{
-        const commentFound = await Comment.find({
-            product: new mongoose.Types.ObjectId(productId)
-        }).populate("user", "name _id")
-        userId = userId ? userId.toString(): null
+// const getProductComment = async (productId, userId = null) => {
+//     try{
+//         const commentFound = await Comment.find({
+//             product: new mongoose.Types.ObjectId(productId)
+//         }).populate("user", "name _id")
+//         userId = userId ? userId.toString(): null
         
-        if(commentFound){
-            const result = commentFound.map(comment => {
-                return {...comment.toObject(), 
-                    fromUser: userId ?  userId === comment.user._id.toString() :false,
+//         if(commentFound){
+//             const result = commentFound.map(comment => {
+//                 return {...comment.toObject(), 
+//                     fromUser: userId ?  userId === comment.user._id.toString() :false,
                     
-                }
-            })
-            return result
-        }
-        else{
-            throw new Error("Khong tim duoc rating cua san pham")
-        }
+//                 }
+//             })
+//             return result
+//         }
+//         else{
+//             throw new Error("Khong tim duoc rating cua san pham")
+//         }
         
+//     }
+//     catch(err){
+//         throw err
+//     }
+// }
+const getProductComment = async (productId, userId = null, page = 1, limit = 5) => {
+    try {
+        const skip = (page - 1) * limit;
+        userId = userId ? userId.toString() : null;
+
+        let userComment = null;
+        let comments = [];
+
+        if (page === 1 && userId) {
+            // 1. Lấy comment của người dùng (nếu có)
+            userComment = await Comment.findOne({
+                product: new mongoose.Types.ObjectId(productId),
+                user: new mongoose.Types.ObjectId(userId)
+            }).populate("user", "name _id");
+
+            // 2. Lấy các comment khác, loại trừ comment của user
+            const query = {
+                product: new mongoose.Types.ObjectId(productId),
+                ...(userComment && { user: { $ne: new mongoose.Types.ObjectId(userId) } })
+            };
+
+            comments = await Comment.find(query)
+                .skip(userComment ? limit - 1 : limit) // Giảm 1 nếu đã lấy comment user rồi
+                .limit(userComment ? limit - 1 : limit)
+                .populate("user", "name _id");
+
+        } else {
+            // Các trang khác: chỉ lấy các comment khác
+            const query = {
+                product: new mongoose.Types.ObjectId(productId),
+                ...(userId && { user: { $ne: new mongoose.Types.ObjectId(userId) } })
+            };
+
+            comments = await Comment.find(query)
+                .skip(skip)
+                .limit(limit)
+                .populate("user", "name _id");
+        }
+
+        // Gộp comment user (nếu có) vào đầu
+        const allComments = userComment ? [userComment, ...comments] : comments;
+
+        const result = allComments.map(comment => ({
+            ...comment.toObject(),
+            fromUser: userId ? userId === comment.user._id.toString() : false,
+        }));
+
+        return result;
+
+    } catch (err) {
+        throw err;
     }
-    catch(err){
-        throw err
+};
+
+const getCommentTotalPages = async (productId, limit = 5) => {
+    try {
+        const total = await Comment.countDocuments({
+            product: new mongoose.Types.ObjectId(productId)
+        });
+        const totalPages = Math.ceil(total / limit);
+        return {
+            total,
+            totalPages}
+        ;
+    } catch (err) {
+        throw err;
     }
-}
+};
+
 module.exports = {
     createComment,
     updateComment,
     deleteComment,
     getCommentById,
     getProductComment,
-    createAnswer
+    createAnswer,
+    getCommentTotalPages
 }
 
