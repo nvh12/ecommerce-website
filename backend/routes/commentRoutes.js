@@ -4,17 +4,16 @@ const { verifyUser } = require("../middleware/authMiddleware")
 const router = express.Router()
 
 
+//Lấy thông tin trang cmt dang total: số cmt, totalPages: số trang theo limit (lượng cmt 1 trang)
+//Đầu vào productId ở params và limit ở query
+router.get("/page/:productId", commentController.findCommentPageControl)
+
 // Tìm comment của sản phẩm, trả về các comment + 1 trường fromUser và + trường user là object có 2 trường 
 //name và _id
 // Đang test nên đã cho tạm userIduserId
 //Intput: productId ở params
 //Done
 router.get("/:productId", commentController.getCommentProductControl)
-
-//Lấy thông tin trang cmt dang total: số cmt, totalPages: số trang theo limit (lượng cmt 1 trang)
-//Đầu vào productId ở params và limit ở query
-router.get("/page/:productId", commentController.findCommentPageControl)
-
 
 //Update rating theo id
 // Yêu cầu đầu vào : productId ở params và newComment trong body

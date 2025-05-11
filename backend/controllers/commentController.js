@@ -131,7 +131,7 @@ const getCommentByIdControl = async (req, res) => {
         res.status(500).json({message:"Loi khong tim duoc cmt nay, controller", error: err.message})
     }
 }
-const findCommentPageControl = async(res, req) =>{
+const findCommentPageControl = async(req, res) =>{
     try{
         const limit = req.query
         const productId = req.params
