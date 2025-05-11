@@ -26,6 +26,7 @@ const router = express.Router();
 //     ratingsCount
 //     ratingsAvg
 //Done
+// router.post('/', createProductControl); 
 router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
 
 

@@ -56,6 +56,25 @@ const findRatingControl = async (req, res) => {
         res.status(500).json({message:"Loi khi tim rating cua san pham ", error:err.message})
     }
 }
+
+const findAllRatingControl = async (req, res) => {
+    try {
+        const { productId } = req.params;
+
+        // Lấy tất cả rating của sản phẩm từ service
+        const ratings = await ratingServices.getRatingProduct(productId, null, true); // allRating = true cho admin
+
+        // Kiểm tra nếu không tìm thấy rating nào
+        if (!ratings || (Array.isArray(ratings) && ratings.length === 0)) {
+            res.status(404).json({ message: "Không tìm thấy đánh giá nào cho sản phẩm này" });
+        } else {
+            res.status(200).json({ message: "Tìm thấy đánh giá", ratings });
+        }
+    } catch (err) {
+        res.status(500).json({ message: "Lỗi khi tìm rating của sản phẩm", error: err.message });
+    }
+};
+
 const findRatingByIdControl = async (req, res) => {
     try {
         const { ratingId } = req.params;
@@ -118,5 +137,6 @@ module.exports = {
     findRatingControl,
     updateRatingControl,
     deleteRatingControl,
-    findRatingByIdControl
+    findRatingByIdControl,
+    findAllRatingControl
 };

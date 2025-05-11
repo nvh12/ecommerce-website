@@ -28,6 +28,31 @@ const getCommentProductControl = async (req, res) =>{
         res.status(500).json({message:"Loi khong load cmt duoc, controller", error: err.message})
     }
 }
+const createAnswerControl = async (req, res) => {
+    try {
+        const { parentCommentId, productId, replyContent } = req.body;
+        let userId;
+
+        if (req.cookies.accessToken) {
+            const accessToken = req.cookies.accessToken;
+            const decode = jwt.verify(accessToken, ACCESS_SECRET);
+            userId = decode.id;
+        } else {
+            return res.status(401).json({ message: "Người dùng chưa đăng nhập" });
+        }
+
+        const newAnswer = await commentServices.createAnswer(userId, productId, parentCommentId, replyContent);
+        
+        if (newAnswer) {
+            res.status(200).json({ message: "Tạo phản hồi thành công", newAnswer });
+        } else {
+            res.status(404).json({ message: "Không thể tạo phản hồi" });
+        }
+    } catch (err) {
+        res.status(500).json({ message: "Lỗi khi tạo phản hồi, controller", error: err.message });
+    }
+};
+
 
 const deleteCommentControl = async (req, res) =>{
     try{
@@ -111,5 +136,6 @@ module.exports ={
     deleteCommentControl,
     updateCommentControl,
     createCommentControl,
-    getCommentByIdControl
+    getCommentByIdControl,
+    createAnswerControl
 }
