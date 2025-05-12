@@ -94,6 +94,20 @@ const updateComment = async (commentId, newComment) => {
 //     }
     
 // }
+const deleteCommentById = async (cmtId) => {
+    try{
+        const comment=  await Comment.findById(new mongoose.Types.ObjectId(cmtId))
+        if (comment.answer && comment.answer.length > 0) {
+                for (const replyId of comment.answer) {
+                    await deleteCommentById(replyId);
+                }
+            }
+        return await Comment.findByIdAndDelete(new mongoose.Types.ObjectId(cmtId))
+    }
+    catch(err){
+        throw err
+    }
+}
 const deleteComment = async (objectId, objectType = "comment") => {
     try {
         if (objectType !== "comment") {
@@ -111,22 +125,15 @@ const deleteComment = async (objectId, objectType = "comment") => {
                         { $pull: { answer: comment._id } }
                     );
                 }
-                await deleteComment(comment._id, "comment");
+                await deleteCommentById(comment._id);
             }
 
             return { deletedCount: comments.length };
         } else {
-            // Xử lý xóa 1 comment và các reply
-            const comment = await Comment.findById(objectId);
-            if (!comment) {
-                throw new Error("Không tìm thấy comment để xóa");
-            }
 
-            // Đệ quy xóa các comment con
-            if (comment.answer && comment.answer.length > 0) {
-                for (const replyId of comment.answer) {
-                    await deleteComment(replyId, "comment");
-                }
+            const comment = await Comment.findById(objectId)
+            if(!comment){
+                throw new Error("Khong tim duoc comment")
             }
             // Xóa id ở cmt chacha
             if (comment.reply && comment._id && comment.product) {
@@ -135,11 +142,8 @@ const deleteComment = async (objectId, objectType = "comment") => {
                     { $pull: { answer: comment._id } }
                 );
             }
-
-
-            // Xóa comment chính
-            const deleted = await Comment.findByIdAndDelete(objectId);
-            return deleted;
+            await deleteCommentById(objectId)
+            return comment;
         }
     } catch (err) {
         throw err;
