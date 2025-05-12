@@ -7,6 +7,7 @@ const ACCESS_SECRET = process.env.JWT_SECRET;
 const getCommentProductControl = async (req, res) =>{
     try{
         const {productId} = req.params
+        const {page, limit} = req.query
         let userId
         if(req.cookies.accessToken){
             const accessToken = req.cookies.accessToken
@@ -16,7 +17,7 @@ const getCommentProductControl = async (req, res) =>{
         else{
             userId = null
         }
-        const commentProduct = await commentServices.getProductComment(productId, userId)
+        const commentProduct = await commentServices.getProductComment({userId, productId, page, limit})
         if (commentProduct){
             res.status(200).json({message:"Success", commentProduct})
         }
