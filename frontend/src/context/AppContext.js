@@ -22,8 +22,7 @@ const AppContextProvider = (props) => {
     const [usersForAdmin, setUsersForAdmin] = useState([])
     const [ordersForAdmin, setOrdersForAdmin] = useState([])
 
-    // const backendUrl = process.env.REACT_APP_BACKEND_URL;
-    const backendUrl = "http://localhost:5000"
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const fetchUserData = async () => {
         try {
             const {data} = await axios.get(backendUrl + "/user", {withCredentials: true})
@@ -65,17 +64,17 @@ const AppContextProvider = (props) => {
     const fetchProduct = useCallback(async (productId) => {
         if (!productId) return;
         
-        console.log('Starting to fetch product:', productId);
+        //console.log('Starting to fetch product:', productId);
         setIsLoadingProduct(true);
         setProductError(null);
         
         try {
             const { data } = await axios.get(`${backendUrl}/product/${productId}`);
-            console.log('Raw response data:', data);
+            //console.log('Raw response data:', data);
             
             if (data && data.product && Array.isArray(data.product) && data.product.length > 0) {
                 const productFromResponse = data.product[0];
-                console.log('Product data from response:', productFromResponse);
+                //console.log('Product data from response:', productFromResponse);
                 
                 // Create a new object with the correct structure
                 const productData = {
@@ -89,7 +88,7 @@ const AppContextProvider = (props) => {
                     reviewsCount: Number(productFromResponse.reviewsCount) || 0
                 };
                 
-                console.log('Processed product data:', productData);
+                //console.log('Processed product data:', productData);
                 setProduct(productData);
             } else {
                 console.log('No valid product data in response');
@@ -98,7 +97,7 @@ const AppContextProvider = (props) => {
         } catch (error) {
             console.error('Error fetching product:', error);
             setProductError(error.response?.data?.message || 'Failed to fetch product');
-            toast.error('Failed to fetch product details');
+            toast.error('Lỗi lấy chi tiết sản phẩm');
             setProduct(null);
         } finally {
             setIsLoadingProduct(false);

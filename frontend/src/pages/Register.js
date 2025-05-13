@@ -22,7 +22,6 @@ const Register = () => {
                 name, email, password
             })
             toast.success("Đăng ký thành công")
-            fetchUserData()
             navigate('/login')
         } catch (error) {
             toast.error("Đăng ký không thành công")

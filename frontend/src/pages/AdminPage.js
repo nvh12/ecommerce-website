@@ -271,9 +271,10 @@ const Dashboard = ({ stats, ordersForAdmin }) => {
 
 // UserList Component
 const UserList = ({ backendUrl }) => {
-  const [users, setUsers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const {usersForAdmin, setUsersForAdmin} = useContext(AppContext)
+  // setUsers(usersForAdmin)
 
   useEffect(() => {
     fetchUsers();
@@ -288,7 +289,7 @@ const UserList = ({ backendUrl }) => {
         withCredentials: true
       };
       const { data } = await axios.get(`${backendUrl}/admin/user`, config);
-      setUsers(data.user || []);
+      setUsersForAdmin(data.user || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Lỗi khi tải danh sách người dùng');
@@ -350,7 +351,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {usersForAdmin.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -700,7 +701,7 @@ const ProductList = ({ backendUrl }) => {
                     : selectedProduct.features
             };
 
-            console.log('Sending product data:', productData);
+           // console.log('Sending product data:', productData);
 
             const config = {
                 headers: {
@@ -1513,7 +1514,7 @@ const AdminPage = () => {
           return sum + orderPrice;
         }, 0);
       
-      console.log(`Calculated total revenue: ${totalRevenue} from ${ordersForAdmin.length} orders`);
+      //console.log(`Calculated total revenue: ${totalRevenue} from ${ordersForAdmin.length} orders`);
       
       setStats({
         totalProducts: allProducts.length,

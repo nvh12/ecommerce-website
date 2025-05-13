@@ -14,7 +14,12 @@ const Pagination = ({pageName}) => {
         switch (pageName) {
             case "productsPage":
                 try {
-                    const res = await axios.get(`${backendUrl}/product/page`)
+                    const res = await axios.get(`${backendUrl}/product/page`,
+                        {params: {
+                            limit: 18
+                            }
+                        }
+                    )
                     setTotalPages(res.data.page.totalPages)
                 } catch (error) {
                     console.log(error.message)
@@ -40,7 +45,10 @@ const Pagination = ({pageName}) => {
             case "phonePage":
                 try {
                     const res = await axios.get(`${backendUrl}/product/page`, {
-                        params: { category: 'Điện thoại' }
+                        params: { 
+                            category: 'Điện thoại',
+                            limit: 18 
+                        }
                     })
                     setTotalPages(res.data.page.totalPages)
                 } catch (error) {
@@ -50,7 +58,10 @@ const Pagination = ({pageName}) => {
             case "laptopPage":
                 try {
                     const res = await axios.get(`${backendUrl}/product/page`, {
-                        params: { category: 'Laptop' }
+                        params: { 
+                            category: 'Laptop',
+                            limit: 18
+                            }
                     })
                     setTotalPages(res.data.page.totalPages)
                 } catch (error) {
@@ -68,7 +79,7 @@ const Pagination = ({pageName}) => {
                     const res = await axios.get(`${backendUrl}/product`, {
                         params: {
                             page: currentPage,
-                            limit: 15
+                            limit: 18
                         }
                     })
                     setProductItems(res.data.product)
@@ -106,7 +117,7 @@ const Pagination = ({pageName}) => {
                             }
                           })
                         )
-                        console.log("orderwithuser",ordersWithUser)
+                        //console.log("orderwithuser",ordersWithUser)
                         setOrdersForAdmin(ordersWithUser)
                     }
                     fetchOrdersWithUser()
