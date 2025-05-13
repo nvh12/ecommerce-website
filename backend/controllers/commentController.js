@@ -7,6 +7,7 @@ const ACCESS_SECRET = process.env.JWT_SECRET;
 const getCommentProductControl = async (req, res) =>{
     try{
         const {productId} = req.params
+        const {page, limit} = req.query
         let userId
         if(req.cookies.accessToken){
             const accessToken = req.cookies.accessToken
@@ -16,7 +17,7 @@ const getCommentProductControl = async (req, res) =>{
         else{
             userId = null
         }
-        const commentProduct = await commentServices.getProductComment(productId, userId)
+        const commentProduct = await commentServices.getProductComment({userId, productId, page, limit})
         if (commentProduct){
             res.status(200).json({message:"Success", commentProduct})
         }
@@ -28,6 +29,31 @@ const getCommentProductControl = async (req, res) =>{
         res.status(500).json({message:"Loi khong load cmt duoc, controller", error: err.message})
     }
 }
+const createAnswerControl = async (req, res) => {
+    try {
+        const { parentCommentId, productId, replyContent } = req.body;
+        let userId;
+
+        if (req.cookies.accessToken) {
+            const accessToken = req.cookies.accessToken;
+            const decode = jwt.verify(accessToken, ACCESS_SECRET);
+            userId = decode.id;
+        } else {
+            return res.status(401).json({ message: "Người dùng chưa đăng nhập" });
+        }
+
+        const newAnswer = await commentServices.createAnswer(userId, productId, parentCommentId, replyContent);
+        
+        if (newAnswer) {
+            res.status(200).json({ message: "Tạo phản hồi thành công", newAnswer });
+        } else {
+            res.status(404).json({ message: "Không thể tạo phản hồi" });
+        }
+    } catch (err) {
+        res.status(500).json({ message: "Lỗi khi tạo phản hồi, controller", error: err.message });
+    }
+};
+
 
 const deleteCommentControl = async (req, res) =>{
     try{
@@ -106,10 +132,29 @@ const getCommentByIdControl = async (req, res) => {
         res.status(500).json({message:"Loi khong tim duoc cmt nay, controller", error: err.message})
     }
 }
+const findCommentPageControl = async(req, res) =>{
+    try{
+        const limit = req.query
+        const productId = req.params
+
+        const page = await commentServices.getCommentTotalPages({productId, limit})
+        if(!page){
+            res.status(404).json({message:"Can not find comment page"})
+        }
+        else{
+            res.status(200).json({message:"Success", page})
+        }
+    }
+    catch(err){
+        res.status(500).json({message:err.message, err});
+    }
+}
 module.exports ={
     getCommentProductControl,
     deleteCommentControl,
     updateCommentControl,
     createCommentControl,
-    getCommentByIdControl
+    getCommentByIdControl,
+    createAnswerControl,
+    findCommentPageControl
 }

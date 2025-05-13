@@ -42,6 +42,7 @@ async function userOrders(req, res) {
         if (total === 0) {
             return res.status(200).json({
                 status: 'success',
+                data: [],
                 message: 'No orders found'
             });
         }

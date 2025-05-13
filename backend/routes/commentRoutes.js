@@ -1,6 +1,12 @@
 const express = require("express")
 const commentController = require("../controllers/commentController")
-const router = express.Router();
+const { verifyUser } = require("../middleware/authMiddleware")
+const router = express.Router()
+
+
+//Lấy thông tin trang cmt dang total: số cmt, totalPages: số trang theo limit (lượng cmt 1 trang)
+//Đầu vào productId ở params và limit ở query
+router.get("/page/:productId", commentController.findCommentPageControl)
 
 // Tìm comment của sản phẩm, trả về các comment + 1 trường fromUser và + trường user là object có 2 trường 
 //name và _id
@@ -12,20 +18,23 @@ router.get("/:productId", commentController.getCommentProductControl)
 //Update rating theo id
 // Yêu cầu đầu vào : productId ở params và newComment trong body
 //Done
-router.put("/update/:commentId",commentController.updateCommentControl)
+router.put("/update/:commentId",verifyUser,commentController.updateCommentControl)
 
 
-// Tạo rating mới.  
+// Tạo comment mới.  
 // Có thể sử dụng để update
 // Yêu cầu đầu vào: productId và comment trong body, userId lấy từ cookies
 // Trong quá trình test chưa có userId có sẵn
 //Done
-router.post("/create", commentController.createCommentControl)
+router.post("/create",verifyUser, commentController.createCommentControl)
 
 // Xóa rating. Yêu cầu đầu vào là id trong params
 // Yêu cầu đầu vào: commentId ở params 
 //Done
-router.delete("/delete/:commentId", commentController.deleteCommentControl)
+router.delete("/delete/:commentId",verifyUser, commentController.deleteCommentControl)
+
+//Tạo reply. Yêu cầu  parentCommentId, productId, replyContent trong body
+router.post("/reply",verifyUser, commentController.createAnswerControl)
 
 
 //Tìm rating theo id. Yêu cầu đầu vào là commentId ở params

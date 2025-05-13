@@ -8,7 +8,22 @@ const commentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:'Product',
         required:true
+    },
+    reply: {
+        type: Boolean,
+        default: false
+    },
+    answer: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: []
+    }],
+    parent:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: null
     }
+
 
 })
 
