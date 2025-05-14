@@ -17,13 +17,17 @@ import LaptopPage from '../components/LaptopPage.js'
 import WatchPage from '../components/WatchPage.js'
 import SmartwatchPage from '../components/SmartwatchPage.js'
 import TabletPage from '../components/TabletPage.js'
+import axios from 'axios'
 
 const Home = () => {
-  const { userData } = useContext(AppContext);
+  const { userData, productItems, backendUrl } = useContext(AppContext);
   const isAdmin = userData?.role === 'admin';
   const { categoryType } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Create separate state for recommendations
+  const [recommendationItems, setRecommendationItems] = useState([]);
   
   // Extract category from URL if present
   const getCategoryFromPath = () => {
@@ -74,9 +78,9 @@ const Home = () => {
         return (
           <>
             <Sale />
-            <RecommendationGrid />
+            <RecommendationGrid products={recommendationItems} />
             <AdvertisementCarousel />
-            <Pagination pageName="productsPage"/>
+            <Pagination pageName="recommendationPage" setItems={setRecommendationItems} />
           </>
         );
     }

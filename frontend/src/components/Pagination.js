@@ -4,8 +4,8 @@ import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../utils/axiosInstance'
 
-const Pagination = ({pageName}) => {
-    const {backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin} = useContext(AppContext)
+const Pagination = ({ pageName, setItems }) => {
+    const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const navigate = useNavigate()
@@ -13,6 +13,7 @@ const Pagination = ({pageName}) => {
     const fetchTotalPages = async () => {
         switch (pageName) {
             case "productsPage":
+            case "recommendationPage":
                 try {
                     const res = await axios.get(`${backendUrl}/product/page`,
                         {params: {
@@ -83,6 +84,24 @@ const Pagination = ({pageName}) => {
                         }
                     })
                     setProductItems(res.data.product)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "recommendationPage":
+                try {
+                    const res = await axios.get(`${backendUrl}/product`, {
+                        params: {
+                            page: currentPage,
+                            limit: 18
+                        }
+                    })
+                    // Use the setItems prop if provided, otherwise fall back to the context
+                    if (setItems) {
+                        setItems(res.data.product)
+                    } else {
+                        setProductItems(res.data.product)
+                    }
                 } catch (error) {
                     console.log(error.message)
                 }

@@ -503,22 +503,22 @@ const ProductList = ({ backendUrl }) => {
         fetchFilters();
     }, [backendUrl]);
 
-    // Keep the original fetchProducts function for CRUD operations
-    const fetchProducts = async () => {
-        try {
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                },
-                withCredentials: true
-            };
-            const { data } = await axios.get(`${backendUrl}/product`, config);
-            setProducts(data.product || []);
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            toast.error('Lỗi khi tải danh sách sản phẩm');
-        }
-    };
+    // // Keep the original fetchProducts function for CRUD operations
+    // const fetchProducts = async () => {
+    //     try {
+    //         const config = {
+    //             headers: {
+    //                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    //             },
+    //             withCredentials: true
+    //         };
+    //         const { data } = await axios.get(`${backendUrl}/product`, config);
+    //         setProducts(data.product || []);
+    //     } catch (error) {
+    //         console.error('Error fetching products:', error);
+    //         toast.error('Lỗi khi tải danh sách sản phẩm');
+    //     }
+    // };
 
     // When productItems changes (e.g., through pagination), update our local state
     useEffect(() => {
@@ -528,9 +528,9 @@ const ProductList = ({ backendUrl }) => {
     }, [productItems]);
 
     // On initial load, fetch products directly
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+    // useEffect(() => {
+    //     fetchProducts();
+    // }, []);
 
     // Apply filters to products
     const handleApplyFilters = async () => {
@@ -543,8 +543,9 @@ const ProductList = ({ backendUrl }) => {
             if (filterBrand) params.brand = filterBrand;
             if (filterPriceMin) params.priceMin = filterPriceMin;
             if (filterPriceMax) params.priceMax = filterPriceMax;
-            
-            const response = await axios.get(`${backendUrl}/product`, { params });
+            console.log(params);
+            const response = await axios.get(`${backendUrl}/product`, { params, limit: 20 });
+            console.log(response.data);
             
             if (response.data && response.data.product) {
                 setProducts(response.data.product);
@@ -565,7 +566,7 @@ const ProductList = ({ backendUrl }) => {
         setFilterBrand('');
         setFilterPriceMin('');
         setFilterPriceMax('');
-        fetchProducts(); // Reset to original list
+        // fetchProducts(); // Reset to original list
     };
 
     // Helper function to refresh the current pagination page
@@ -665,7 +666,7 @@ const ProductList = ({ backendUrl }) => {
             });
             
             // First fetch all products to update the local state
-            fetchProducts();
+            // fetchProducts();
             
             // Then refresh the current pagination page to keep UI consistent
             refreshCurrentPage();
@@ -714,7 +715,7 @@ const ProductList = ({ backendUrl }) => {
             await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
             toast.success('Cập nhật sản phẩm thành công');
             setShowEditModal(false);
-            fetchProducts();
+            // fetchProducts();
             
             // Also refresh the current pagination page to keep UI consistent
             refreshCurrentPage();
@@ -735,7 +736,7 @@ const ProductList = ({ backendUrl }) => {
                 };
                 await axiosInstance.delete(`${backendUrl}/product/${productId}`, config);
                 toast.success('Đã xóa sản phẩm thành công');
-                fetchProducts();
+                // fetchProducts();
                 
                 // Also refresh the current pagination page to keep UI consistent
                 refreshCurrentPage();

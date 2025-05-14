@@ -1,0 +1,80 @@
+.sale-carousel {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.sale-carousel .carousel-indicators {
+  margin-bottom: -0.5rem;
+}
+
+.sale-carousel .carousel-indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ccc;
+  margin: 0 5px;
+}
+
+.sale-carousel .carousel-indicators button.active {
+  background-color: #dc3545;
+}
+
+.carousel-custom-icon {
+  font-size: 1.5rem;
+  color: #dc3545;
+  background-color: white;
+  border-radius: 50%;
+  padding: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.sale-carousel .carousel-control-prev,
+.sale-carousel .carousel-control-next {
+  width: 5%;
+  opacity: 0.9;
+}
+
+.sale-carousel .carousel-control-prev {
+  left: -10px;
+}
+
+.sale-carousel .carousel-control-next {
+  right: -10px;
+}
+
+.sales-section {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sale-badge {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Animation for carousel transitions */
+.carousel-item {
+  transition: transform 0.6s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .carousel-custom-icon {
+    font-size: 1rem;
+    padding: 0.3rem;
+  }
+  
+  .sale-carousel .carousel-control-prev {
+    left: -5px;
+  }
+  
+  .sale-carousel .carousel-control-next {
+    right: -5px;
+  }
+} 

@@ -42,7 +42,7 @@ const ProductDetail = () => {
     useEffect(() => {
         if (product) {
             setSelectedColor(product.color?.[0] || null);
-            setSelectedImage(product.images?.[0] || null);
+            setSelectedImage(product.images?.[1] || null);
         }
     }, [product]);
 
