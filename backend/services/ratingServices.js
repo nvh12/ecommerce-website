@@ -45,50 +45,45 @@ const createRating = async (userId , productID, rating) => {
 }
 
 const getRatingProduct = async (productId, userId = null, allRating = true) => {
-    try{
-        let ratingFound
-        if (allRating=== true){
-            ratingFound = await Rating.find({
+    try {
+        let ratings;
+
+        if (allRating === true) {
+            // Lấy tất cả rating của sản phẩm
+            ratings = await Rating.find({
                 product: new mongoose.Types.ObjectId(productId)
-            }).lean()
-        }
-        else {
+            }).lean();
+
+            // Nếu không có rating nào, trả về mảng rỗng
+            if (!ratings || ratings.length === 0) {
+                return []; // Trả về mảng rỗng khi không tìm thấy rating
+            }
+
+            return ratings; // Trả về tất cả rating của sản phẩm
+        } else {
+            // Nếu cần tìm rating của sản phẩm cho 1 người dùng cụ thể
             if (!userId) {
-                throw new Error("Thiếu userId để truy vấn rating cụ thể.");
+                throw new Error("Thiếu userId để truy vấn rating cụ thể");
             }
-            ratingFound = await Rating.findOne({
-                product:new mongoose.Types.ObjectId(productId),
+
+            const rating = await Rating.findOne({
+                product: new mongoose.Types.ObjectId(productId),
                 user: new mongoose.Types.ObjectId(userId)
-            })
-            if (ratingFound) {
-                return {...ratingFound.toObject(), fromUser:true}
+            }).lean();
+
+            // Nếu không tìm thấy rating, trả về null
+            if (!rating) {
+                return null; // Trả về null nếu không tìm thấy rating
             }
-            else{
-                return []
-                throw new Error("Không tìm được rating của sản phảm") 
-            }
+
+            return { ...rating, fromUser: true }; // Trả về rating với trường `fromUser: true`
         }
-        if (Array.isArray(ratingFound) && ratingFound.length > 0){
-                // Them truong fromUser de front-end thiet ke rieng cho nhung phan cua nguoi dung do
-                const result = ratingFound.map(rating => 
-                {
-                    return {...rating,
-                        fromUser:userId ? userId.toString() === rating.user.toString() : false
-                    }
-                    
-                }
-                )
-                return result
-        }
-        
-        else{
-            throw new Error("Khong tim duoc rating cua san pham") 
-        }
+    } catch (err) {
+        throw err; // Ném lỗi nếu có lỗi xảy ra
     }
-    catch(err){
-        throw err
-    }
-}
+};
+
+
 
 const deleteRating = async (objectId, objectType = "rating") => {
     try{

@@ -22,7 +22,7 @@ const Login = () => {
       await fetchUserData()
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        toast.error(error.response.data.error || "Thông tin đăng nhập sai!");
+        toast.error("Thông tin đăng nhập sai!");
       } else {
         toast.error("Có lỗi xảy ra, vui lòng thử lại sau!");
       }
@@ -53,20 +53,21 @@ const Login = () => {
                   <h2 className="fw-bold mb-2 text-uppercase">Đăng Nhập</h2>
                   <p className="text-black-50 mb-5">Vui lòng nhập email và mật khẩu!</p>
 
-                  <div className="form-outline form-white mb-4">
-                    <input type="email" id="typeEmailX" className="form-control form-control-lg" placeholder="Email" 
-                    onChange={(e) => setIdentifier(e.target.value)}/>
-                  </div>
-
-                  <div className="form-outline form-white mb-4">
-                    <input type="password" id="typePasswordX" className="form-control form-control-lg" placeholder="Mật khẩu" 
-                    onChange={(e) => setPassword(e.target.value)}/>
-                  </div>
-
-                  <button className="btn btn-lg px-5 hover-style" type="submit" style={{backgroundColor: '#FFD400'}}
-                  onClick={onSubmitHandler}>
-                    Đăng Nhập
-                  </button>
+                  <form onSubmit={onSubmitHandler}>
+                    <div className="form-outline form-white mb-4">
+                      <input type="email" id="typeEmailX" className="form-control form-control-lg" placeholder="Email" 
+                      onChange={(e) => setIdentifier(e.target.value)}/>
+                    </div>
+  
+                    <div className="form-outline form-white mb-4">
+                      <input type="password" id="typePasswordX" className="form-control form-control-lg" placeholder="Mật khẩu" 
+                      onChange={(e) => setPassword(e.target.value)}/>
+                    </div>
+  
+                    <button className="btn btn-lg px-5 hover-style" type="submit" style={{backgroundColor: '#FFD400'}}>
+                      Đăng Nhập
+                    </button>
+                  </form>
                 </div>
 
                 <div>

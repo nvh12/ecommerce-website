@@ -37,7 +37,7 @@ const SearchBar = () => {
                 const brandResponse = await axios.get(`${backendUrl}/product/brand`);
                 if (brandResponse.data && brandResponse.data.message === "Success") {
                     setBrands(brandResponse.data.brandFound || []);
-                    console.log(brandResponse.data.brandFound);
+                    // console.log(brandResponse.data.brandFound);
                 }
                 //Fetch categories
                 const categoryResponse = await axios.get(`${backendUrl}/product/category`);

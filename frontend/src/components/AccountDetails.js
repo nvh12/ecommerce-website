@@ -19,12 +19,19 @@ const AccountDetails = () => {
     const onSubmitHandler = async (e) => {
         e.preventDefault()
         try {
-            await axios.put(backendUrl + "/user/update", {
-                updateData: {
-                    name: name,
-                    password: password
-                }
-            }, { withCredentials: true })
+            password === "" ? 
+                await axios.put(backendUrl + "/user/update", {
+                    updateData: {
+                        name: name,
+                    }
+                }, { withCredentials: true })
+            :
+                await axios.put(backendUrl + "/user/update", {
+                    updateData: {
+                        name: name,
+                        password: password
+                    }
+                }, { withCredentials: true })
             fetchUserData()
             toast.success("Cập nhật thông tin thành công!")
         } catch (error) {
@@ -36,29 +43,30 @@ const AccountDetails = () => {
         <div className="d-inline-block">
             <h2>Thông tin tài khoản</h2>
             <hr />
-            <div className="my-3">
-                <p className="fs-4 bold">Tên: </p>
-                <input type="text" className="fs-5 text-muted border rounded form-control shadow-none outline-none"
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)}/>
-            </div>
-            <div className="row my-3">
-                <div className="col-md-6 col-12">
-                    <p className="fs-4 bold">Địa chỉ Email: </p>
-                    <input type="email" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
-                        value={email} readOnly/>
+            <form onSubmit={onSubmitHandler}>
+                <div className="my-3">
+                    <p className="fs-4 bold">Tên: </p>
+                    <input type="text" className="fs-5 text-muted border rounded form-control shadow-none outline-none"
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)}/>
                 </div>
-                <div className="col-md-6 col-12">
-                    <p className="fs-4 bold">Mật khẩu mới: </p>
-                    <input type="password" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
-                        value={password}  placeholder="Nhập mật khẩu mới"
-                        onChange={(e) => setPassword(e.target.value)} />
+                <div className="row my-3">
+                    <div className="col-md-6 col-12">
+                        <p className="fs-4 bold">Địa chỉ Email: </p>
+                        <input type="email" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
+                            value={email} readOnly/>
+                    </div>
+                    <div className="col-md-6 col-12">
+                        <p className="fs-4 bold">Mật khẩu mới: </p>
+                        <input type="password" className="fs-5 text-muted border form-control rounded shadow-none outline-none"
+                            value={password}  placeholder="Nhập mật khẩu mới"
+                            onChange={(e) => setPassword(e.target.value)} />
+                    </div>
                 </div>
-            </div>
-            <button className='btn rounded-pill hover-style mt-4' style={{ backgroundColor: '#FFD400' }}
-                onClick={onSubmitHandler}>
-                Sửa thông tin
-            </button>
+                <button type="submit" className='btn rounded-pill hover-style mt-4' style={{ backgroundColor: '#FFD400' }}>
+                    Sửa thông tin
+                </button>
+            </form>
         </div>
     )
 }

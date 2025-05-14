@@ -12,7 +12,7 @@ const Order = ({indexOrder, dataOrder, page}) => {
     const [show, setShow] = useState(false)
 
     const fetchOrderDetail = async () => {
-        console.log("dataOrder", dataOrder) //thông tin 1 đơn hàng
+        //console.log("dataOrder", dataOrder) //thông tin 1 đơn hàng
         const idList = dataOrder.items.map(item => item.product)
         const quantityListTest = dataOrder.items.map(item => item.quantity)
         setQuantityList(quantityListTest)

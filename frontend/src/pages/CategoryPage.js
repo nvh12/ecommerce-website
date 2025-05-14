@@ -9,6 +9,7 @@ import WatchPage from '../components/WatchPage';
 import SmartwatchPage from '../components/SmartwatchPage';
 import TabletPage from '../components/TabletPage';
 import { Container } from 'react-bootstrap';
+import Sale from '../components/Sale';
 
 const CategoryPage = () => {
   const { categoryType } = useParams();
@@ -25,7 +26,12 @@ const CategoryPage = () => {
   const renderCategoryComponent = () => {
     switch (activeCategory) {
       case 'phone':
-        return <PhonePage />;
+        return (
+        <>
+          {/* <Sale /> */}
+          <PhonePage />
+        </>
+        );
       case 'laptop':
         return <LaptopPage />;
       case 'watch':

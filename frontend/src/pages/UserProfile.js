@@ -55,7 +55,7 @@ const UserProfile = () => {
         }
       )
       const temp = res.data.data
-      console.log("don hang", temp.length) // nếu không có dòng này thì code của của tôi lỗi runtime
+      //console.log("don hang", temp.length) // nếu không có dòng này thì code của của tôi lỗi runtime
       setUserOrders(temp)
     } catch (error) {
       // toast.error("Lỗi lấy đơn hàng")
