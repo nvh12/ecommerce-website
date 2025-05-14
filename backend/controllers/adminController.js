@@ -81,7 +81,7 @@ async function getSingleUser(req, res) {
         const user = await userServices.getUserByObjectId(id);
         if (!user) {
             return res.status(404).json({ status: 'error', error: 'User not found' });
-        } 
+        }
         res.status(200).json({ status: 'success', user: user });
     } catch (error) {
         res.status(500).json({ status: 'error', error: error.message });
@@ -113,9 +113,24 @@ async function getUserOrders(req, res) {
     }
 }
 
+async function updateUser(req, res) {
+    try {
+        const updateData = req.body;
+        const { id } = req.params;
+        const userObject = await userServices.getUserByObjectId(id);
+        if (!userObject) return res.status(404).json({ message: 'User not found' });
+        const updated = await userServices.updateUser(id, updateData);
+        const { password: _, ...user } = updated.toObject();
+        res.status(200).json({ data: user, status: 'success' });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
 module.exports = {
     getUsers,
     getSingleUser,
+    updateUser,
     getOrders,
     getSingleOrder,
     updateOrder,
