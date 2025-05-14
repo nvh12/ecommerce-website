@@ -68,15 +68,31 @@ const findProduct = async (info) => {
                 {features:{ $elemMatch: { $regex: search, $options: 'i' } }}
             ];
         }
-        if (category) filter.category = category;
-        if (features) {
-            filter.features = Array.isArray(features) ? { $all: features } : features;
+        if (category) {
+            filter.category = { $regex: new RegExp(`^${category}$`, 'i') };
         }
-        if (brand) filter.brand = brand;
+
+        if (features) {
+            if (Array.isArray(features)) {
+                filter.features = {
+                    $all: features.map(f => new RegExp(`^${f}$`, 'i'))
+                };
+            } else {
+                filter.features = { $regex: new RegExp(`^${features}$`, 'i') };
+            }
+        }
+
+        if (brand) {
+            filter.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
+        }
 
         let sort = {};
         if (order) {
+            if(order ==="discount"){
+                filter.discount = { $ne: 0 };
+            }
             sort[order] = dir === 'desc' ? -1 : 1;
+            
         }
 
         if (priceMin || priceMax) {

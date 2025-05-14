@@ -26,8 +26,8 @@ const router = express.Router();
 //     ratingsCount
 //     ratingsAvg
 //Done
-// router.post('/', createProductControl); 
-router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
+router.post('/', createProductControl); 
+// router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
 
 
 // Gọi ra brand và category
