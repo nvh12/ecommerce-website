@@ -18,7 +18,7 @@ router.get('/user', getUsers); //Lấy user
 // nếu ko có name trả tất cả user
 router.get('/user/:id', getSingleUser);
 router.put('/user/:id', updateUser);
-router.del('/user/:id', deleteUser);
+router.delete('/user/:id', deleteUser);
 router.get('/user/order', getUserOrders); //Lấy các order của user
 // admin/user/order?id=${id}&page=${page}&sortBy=${sortBy}&order=${order}
 // ko cần sắp xếp thì bỏ sortBy với order
