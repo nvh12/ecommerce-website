@@ -127,10 +127,23 @@ async function updateUser(req, res) {
     }
 }
 
+async function deleteUser(req, res) {
+    try {
+        const { id } = req.params;
+        const userObject = await userServices.getUserByObjectId(id);
+        if (!userObject) return res.status(404).json({ message: 'User not found' });
+        const del = await userServices.deleteUser(id);
+        res.status(200).json({ data: del, status: 'success' });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+}
+
 module.exports = {
     getUsers,
     getSingleUser,
     updateUser,
+    deleteUser,
     getOrders,
     getSingleOrder,
     updateOrder,
