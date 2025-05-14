@@ -11,7 +11,6 @@ import ProductDetail from './pages/ProductDetail.js';
 import CartPage from './pages/CartPage';
 import AdminPage from './pages/AdminPage';
 import SearchResults from './pages/SearchResults';
-import CategoryPage from './pages/CategoryPage';
 
 function App() {
   return (
@@ -27,15 +26,15 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/search" element={<SearchResults />} />
           
-          {/* New category route pattern */}
-          <Route path="/category/:categoryType" element={<CategoryPage />} />
+          {/* Category routes - all now handled by Home.js */}
+          <Route path="/category/:categoryType" element={<Home />} />
           
-          {/* Legacy routes for backward compatibility - redirect to category page */}
-          <Route path='/phone' element={<CategoryPage />} />
-          <Route path='/laptop' element={<CategoryPage />} />
-          <Route path='/tablet' element={<CategoryPage />} />
-          <Route path='/watch' element={<CategoryPage />} />
-          <Route path='/smartwatch' element={<CategoryPage />} />
+          {/* Legacy routes - all handled by Home.js */}
+          <Route path='/phone' element={<Home />} />
+          <Route path='/laptop' element={<Home />} />
+          <Route path='/tablet' element={<Home />} />
+          <Route path='/watch' element={<Home />} />
+          <Route path='/smartwatch' element={<Home />} />
       </Routes>
     </div>
   );

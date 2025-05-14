@@ -1,33 +1,94 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import SalesCarousel from '../components/SalesCarousel.js'
 import RecommendationGrid from '../components/RecommendationGrid.js'
 import Sale from '../components/Sale.js'
 import AdvertisementCarousel from '../components/AdvertisementCarousel.js'
 import Header from '../components/Header.js'
 import Footer from '../components/Footer.js'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import Pagination from '../components/Pagination.js'
 import { AppContext } from '../context/AppContext.js'
 import { Button } from 'react-bootstrap'
 import '../styles/AdminPage.css'
 import '../styles/NavigationButtons.css'
 import Navbar from '../components/Navbar.js'
+import PhonePage from '../components/PhonePage.js'
+import LaptopPage from '../components/LaptopPage.js'
+import WatchPage from '../components/WatchPage.js'
+import SmartwatchPage from '../components/SmartwatchPage.js'
+import TabletPage from '../components/TabletPage.js'
 
 const Home = () => {
   const { userData } = useContext(AppContext);
   const isAdmin = userData?.role === 'admin';
+  const { categoryType } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Extract category from URL if present
+  const getCategoryFromPath = () => {
+    const path = location.pathname;
+    if (path.startsWith('/category/')) {
+      return path.split('/')[2];
+    }
+    // For legacy URL paths
+    if (path === '/phone') return 'phone';
+    if (path === '/laptop') return 'laptop';
+    if (path === '/watch') return 'watch';
+    if (path === '/smartwatch') return 'smartwatch';
+    if (path === '/tablet') return 'tablet';
+    return null;
+  };
+
+  const [activeCategory, setActiveCategory] = useState(categoryType || getCategoryFromPath() || null);
+
+  // Update active category when URL parameter changes
+  useEffect(() => {
+    const category = categoryType || getCategoryFromPath();
+    if (category) {
+      setActiveCategory(category);
+    }
+  }, [categoryType, location.pathname]);
+
+  // Handle category change
+  const handleCategoryChange = (category) => {
+    setActiveCategory(category);
+    // Update URL without page reload
+    navigate(`/category/${category}`, { replace: true });
+  };
+
+  // Render the appropriate category component based on the activeCategory
+  const renderCategoryComponent = () => {
+    switch (activeCategory) {
+      case 'phone':
+        return <PhonePage />;
+      case 'laptop':
+        return <LaptopPage />;
+      case 'watch':
+        return <WatchPage />;
+      case 'smartwatch':
+        return <SmartwatchPage />;
+      case 'tablet':
+        return <TabletPage />;
+      default:
+        return (
+          <>
+            <Sale />
+            <RecommendationGrid />
+            <AdvertisementCarousel />
+            <Pagination pageName="productsPage"/>
+          </>
+        );
+    }
+  };
 
   return (
     <div>
       <Header />
-      <Navbar />
-        <div className="container-fluid py-4">
-            {/* <SalesCarousel /> */}
-            <Sale />
-            <RecommendationGrid />
-        </div>
-        <AdvertisementCarousel />
-        <Pagination pageName="productsPage"/>
+      <Navbar onCategoryChange={handleCategoryChange} activeCategory={activeCategory} />
+      <div className="container-fluid py-4">
+        {renderCategoryComponent()}
+      </div>
       <Footer />
       
       {isAdmin && (

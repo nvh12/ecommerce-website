@@ -1,25 +1,43 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext.js';
 import ProductCard from './ProductCard.js';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import Header from './Header';
-import NavbarComponent from './Navbar';
 import Pagination from './Pagination';
+import axiosInstance from '../utils/axiosInstance';
 
 const PhonePage = () => {
-  const { productItems } = useContext(AppContext);
+  const { backendUrl } = useContext(AppContext);
+  const [phoneProducts, setPhoneProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Filter state
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
 
-  // Extract unique brands from phone products
-  const phoneProducts = productItems.filter(
-    (product) => product.category[0]?.toLowerCase() === 'điện thoại' || product.category[0]?.toLowerCase() === 'phone'
-  );
+  useEffect(() => {
+    const fetchSmartWatches = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get(`${backendUrl}/product/?category=Phone`);
+        setPhoneProducts(response.data.product);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching smartwatches:', err);
+        setError('Không có điện thoại thông minh nào');
+        setLoading(false);
+      }
+    };
+
+    fetchSmartWatches();
+  }, [backendUrl]);
+
+  // Danh sách hãng (brand) duy nhất
   const brands = Array.from(new Set(phoneProducts.map((p) => p.brand).filter(Boolean)));
 
-  // Filter logic
+  // Lọc theo brand và giá
   const filteredProducts = phoneProducts.filter((product) => {
-    let matchesBrand = !brand || product.brand === brand;
+    const matchesBrand = !brand || product.brand === brand;
     let matchesPrice = true;
     if (priceRange === 'lt5') matchesPrice = product.price < 5000000;
     if (priceRange === '5to10') matchesPrice = product.price >= 5000000 && product.price <= 10000000;
@@ -29,10 +47,11 @@ const PhonePage = () => {
 
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
-
       <Container className="py-4">
+        {/* Header và Filter */}
         <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
-          <h2 className="mb-3 mb-md-0 fw-bold text-primary">Điện thoại thông minh</h2>
+          <h2 className="mb-3 mb-md-0 fw-bold text-primary">Điện Thoại Thông Minh</h2>
+
           <Form className="d-flex gap-3 flex-wrap">
             <Form.Group controlId="brandSelect">
               <Form.Select
@@ -46,6 +65,7 @@ const PhonePage = () => {
                 ))}
               </Form.Select>
             </Form.Group>
+
             <Form.Group controlId="priceSelect">
               <Form.Select
                 value={priceRange}
@@ -58,14 +78,23 @@ const PhonePage = () => {
                 <option value="gt10">Trên 10 triệu</option>
               </Form.Select>
             </Form.Group>
+
             {(brand || priceRange) && (
-              <Button variant="outline-secondary" onClick={() => { setBrand(''); setPriceRange(''); }}>
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setBrand('');
+                  setPriceRange('');
+                }}
+              >
                 Xóa lọc
               </Button>
             )}
           </Form>
         </div>
-        <Row xs={2} md={3} lg={5} className="g-4">
+
+        {/* Sản phẩm */}
+        <Row xs={2} md={3} lg={4} className="g-4">
           {filteredProducts.length === 0 ? (
             <Col xs={12} className="text-center text-muted py-5">
               Không có sản phẩm phù hợp.
@@ -78,9 +107,11 @@ const PhonePage = () => {
             ))
           )}
         </Row>
-        
-        {/* Add Pagination component */}
-        <Pagination pageName="phonePage" />
+
+        {/* Phân trang */}
+        <div className="mt-4">
+          <Pagination pageName="phonePage" />
+        </div>
       </Container>
     </div>
   );

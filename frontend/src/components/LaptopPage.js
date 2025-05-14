@@ -2,8 +2,6 @@ import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext.js';
 import ProductCard from './ProductCard.js';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import Header from './Header';
-import NavbarComponent from './Navbar';
 import Pagination from './Pagination';
 
 const LaptopPage = () => {
@@ -11,15 +9,14 @@ const LaptopPage = () => {
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
 
-  // Extract unique brands from laptop products
   const laptopProducts = productItems.filter(
     (product) => product.category[0]?.toLowerCase() === 'laptop'
   );
+
   const brands = Array.from(new Set(laptopProducts.map((p) => p.brand).filter(Boolean)));
 
-  // Filter logic
   const filteredProducts = laptopProducts.filter((product) => {
-    let matchesBrand = !brand || product.brand === brand;
+    const matchesBrand = !brand || product.brand === brand;
     let matchesPrice = true;
     if (priceRange === 'lt10') matchesPrice = product.price < 10000000;
     if (priceRange === '10to20') matchesPrice = product.price >= 10000000 && product.price <= 20000000;
@@ -64,7 +61,8 @@ const LaptopPage = () => {
             )}
           </Form>
         </div>
-        <Row xs={2} md={3} lg={5} className="g-4">
+
+        <Row xs={2} md={3} lg={4} className="g-4">
           {filteredProducts.length === 0 ? (
             <Col xs={12} className="text-center text-muted py-5">
               Không có sản phẩm phù hợp.
@@ -77,9 +75,10 @@ const LaptopPage = () => {
             ))
           )}
         </Row>
-        
-        {/* Add Pagination component */}
-        <Pagination pageName="laptopPage" />
+
+        <div className="mt-4">
+          <Pagination pageName="laptopPage" />
+        </div>
       </Container>
     </div>
   );

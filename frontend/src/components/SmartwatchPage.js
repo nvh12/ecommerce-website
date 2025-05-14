@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Form, Button } from 'react-bootstrap';
 import ProductCard from './ProductCard';
 import { AppContext } from '../context/AppContext';
 import axiosInstance from '../utils/axiosInstance';
@@ -9,14 +9,17 @@ const SmartwatchPage = () => {
   const [smartwatches, setSmartWatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Filter state
+  const [brand, setBrand] = useState('');
+  const [priceRange, setPriceRange] = useState('');
 
   useEffect(() => {
     const fetchSmartWatches = async () => {
       try {
         setLoading(true);
-        // In a real app, you would fetch from a category-specific endpoint
-        const response = await axiosInstance.get(`${backendUrl}/products?category=smartwatches`);
-        setSmartWatches(response.data.data);
+        const response = await axiosInstance.get(`${backendUrl}/product/?category=Smartwatch`);
+        setSmartWatches(response.data.product);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching smartwatches:', err);
@@ -28,6 +31,19 @@ const SmartwatchPage = () => {
     fetchSmartWatches();
   }, [backendUrl]);
 
+  // Lấy danh sách brand duy nhất
+  const brands = Array.from(new Set(smartwatches.map((p) => p.brand).filter(Boolean)));
+
+  // Áp dụng filter
+  const filteredProducts = smartwatches.filter((product) => {
+    let matchesBrand = !brand || product.brand === brand;
+    let matchesPrice = true;
+    if (priceRange === 'lt5') matchesPrice = product.price < 5000000;
+    if (priceRange === '5to10') matchesPrice = product.price >= 5000000 && product.price <= 10000000;
+    if (priceRange === 'gt10') matchesPrice = product.price > 10000000;
+    return matchesBrand && matchesPrice;
+  });
+
   if (loading) {
     return (
       <div className="text-center py-5">
@@ -38,32 +54,60 @@ const SmartwatchPage = () => {
     );
   }
 
-
   return (
-    <Container>
-      <h2 className="mb-4">Đồng Hồ Thông Minh</h2>
-      <Row>
-        {smartwatches.length > 0 ? (
-          smartwatches.map(smartwatch => (
-            <Col key={smartwatch._id} sm={6} md={4} lg={3} className="mb-4">
-              <ProductCard product={smartwatch} />
+    <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+      <Container className="py-4">
+        <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
+          <h2 className="mb-3 mb-md-0 fw-bold text-primary">Đồng Hồ Thông Minh</h2>
+          <Form className="d-flex gap-3 flex-wrap">
+            <Form.Group controlId="brandSelect">
+              <Form.Select
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                style={{ minWidth: 150 }}
+              >
+                <option value="">Tất cả hãng</option>
+                {brands.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group controlId="priceSelect">
+              <Form.Select
+                value={priceRange}
+                onChange={(e) => setPriceRange(e.target.value)}
+                style={{ minWidth: 150 }}
+              >
+                <option value="">Tất cả giá</option>
+                <option value="lt5">Dưới 5 triệu</option>
+                <option value="5to10">5 - 10 triệu</option>
+                <option value="gt10">Trên 10 triệu</option>
+              </Form.Select>
+            </Form.Group>
+            {(brand || priceRange) && (
+              <Button variant="outline-secondary" onClick={() => { setBrand(''); setPriceRange(''); }}>
+                Xóa lọc
+              </Button>
+            )}
+          </Form>
+        </div>
+
+        <Row xs={2} md={3} lg={4} className="g-4">
+          {filteredProducts.length === 0 ? (
+            <Col xs={12} className="text-center text-muted py-5">
+              Không có sản phẩm phù hợp.
             </Col>
-          ))
-        ) : (
-          <Col xs={12}>
-            <Card className="text-center py-5">
-              <Card.Body>
-                <Card.Title>Không có đồng hồ thông minh nào</Card.Title>
-                <Card.Text>
-                  Hiện tại chưa có đồng hồ thông minh nào trong danh mục này.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        )}
-      </Row>
-    </Container>
+          ) : (
+            filteredProducts.map((smartwatch) => (
+              <Col key={smartwatch._id}>
+                <ProductCard product={smartwatch} />
+              </Col>
+            ))
+          )}
+        </Row>
+      </Container>
+    </div>
   );
 };
 
-export default SmartwatchPage; 
+export default SmartwatchPage;
