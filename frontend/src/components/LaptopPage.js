@@ -15,21 +15,31 @@ const LaptopPage = () => {
   const [priceRange, setPriceRange] = useState('');
 
   useEffect(() => {
-    const fetchLaptops = async () => {
+    const fetchLaptop = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get(`${backendUrl}/product/?category=Laptop`);
-        setlaptopProducts(response.data.product);
+        const response = await axiosInstance.get(`${backendUrl}/product`, {
+          params: {
+            category: 'laptop',
+            limit : 16,
+            brand: brand || undefined,
+            priceRange: priceRange || undefined,
+          }
+        });
+  
+        setlaptopProducts(response.data.product || []);
+        // setTotalPages(response.data.totalPages || 1); 
+        console.log(response.data.product)
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching laptops:', err);
+        console.error('Error fetching phones:', err);
         setError('Không có máy tính nào');
         setLoading(false);
       }
     };
-
-    fetchLaptops();
-  }, [backendUrl]);
+  
+    fetchLaptop();
+  }, [backendUrl, brand, priceRange]);
   const brands = Array.from(new Set(laptopProducts.map((p) => p.brand).filter(Boolean)));
 
   const filteredProducts = laptopProducts.filter((product) => {
@@ -93,8 +103,8 @@ const LaptopPage = () => {
           )}
         </Row>
 
-        <div className="mt-4">
-          <Pagination pageName="laptopPage" />
+        <div className="mt-4">/
+          <Pagination pageName="productsPage" category='Laptop' brand={brand} setItems={setlaptopProducts}/>
         </div>
       </Container>
     </div>

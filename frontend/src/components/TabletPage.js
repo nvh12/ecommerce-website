@@ -1,17 +1,40 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext.js';
 import ProductCard from './ProductCard.js';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Pagination from './Pagination';
+import axiosInstance from '../utils/axiosInstance';
 
 const TabletPage = () => {
-  const { productItems } = useContext(AppContext);
+  const { backendUrl } = useContext(AppContext);
+  const [tabletProducts, setTabletProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
 
-  const tabletProducts = productItems.filter(
-    (product) => product.category[0]?.toLowerCase() === 'tablet'
-  );
+  useEffect(() => {
+    const fetchTablets = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get(`${backendUrl}/product`, {
+          params: {
+            category: 'Tablet',
+            limit: 16,
+            brand: brand || undefined,
+            priceRange: priceRange || undefined,
+          }
+        });
+        setTabletProducts(response.data.product || []);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching tablets", err);
+        setError("Không có máy tính bảng nào");
+        setLoading(false);
+      }
+    };
+    fetchTablets();
+  }, [backendUrl, brand, priceRange]);
 
   const brands = Array.from(new Set(tabletProducts.map((p) => p.brand).filter(Boolean)));
 
@@ -61,7 +84,6 @@ const TabletPage = () => {
             )}
           </Form>
         </div>
-
         <Row xs={2} md={3} lg={4} className="g-4">
           {filteredProducts.length === 0 ? (
             <Col xs={12} className="text-center text-muted py-5">
@@ -75,9 +97,8 @@ const TabletPage = () => {
             ))
           )}
         </Row>
-
         <div className="mt-4">
-          <Pagination pageName="tabletPage" />
+          <Pagination pageName="productsPage" category='tablet' brand={brand} setItems={setTabletProducts} />
         </div>
       </Container>
     </div>

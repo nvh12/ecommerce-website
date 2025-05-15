@@ -10,27 +10,36 @@ const PhonePage = () => {
   const [phoneProducts, setPhoneProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Filter state
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
+
 
   useEffect(() => {
     const fetchPhones = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get(`${backendUrl}/product/?category=Phone`);
-        setPhoneProducts(response.data.product);
+        const response = await axiosInstance.get(`${backendUrl}/product`, {
+          params: {
+            category: 'Phone',
+            limit: 16,
+            brand: brand || undefined,
+            priceRange: priceRange || undefined,
+          }
+        });
+
+        setPhoneProducts(response.data.product || []);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching smartwatches:', err);
+        console.error('Error fetching phones:', err);
         setError('Không có điện thoại thông minh nào');
         setLoading(false);
       }
     };
 
     fetchPhones();
-  }, [backendUrl]);
+  }, [backendUrl, brand, priceRange]);
 
   // Danh sách hãng (brand) duy nhất
   const brands = Array.from(new Set(phoneProducts.map((p) => p.brand).filter(Boolean)));
@@ -110,7 +119,7 @@ const PhonePage = () => {
 
         {/* Phân trang */}
         <div className="mt-4">
-          <Pagination pageName="phonePage" />
+          <Pagination pageName="productsPage" category='phone' brand={brand} setItems={setPhoneProducts} />
         </div>
       </Container>
     </div>
@@ -118,3 +127,4 @@ const PhonePage = () => {
 };
 
 export default PhonePage;
+
