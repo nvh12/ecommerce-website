@@ -1041,12 +1041,60 @@ const ProductList = ({ backendUrl }) => {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>URL Hình Ảnh</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.images}
-                                onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
-                                placeholder="https://example.com/image.jpg"
-                            />
+                            {(Array.isArray(newProduct?.images) && newProduct.images.length > 0) &&
+                            (newProduct.images.map((item, index) => {
+                              const handleImageChange = (e) => {
+                                const newImageLink = e.target.value
+                                const updatedImages = newProduct.images
+                                if(newImageLink === "") {
+                                  updatedImages.splice(index, 1)
+                                } else {
+                                  updatedImages[index] = newImageLink
+                                }
+                                setNewProduct(prev => ({...prev, images: updatedImages}))
+                              }
+                              return (
+                                <Row className='my-1'>
+                                  <Col md={2}>Hình {index + 1}</Col>
+                                  <Col md={10}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                        type='text'
+                                        value={item}
+                                        onChange={handleImageChange}
+                                        placeholder='Link ảnh'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>
+                              )
+                            }))
+                            }
+                            <div className='d-block'>
+                                <Button
+                                  variant='secondary'
+                                  className='my-2 d-block-inline'
+                                  onClick={() => {
+                                    const updatedImages = [...(newProduct?.images || [])]
+                                    updatedImages.push("")
+                                    setNewProduct(prev => ({...prev, images: updatedImages}))
+                                  }}
+                                >
+                                  Thêm ảnh
+                                </Button>
+                                <Button
+                                  variant='danger'
+                                  className='my-2 ms-2 d-block-inline'
+                                  onClick={() => {
+                                    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa tất cả các ảnh của sản phẩm?")
+                                    if(confirmDelete) {
+                                      setNewProduct(prev => ({...prev, images: []}))
+                                    }
+                                  }}
+                                >
+                                  Xóa tất cả ảnh 
+                                </Button>
+                            </div>        
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Mô Tả</Form.Label>
@@ -1145,6 +1193,7 @@ const ProductList = ({ backendUrl }) => {
                         <div className="d-flex justify-content-end">
                             <Button variant="secondary" className="me-2" onClick={() => {
                                 setNewProduct(prev => ({...prev, features: []}))
+                                setNewProduct(prev => ({...prev, images: []}))
                                 setShowAddModal(false)
                                 }}>
                                 Hủy
@@ -1266,6 +1315,63 @@ const ProductList = ({ backendUrl }) => {
                                     placeholder="Chống nước, Bluetooth, ..."
                                 />
                             </Form.Group> */}
+                            <Form.Group>
+                              <Form.Label>URL Hình Ảnh</Form.Label>
+                              {(Array.isArray(selectedProduct?.images) && selectedProduct.images.length > 0) &&
+                              (selectedProduct.images.map((item, index) => {
+                                const handleImageChange = (e) => {
+                                  const newImageLink = e.target.value
+                                  const updatedImages = [...selectedProduct.images]
+                                  if(newImageLink === "") {
+                                    updatedImages.splice(index, 1)
+                                  } else {
+                                    updatedImages[index] = newImageLink
+                                  }
+                                  setSelectedProduct(prev => ({...prev, images: updatedImages}))
+                                }
+                                return (
+                                  <Row className='my-1'>
+                                    <Col md={2}>Hình {index + 1}</Col>
+                                    <Col md={10}>
+                                      <Form.Group>
+                                        <Form.Control
+                                          type='text'
+                                          value={item}
+                                          onChange={handleImageChange}
+                                          placeholder='Link ảnh'
+                                        />                                          
+                                      </Form.Group>
+                                    </Col>
+                                  </Row>
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                  variant='secondary'
+                                  className='my-2 d-block-inline'
+                                  onClick={() => {
+                                    const updateImages = [...(selectedProduct?.images || [])]
+                                    updateImages.push("")
+                                    setSelectedProduct(prev => ({...prev, images: updateImages}))
+                                  }}
+                                >
+                                  Thêm ảnh
+                                </Button>
+                                <Button
+                                  variant='danger'
+                                  className='my-2 ms-2 d-block-inline'
+                                  onClick={() => {
+                                    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa tất cả các ảnh của sản phẩm?")
+                                    if(confirmDelete) {
+                                      setSelectedProduct(prev => ({...prev, images: []}))
+                                    }
+                                  }}
+                                >
+                                  Xóa tất cả ảnh 
+                                </Button>
+                              </div>
+                            </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Mô Tả</Form.Label>
                                 <Form.Control
