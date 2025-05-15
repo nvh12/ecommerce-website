@@ -536,7 +536,7 @@ const ProductList = ({ backendUrl }) => {
     const handleApplyFilters = async () => {
         setIsFiltering(true);
         try {
-            let params = { page: 1 };
+            let params = { page: 1, limit: 18 };
             
             if (filterName) params.search = filterName;
             if (filterCategory) params.category = filterCategory;
@@ -544,7 +544,7 @@ const ProductList = ({ backendUrl }) => {
             if (filterPriceMin) params.priceMin = filterPriceMin;
             if (filterPriceMax) params.priceMax = filterPriceMax;
             console.log(params);
-            const response = await axios.get(`${backendUrl}/product`, { params, limit: 20 });
+            const response = await axios.get(`${backendUrl}/product`, { params});
             console.log(response.data);
             
             if (response.data && response.data.product) {

@@ -11,10 +11,9 @@ const NavbarComponent = ({ onCategoryChange, activeCategory }) => {
     { id: 1, name: 'Điện thoại', path: '/category/phone', value: 'phone' },
     { id: 2, name: 'Laptop', path: '/category/laptop', value: 'laptop' },
     { id: 3, name: 'Phụ kiện', value: 'accessories', isDropdown: true, items: [
-      { name: 'Tai nghe', path: '/category/accessories/headphones' },
-      { name: 'Chuột', path: '/category/accessories/mouse' },
-      { name: 'Bàn phím', path: '/category/accessories/keyboard' },
-      { name: 'Bao da ốp lưng', path: '/category/accessories/cases' }
+      { name: 'Tai nghe', path: '/category/headphones' , value: 'headphone'},
+      { name: 'Chuột', path: '/category/mouse',value:'mouse' },
+      { name: 'Bàn phím', path: '/category/keyboard' ,value:'keyboard'}
     ]},
     { id: 4, name: 'Smartwatch', path: '/category/smartwatch', value: 'smartwatch' },
     { id: 5, name: 'Đồng hồ', path: '/category/watch', value: 'watch' },

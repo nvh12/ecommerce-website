@@ -13,12 +13,30 @@ const Pagination = ({ pageName, setItems }) => {
     const fetchTotalPages = async () => {
         switch (pageName) {
             case "productsPage":
-            case "recommendationPage":
                 try {
-                    const res = await axios.get(`${backendUrl}/product/page`,
+                    const res = await axiosInstance.get(`${backendUrl}/product/page`,
                         {params: {
                             limit: 18
                             }
+                        },
+                        {
+                            withCredentials: true
+                        }
+                    )
+                    setTotalPages(res.data.page.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "recommendationPage":
+                try {
+                    const res = await axiosInstance.get(`${backendUrl}/product/page`,
+                        {params: {
+                            limit: 18
+                            }
+                        },
+                        {
+                            withCredentials: true
                         }
                     )
                     setTotalPages(res.data.page.totalPages)
