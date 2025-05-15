@@ -752,9 +752,10 @@ const ProductList = ({ backendUrl }) => {
             ...product,
             category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
             color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
-            features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
+            // features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
         };
     };
+    console.log("product", products)
 
     return (
         <div className="mt-4">
@@ -907,6 +908,8 @@ const ProductList = ({ backendUrl }) => {
                                                 onClick={() => {
                                                     setSelectedProduct(prepareProductForEdit(product));
                                                     setShowEditModal(true);
+                                                    console.log("productselected:", product)
+                                                    console.log("productselected1:", selectedProduct)
                                                 }}
                                             >
                                                 Chỉnh Sửa
@@ -1037,15 +1040,6 @@ const ProductList = ({ backendUrl }) => {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.features}
-                                onChange={(e) => setNewProduct({ ...newProduct, features: e.target.value })}
-                                placeholder="Chống nước, Bluetooth, ..."
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
                             <Form.Label>URL Hình Ảnh</Form.Label>
                             <Form.Control
                                 type="text"
@@ -1064,8 +1058,95 @@ const ProductList = ({ backendUrl }) => {
                                 required
                             />
                         </Form.Group>
+                        <Form.Group>
+                          <Form.Label>Thông số kỹ thuật</Form.Label>
+                          {(Array.isArray(newProduct?.features) && newProduct.features.length > 0) &&
+                          (newProduct.features.map((item, index) => {
+                            const [label, value] = item.split(":")
+                            const handleLabelChange = (e) => {
+                              const newLabel = e.target.value;
+                              const updatedFeatures = [...newProduct.features];
+                              const [, value = ""] = updatedFeatures[index].split(":");
+
+                              if (newLabel.trim() === "" && value.trim() === "") {
+                                updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedFeatures[index] = `${newLabel}:${value.trim()}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                            };
+                            const handleValueChange = (e) => {
+                              const newValue = e.target.value;
+                              const updatedFeatures = [...newProduct.features];
+                              const [label = ""] = updatedFeatures[index].split(":");
+
+                              if (label.trim() === "" && newValue.trim() === "") {
+                                updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedFeatures[index] = `${label.trim()}:${newValue}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                            };
+                            return (
+                            <Row key={index} className='my-1'>
+                              <Col md={3}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={label}
+                                  onChange={handleLabelChange}
+                                  placeholder='Tên thông số'
+                                  />
+                                </Form.Group>
+                              </Col>
+  
+                              <Col md={9}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={value}
+                                  onChange={handleValueChange}
+                                  placeholder='Chi tiết thông số kĩ thuật'
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>  
+                            )
+                          }))
+                          }
+                          <div className='d-block'>
+                            <Button
+                                variant="secondary"
+                                className="mt-2 d-block-inline"
+                                onClick={() => {
+                                  const updatedFeatures = [...(newProduct?.features || [])];
+                                  updatedFeatures.push(":"); // Thêm dòng trống (label:value)
+                                  setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                }}
+                              >
+                                Thêm thông số
+                            </Button>
+                            <Button
+                            variant="danger"
+                            className="mt-2 ms-2"
+                            onClick={() => {
+                              const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả thông số kỹ thuật?")
+                              if(confirmDelete) {
+                                setNewProduct(prev => ({ ...prev, features: [] }));
+                              }
+                            }}
+                          >
+                            Xoá tất cả thông số 
+                            </Button>
+                          </div>
+                        </Form.Group>                  
                         <div className="d-flex justify-content-end">
-                            <Button variant="secondary" className="me-2" onClick={() => setShowAddModal(false)}>
+                            <Button variant="secondary" className="me-2" onClick={() => {
+                                setNewProduct(prev => ({...prev, features: []}))
+                                setShowAddModal(false)
+                                }}>
                                 Hủy
                             </Button>
                         <Button variant="primary" type="submit">
@@ -1176,7 +1257,7 @@ const ProductList = ({ backendUrl }) => {
                                     onChange={(e) => setSelectedProduct({ ...selectedProduct, color: e.target.value })}
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-3">
+                            {/* <Form.Group className="mb-3">
                                 <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -1184,7 +1265,7 @@ const ProductList = ({ backendUrl }) => {
                                     onChange={(e) => setSelectedProduct({ ...selectedProduct, features: e.target.value })}
                                     placeholder="Chống nước, Bluetooth, ..."
                                 />
-                            </Form.Group>
+                            </Form.Group> */}
                             <Form.Group className="mb-3">
                                 <Form.Label>Mô Tả</Form.Label>
                                 <Form.Control
@@ -1195,6 +1276,91 @@ const ProductList = ({ backendUrl }) => {
                                     required
                                 />
                             </Form.Group>
+                            <Form.Group>
+                              <Form.Label>Thông số kỹ thuật</Form.Label>
+                              {(Array.isArray(selectedProduct?.features) && selectedProduct.features.length > 0) &&
+                              (selectedProduct.features.map((item, index) => {
+                                const [label, value] = item.split(":")
+                                const handleLabelChange = (e) => {
+                                  const newLabel = e.target.value;
+                                  const updatedFeatures = [...selectedProduct.features];
+                                  const [, value = ""] = updatedFeatures[index].split(":");
+
+                                  if (newLabel.trim() === "" && value.trim() === "") {
+                                    updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedFeatures[index] = `${newLabel}:${value.trim()}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                };
+                                const handleValueChange = (e) => {
+                                  const newValue = e.target.value;
+                                  const updatedFeatures = [...selectedProduct.features];
+                                  const [label = ""] = updatedFeatures[index].split(":");
+
+                                  if (label.trim() === "" && newValue.trim() === "") {
+                                    updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedFeatures[index] = `${label.trim()}:${newValue}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                };
+                                return (
+                                <Row key={index} className='my-1'>
+                                  <Col md={3}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={label}
+                                      onChange={handleLabelChange}
+                                      placeholder='Tên thông số'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+      
+                                  <Col md={9}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={value}
+                                      onChange={handleValueChange}
+                                      placeholder='Chi tiết thông số kĩ thuật'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>  
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                    variant="secondary"
+                                    className="mt-2 d-block-inline"
+                                    onClick={() => {
+                                      const updatedFeatures = [...(selectedProduct?.features || [])];
+                                      updatedFeatures.push(":"); // Thêm dòng trống (label:value)
+                                      setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                    }}
+                                  >
+                                    Thêm thống số
+                                </Button>
+                                <Button
+                                variant="danger"
+                                className="mt-2 ms-2"
+                                onClick={() => {
+                                  const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả thông số kỹ thuật?")
+                                  if(confirmDelete) {
+                                    setSelectedProduct(prev => ({ ...prev, features: [] }));
+                                  }
+                                }}
+                              >
+                                Xoá tất cả thống số 
+                                </Button>
+                              </div>
+                            </Form.Group>
+                           
                             <div className="d-flex justify-content-end">
                                 <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
                                     Hủy
