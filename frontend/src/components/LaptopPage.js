@@ -103,7 +103,7 @@ const LaptopPage = () => {
           )}
         </Row>
 
-        <div className="mt-4">/
+        <div className="mt-4">
           <Pagination pageName="productsPage" category='Laptop' brand={brand} setItems={setlaptopProducts}/>
         </div>
       </Container>
