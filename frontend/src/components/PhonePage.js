@@ -16,7 +16,7 @@ const PhonePage = () => {
   const [priceRange, setPriceRange] = useState('');
 
   useEffect(() => {
-    const fetchSmartWatches = async () => {
+    const fetchPhones = async () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get(`${backendUrl}/product/?category=Phone`);
@@ -29,7 +29,7 @@ const PhonePage = () => {
       }
     };
 
-    fetchSmartWatches();
+    fetchPhones();
   }, [backendUrl]);
 
   // Danh sách hãng (brand) duy nhất

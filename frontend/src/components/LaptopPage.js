@@ -1,18 +1,35 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext.js';
 import ProductCard from './ProductCard.js';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Pagination from './Pagination';
-
+import axiosInstance from '../utils/axiosInstance.js';
 const LaptopPage = () => {
-  const { productItems } = useContext(AppContext);
+  const { backendUrl } = useContext(AppContext);
+  const [laptopProducts, setlaptopProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Filter state
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
 
-  const laptopProducts = productItems.filter(
-    (product) => product.category[0]?.toLowerCase() === 'laptop'
-  );
+  useEffect(() => {
+    const fetchLaptops = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get(`${backendUrl}/product/?category=Laptop`);
+        setlaptopProducts(response.data.product);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching laptops:', err);
+        setError('Không có máy tính nào');
+        setLoading(false);
+      }
+    };
 
+    fetchLaptops();
+  }, [backendUrl]);
   const brands = Array.from(new Set(laptopProducts.map((p) => p.brand).filter(Boolean)));
 
   const filteredProducts = laptopProducts.filter((product) => {
