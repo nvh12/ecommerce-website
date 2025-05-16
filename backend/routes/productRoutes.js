@@ -9,6 +9,8 @@ const {
 } = require("../controllers/productController");
 const {findBrandControl,findCategoryControl}= require("../controllers/indexController")
 const { verifyUser, verifyRole} = require('../middleware/authMiddleware');
+const { upload } = require('../middleware/uploadMiddleware')
+const {uploadToCloud }= require('../middleware/uploadToCloud')
 const router = express.Router();
 
 // Tạo mới sản phẩm
@@ -26,8 +28,10 @@ const router = express.Router();
 //     ratingsCount
 //     ratingsAvg
 //Done
-router.post('/', createProductControl); 
-// router.post('/', verifyUser, verifyRole('admin'), createProductControl); 
+
+//router.post('/',upload.array('images'),uploadToCloud, createProductControl);//
+
+router.post('/', verifyUser, verifyRole('admin'),upload.array('images'),uploadToCloud, createProductControl); 
 
 
 // Gọi ra brand và category
@@ -46,7 +50,7 @@ router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các
 router.get("/:_id", findOneProductControl) // Tìm kiếm duy nhất 1 sản phẩm dựa theo id
 
 router.delete('/:_id', verifyUser, verifyRole('admin'), deleteProductControl);// Xóa sản phẩm theo id
-router.put('/:_id', verifyUser, verifyRole('admin'), updateProductControl);// update sản phẩm theo id
+router.put('/:_id', verifyUser, verifyRole('admin'), upload.array('images'), uploadToCloud, updateProductControl);// update sản phẩm theo id
 
 
 // Thay đổi các trường như trên get trong bodybody
