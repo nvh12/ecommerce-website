@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Nav, Tab } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useAsyncError } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -274,6 +274,8 @@ const UserList = ({ backendUrl }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const {usersForAdmin, setUsersForAdmin} = useContext(AppContext)
+  const [filterUserName, setFilterUserName] = useState("")
+  const [activeSearchByName, setActiceSearchByName] = useState(false)
   // setUsers(usersForAdmin)
 
   useEffect(() => {
@@ -333,13 +335,31 @@ const UserList = ({ backendUrl }) => {
       }
     }
   };
+  const searchByName =  (e) => {
+    e.preventDefault()
+    setActiceSearchByName(!activeSearchByName)   
+    //setActiceSearchByName(false)   
+  }
 
   return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản Lý Người Dùng</h2>
       </div>
-
+      <Form onSubmit={searchByName} className='mb-3'>
+        <Form.Label className="text-white">Tên Người Dùng</Form.Label>
+        <div className="d-flex gap-2">
+          <Form.Control
+            type="text"
+            placeholder="Tìm kiếm theo tên"
+            value={filterUserName}
+            onChange={(e) => setFilterUserName(e.target.value)}
+          />
+          <Button type="submit" variant="primary" className="px-4">
+            <i className="bi bi-search"></i>
+          </Button>
+        </div>
+      </Form>
       <Table striped bordered hover responsive className="shadow-sm">
         <thead className="bg-light">
           <tr>
@@ -351,7 +371,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {usersForAdmin.map((user) => (
+          {usersForAdmin?.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -382,7 +402,7 @@ const UserList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
-      <Pagination pageName="usersForAdmin" />
+      <Pagination pageName="usersForAdmin" activeSearchByName={activeSearchByName} filterUserName={filterUserName}/>
 
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>

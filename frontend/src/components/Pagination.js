@@ -4,7 +4,8 @@ import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../utils/axiosInstance'
 import { Button } from 'react-bootstrap'
-const Pagination = ({ pageName, setItems, category, brand  }) => {
+const Pagination = ({ pageName, setItems, category, brand, 
+    activeSearchByName, filterUserName}) => {
     const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
@@ -137,11 +138,20 @@ const Pagination = ({ pageName, setItems, category, brand  }) => {
                 break
             case "usersForAdmin":
                 try {
-                    const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
-                        params: { page: currentPage },
-                        withCredentials: true
-                    })
+                    if(filterUserName !== "") {
+                        const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
+                            params: { page: currentPage, name: filterUserName },
+                            withCredentials: true
+                        })
                     setUsersForAdmin(res1.data.user)
+                    } 
+                    if(filterUserName === "") {
+                        const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
+                            params: { page: currentPage},
+                            withCredentials: true
+                        })
+                    setUsersForAdmin(res1.data.user)
+                    }
                     // console.log(res1.data.user)
                 } catch (error) {
                     console.log(error.message)
@@ -217,7 +227,7 @@ const Pagination = ({ pageName, setItems, category, brand  }) => {
     }, [])
     useEffect(() => {
         fetchDataByPage()
-    }, [currentPage])
+    }, [currentPage, activeSearchByName])
 
     return (
         <>
