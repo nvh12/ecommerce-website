@@ -1,17 +1,32 @@
-import React, { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
+import React, { useContext, useEffect, useState } from 'react';
 import ProductCard from './ProductCard.js';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import '../styles/SaleCarousel.css';
+import { AppContext } from '../context/AppContext.js';
 
 const Sale = () => {
-  const { productItems } = useContext(AppContext);
-  console.log(productItems);
-  // Filter products with discount greater than 0
-  const discountedProducts = productItems.filter(product => product.discount > 0);
-  console.log(discountedProducts);
-  // Group products into sets of 6 for each carousel slide
+  const { backendUrl } = useContext(AppContext);
+  const [discountedProducts, setDiscountedProducts] = useState([]);
+
+  // Fetch sản phẩm giảm giá khi component được mount
+  useEffect(() => {
+    const fetchDiscountedProducts = async () => {
+      try {
+        // const url=${backendUrl}/product/?order=discount&dir=desc;
+        const response = await fetch(`${backendUrl}/product/?order=discount&dir=desc&limit=24`);
+        const data = await response.json();
+        console.log(data)
+        setDiscountedProducts(data.product || []); // Giả sử response có key `products`
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm giảm giá:", error);
+      }
+    };
+
+    fetchDiscountedProducts();
+  }, [backendUrl]);
+
+  // Gom nhóm sản phẩm thành từng nhóm 6 sản phẩm
   const groupProducts = (products, size) => {
     return products.reduce((acc, _, i) => {
       if (i % size === 0) acc.push(products.slice(i, i + size));
@@ -21,7 +36,7 @@ const Sale = () => {
 
   const productGroups = groupProducts(discountedProducts, 6);
 
-  // Custom prev/next icons for carousel
+  // Icon điều hướng
   const CustomPrevIcon = <FaChevronLeft className="carousel-custom-icon" />;
   const CustomNextIcon = <FaChevronRight className="carousel-custom-icon" />;
 
@@ -33,32 +48,33 @@ const Sale = () => {
           Ưu Đãi Nóng
         </div>
       </div>
-      
-      <Carousel 
-        controls={true}
-        indicators={true}
-        interval={5000}
-        className="sale-carousel"
-        prevIcon={CustomPrevIcon}
-        nextIcon={CustomNextIcon}
-      >
-        {productGroups.map((group, idx) => (
-          <Carousel.Item key={idx}>
-            <Container fluid>
-              <Row xs={2} md={3} lg={6} className="g-3">
-                {group.map((product) => (
-                  <Col key={product._id}>
-                    <ProductCard 
-                      product={product}
-                      showProgress={false}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </Container>
-          </Carousel.Item>
-        ))}
-      </Carousel>
+
+      {discountedProducts.length > 0 ? (
+        <Carousel
+          controls={true}
+          indicators={true}
+          interval={5000}
+          className="sale-carousel"
+          prevIcon={CustomPrevIcon}
+          nextIcon={CustomNextIcon}
+        >
+          {productGroups.map((group, idx) => (
+            <Carousel.Item key={idx}>
+              <Container fluid>
+                <Row xs={2} md={3} lg={6} className="g-3">
+                  {group.map((product) => (
+                    <Col key={product._id}>
+                      <ProductCard product={product} showProgress={false} />
+                    </Col>
+                  ))}
+                </Row>
+              </Container>
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      ) : (
+        <p className="text-center text-muted">Đang tải sản phẩm giảm giá...</p>
+      )}
     </div>
   );
 };

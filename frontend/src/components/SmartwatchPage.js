@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Spinner, Form, Button } from 'react-bootstra
 import ProductCard from './ProductCard';
 import { AppContext } from '../context/AppContext';
 import axiosInstance from '../utils/axiosInstance';
-
+import Pagination from './Pagination';
 const SmartwatchPage = () => {
   const { backendUrl } = useContext(AppContext);
   const [smartwatches, setSmartWatches] = useState([]);
@@ -14,22 +14,32 @@ const SmartwatchPage = () => {
   const [brand, setBrand] = useState('');
   const [priceRange, setPriceRange] = useState('');
 
+  
   useEffect(() => {
-    const fetchSmartWatches = async () => {
+    const fetchSmartwatch = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get(`${backendUrl}/product/?category=Smartwatch`);
-        setSmartWatches(response.data.product);
+        const response = await axiosInstance.get(`${backendUrl}/product`, {
+          params: {
+            category: 'smartwatch',
+            limit : 16,
+            brand: brand || undefined,
+            priceRange: priceRange || undefined,
+          }
+        });
+  
+        setSmartWatches(response.data.product || []);
+        // setTotalPages(response.data.totalPages || 1); 
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching smartwatches:', err);
-        setError('Không có đồng hồ thông minh nào');
+        console.error('Error fetching phones:', err);
+        setError('Không có đồng hồ nào');
         setLoading(false);
       }
     };
-
-    fetchSmartWatches();
-  }, [backendUrl]);
+  
+    fetchSmartwatch();
+  }, [backendUrl, brand, priceRange]);
 
   // Lấy danh sách brand duy nhất
   const brands = Array.from(new Set(smartwatches.map((p) => p.brand).filter(Boolean)));
@@ -105,6 +115,9 @@ const SmartwatchPage = () => {
             ))
           )}
         </Row>
+        <div className="mt-4">
+          <Pagination pageName="productsPage" category='smartwatch' brand={brand} setItems={setSmartWatches}/>
+        </div>
       </Container>
     </div>
   );

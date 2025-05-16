@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Nav, Tab } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useAsyncError } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -274,6 +274,8 @@ const UserList = ({ backendUrl }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const {usersForAdmin, setUsersForAdmin} = useContext(AppContext)
+  const [filterUserName, setFilterUserName] = useState("")
+  const [activeSearchByName, setActiceSearchByName] = useState(false)
   // setUsers(usersForAdmin)
 
   useEffect(() => {
@@ -333,13 +335,31 @@ const UserList = ({ backendUrl }) => {
       }
     }
   };
+  const searchByName =  (e) => {
+    e.preventDefault()
+    setActiceSearchByName(!activeSearchByName)   
+    //setActiceSearchByName(false)   
+  }
 
   return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản Lý Người Dùng</h2>
       </div>
-
+      <Form onSubmit={searchByName} className='mb-3'>
+        <Form.Label className="text-white">Tên Người Dùng</Form.Label>
+        <div className="d-flex gap-2">
+          <Form.Control
+            type="text"
+            placeholder="Tìm kiếm theo tên"
+            value={filterUserName}
+            onChange={(e) => setFilterUserName(e.target.value)}
+          />
+          <Button type="submit" variant="primary" className="px-4">
+            <i className="bi bi-search"></i>
+          </Button>
+        </div>
+      </Form>
       <Table striped bordered hover responsive className="shadow-sm">
         <thead className="bg-light">
           <tr>
@@ -351,7 +371,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {usersForAdmin.map((user) => (
+          {usersForAdmin?.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -382,7 +402,7 @@ const UserList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
-      <Pagination pageName="usersForAdmin" />
+      <Pagination pageName="usersForAdmin" activeSearchByName={activeSearchByName} filterUserName={filterUserName}/>
 
       {/* Edit User Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -536,7 +556,7 @@ const ProductList = ({ backendUrl }) => {
     const handleApplyFilters = async () => {
         setIsFiltering(true);
         try {
-            let params = { page: 1 };
+            let params = { page: 1, limit: 18 };
             
             if (filterName) params.search = filterName;
             if (filterCategory) params.category = filterCategory;
@@ -544,7 +564,7 @@ const ProductList = ({ backendUrl }) => {
             if (filterPriceMin) params.priceMin = filterPriceMin;
             if (filterPriceMax) params.priceMax = filterPriceMax;
             console.log(params);
-            const response = await axios.get(`${backendUrl}/product`, { params, limit: 20 });
+            const response = await axios.get(`${backendUrl}/product`, { params});
             console.log(response.data);
             
             if (response.data && response.data.product) {
@@ -751,10 +771,11 @@ const ProductList = ({ backendUrl }) => {
         return {
             ...product,
             category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
-            color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
-            features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
+            // color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
+            // features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
         };
     };
+    console.log("product", products)
 
     return (
         <div className="mt-4">
@@ -907,6 +928,8 @@ const ProductList = ({ backendUrl }) => {
                                                 onClick={() => {
                                                     setSelectedProduct(prepareProductForEdit(product));
                                                     setShowEditModal(true);
+                                                    console.log("productselected:", product)
+                                                    console.log("productselected1:", selectedProduct)
                                                 }}
                                             >
                                                 Chỉnh Sửa
@@ -1027,7 +1050,7 @@ const ProductList = ({ backendUrl }) => {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group className="mb-3">
+                        {/* <Form.Group className="mb-3">
                             <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
                             <Form.Control
                                 type="text"
@@ -1035,24 +1058,148 @@ const ProductList = ({ backendUrl }) => {
                                 onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
                                 placeholder="Đỏ, Xanh, ..."
                             />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.features}
-                                onChange={(e) => setNewProduct({ ...newProduct, features: e.target.value })}
-                                placeholder="Chống nước, Bluetooth, ..."
-                            />
-                        </Form.Group>
+                        </Form.Group> */}
+                        <Form.Group className='mb-3'>
+                          <Form.Label>Màu sắc</Form.Label>
+                          {(Array.isArray(newProduct?.color) && newProduct.color.length > 0) &&
+                          (newProduct.color.map((item, index) => {
+                            const [label, ...rest] = item.split(":")
+                            const value = rest.join(":")
+                            const handleLabelChange = (e) => {
+                              const newLabel = e.target.value;
+                              const updatedColors = [...newProduct.color];
+                              const [, value = ""] = updatedColors[index].split(":");
+
+                              if (newLabel.trim() === "" && value.trim() === "") {
+                                updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedColors[index] = `${newLabel}:${value.trim()}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                            };
+                            const handleValueChange = (e) => {
+                              const newValue = e.target.value;
+                              const updatedColors = [...newProduct.color];
+                              const [label = ""] = updatedColors[index].split(":");
+
+                              if (label.trim() === "" && newValue.trim() === "") {
+                                updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedColors[index] = `${label.trim()}:${newValue}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                            };
+                            return (
+                            <Row key={index} className='my-1'>
+                              <Col md={3}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={label}
+                                  onChange={handleLabelChange}
+                                  placeholder='Màu sắc'
+                                  />
+                                </Form.Group>
+                              </Col>
+  
+                              <Col md={9}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={value}
+                                  onChange={handleValueChange}
+                                  placeholder='Link ảnh'
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>  
+                            )
+                          }))
+                          }
+                          <div className='d-block'>
+                            <Button
+                                variant="secondary"
+                                className="mt-2 d-block-inline"
+                                onClick={() => {
+                                  const updatedColors = [...(newProduct?.color || [])];
+                                  updatedColors.push(":"); // Thêm dòng trống (label:value)
+                                  setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                                }}
+                              >
+                                Thêm màu sắc
+                            </Button>
+                            <Button
+                            variant="danger"
+                            className="mt-2 ms-2"
+                            onClick={() => {
+                              const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả màu sắc ?")
+                              if(confirmDelete) {
+                                setNewProduct(prev => ({ ...prev, color: [] }));
+                              }
+                            }}
+                          >
+                            Xoá tất cả màu sắc
+                            </Button>
+                          </div>
+                        </Form.Group>    
                         <Form.Group className="mb-3">
                             <Form.Label>URL Hình Ảnh</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.images}
-                                onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
-                                placeholder="https://example.com/image.jpg"
-                            />
+                            {(Array.isArray(newProduct?.images) && newProduct.images.length > 0) &&
+                            (newProduct.images.map((item, index) => {
+                              const handleImageChange = (e) => {
+                                const newImageLink = e.target.value
+                                const updatedImages = newProduct.images
+                                if(newImageLink === "") {
+                                  updatedImages.splice(index, 1)
+                                } else {
+                                  updatedImages[index] = newImageLink
+                                }
+                                setNewProduct(prev => ({...prev, images: updatedImages}))
+                              }
+                              return (
+                                <Row className='my-1'>
+                                  <Col md={2}>Hình {index + 1}</Col>
+                                  <Col md={10}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                        type='text'
+                                        value={item}
+                                        onChange={handleImageChange}
+                                        placeholder='Link ảnh'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>
+                              )
+                            }))
+                            }
+                            <div className='d-block'>
+                                <Button
+                                  variant='secondary'
+                                  className='my-2 d-block-inline'
+                                  onClick={() => {
+                                    const updatedImages = [...(newProduct?.images || [])]
+                                    updatedImages.push("")
+                                    setNewProduct(prev => ({...prev, images: updatedImages}))
+                                  }}
+                                >
+                                  Thêm ảnh
+                                </Button>
+                                <Button
+                                  variant='danger'
+                                  className='my-2 ms-2 d-block-inline'
+                                  onClick={() => {
+                                    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa tất cả các ảnh của sản phẩm?")
+                                    if(confirmDelete) {
+                                      setNewProduct(prev => ({...prev, images: []}))
+                                    }
+                                  }}
+                                >
+                                  Xóa tất cả ảnh 
+                                </Button>
+                            </div>        
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Mô Tả</Form.Label>
@@ -1064,8 +1211,97 @@ const ProductList = ({ backendUrl }) => {
                                 required
                             />
                         </Form.Group>
+                        <Form.Group>
+                          <Form.Label>Thông số kỹ thuật</Form.Label>
+                          {(Array.isArray(newProduct?.features) && newProduct.features.length > 0) &&
+                          (newProduct.features.map((item, index) => {
+                            const [label, ...rest] = item.split(":")
+                            const value = rest.join(":")
+                            const handleLabelChange = (e) => {
+                              const newLabel = e.target.value;
+                              const updatedFeatures = [...newProduct.features];
+                              const [, value = ""] = updatedFeatures[index].split(":");
+
+                              if (newLabel.trim() === "" && value.trim() === "") {
+                                updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedFeatures[index] = `${newLabel}:${value.trim()}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                            };
+                            const handleValueChange = (e) => {
+                              const newValue = e.target.value;
+                              const updatedFeatures = [...newProduct.features];
+                              const [label = ""] = updatedFeatures[index].split(":");
+
+                              if (label.trim() === "" && newValue.trim() === "") {
+                                updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedFeatures[index] = `${label.trim()}:${newValue}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                            };
+                            return (
+                            <Row key={index} className='my-1'>
+                              <Col md={3}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={label}
+                                  onChange={handleLabelChange}
+                                  placeholder='Tên thông số'
+                                  />
+                                </Form.Group>
+                              </Col>
+  
+                              <Col md={9}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={value}
+                                  onChange={handleValueChange}
+                                  placeholder='Chi tiết thông số kĩ thuật'
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>  
+                            )
+                          }))
+                          }
+                          <div className='d-block'>
+                            <Button
+                                variant="secondary"
+                                className="mt-2 d-block-inline"
+                                onClick={() => {
+                                  const updatedFeatures = [...(newProduct?.features || [])];
+                                  updatedFeatures.push(":"); // Thêm dòng trống (label:value)
+                                  setNewProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                }}
+                              >
+                                Thêm thông số
+                            </Button>
+                            <Button
+                            variant="danger"
+                            className="mt-2 ms-2"
+                            onClick={() => {
+                              const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả thông số kỹ thuật?")
+                              if(confirmDelete) {
+                                setNewProduct(prev => ({ ...prev, features: [] }));
+                              }
+                            }}
+                          >
+                            Xoá tất cả thông số 
+                            </Button>
+                          </div>
+                        </Form.Group>                  
                         <div className="d-flex justify-content-end">
-                            <Button variant="secondary" className="me-2" onClick={() => setShowAddModal(false)}>
+                            <Button variant="secondary" className="me-2" onClick={() => {
+                                setNewProduct(prev => ({...prev, features: []}))
+                                setNewProduct(prev => ({...prev, images: []}))
+                                setShowAddModal(false)
+                                }}>
                                 Hủy
                             </Button>
                         <Button variant="primary" type="submit">
@@ -1168,15 +1404,100 @@ const ProductList = ({ backendUrl }) => {
                                     required
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-3">
+                            {/* <Form.Group className="mb-3">
                                 <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={selectedProduct.color}
                                     onChange={(e) => setSelectedProduct({ ...selectedProduct, color: e.target.value })}
                                 />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
+                            </Form.Group> */}
+                            <Form.Group className='mb-3'>
+                              <Form.Label>Màu sắc</Form.Label>
+                              {(Array.isArray(selectedProduct?.color) && selectedProduct.color.length > 0) &&
+                              (selectedProduct.color.map((item, index) => {
+                                const [label, ...rest] = item.split(":")
+                                const value = rest.join(":")
+                                const handleLabelChange = (e) => {
+                                  const newLabel = e.target.value;
+                                  const updatedColors = [...selectedProduct.color];
+                                  const [, value = ""] = updatedColors[index].split(":");
+
+                                  if (newLabel.trim() === "" && value.trim() === "") {
+                                    updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedColors[index] = `${newLabel}:${value.trim()}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                };
+                                const handleValueChange = (e) => {
+                                  const newValue = e.target.value;
+                                  const updatedColors = [...selectedProduct.color];
+                                  const [label = ""] = updatedColors[index].split(":");
+
+                                  if (label.trim() === "" && newValue.trim() === "") {
+                                    updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedColors[index] = `${label.trim()}:${newValue}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                };
+                                return (
+                                <Row key={index} className='my-1'>
+                                  <Col md={3}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={label}
+                                      onChange={handleLabelChange}
+                                      placeholder='Màu sắc'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+      
+                                  <Col md={9}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={value}
+                                      onChange={handleValueChange}
+                                      placeholder='Link ảnh'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>  
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                    variant="secondary"
+                                    className="mt-2 d-block-inline"
+                                    onClick={() => {
+                                      const updatedColors = [...(selectedProduct?.color || [])];
+                                      updatedColors.push(":"); // Thêm dòng trống (label:value)
+                                      setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                    }}
+                                  >
+                                    Thêm màu sắc
+                                </Button>
+                                <Button
+                                    variant="danger"
+                                    className="mt-2 ms-2"
+                                    onClick={() => {
+                                      const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả màu sắc ?")
+                                      if(confirmDelete) {
+                                        setSelectedProduct(prev => ({ ...prev, color: [] }));
+                                      }
+                                    }}
+                              >
+                                Xoá tất cả màu sắc
+                                </Button>
+                              </div>
+                            </Form.Group>    
+                            {/* <Form.Group className="mb-3">
                                 <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -1184,6 +1505,63 @@ const ProductList = ({ backendUrl }) => {
                                     onChange={(e) => setSelectedProduct({ ...selectedProduct, features: e.target.value })}
                                     placeholder="Chống nước, Bluetooth, ..."
                                 />
+                            </Form.Group> */}
+                            <Form.Group>
+                              <Form.Label>URL Hình Ảnh</Form.Label>
+                              {(Array.isArray(selectedProduct?.images) && selectedProduct.images.length > 0) &&
+                              (selectedProduct.images.map((item, index) => {
+                                const handleImageChange = (e) => {
+                                  const newImageLink = e.target.value
+                                  const updatedImages = [...selectedProduct.images]
+                                  if(newImageLink === "") {
+                                    updatedImages.splice(index, 1)
+                                  } else {
+                                    updatedImages[index] = newImageLink
+                                  }
+                                  setSelectedProduct(prev => ({...prev, images: updatedImages}))
+                                }
+                                return (
+                                  <Row className='my-1'>
+                                    <Col md={2}>Hình {index + 1}</Col>
+                                    <Col md={10}>
+                                      <Form.Group>
+                                        <Form.Control
+                                          type='text'
+                                          value={item}
+                                          onChange={handleImageChange}
+                                          placeholder='Link ảnh'
+                                        />                                          
+                                      </Form.Group>
+                                    </Col>
+                                  </Row>
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                  variant='secondary'
+                                  className='my-2 d-block-inline'
+                                  onClick={() => {
+                                    const updateImages = [...(selectedProduct?.images || [])]
+                                    updateImages.push("")
+                                    setSelectedProduct(prev => ({...prev, images: updateImages}))
+                                  }}
+                                >
+                                  Thêm ảnh
+                                </Button>
+                                <Button
+                                  variant='danger'
+                                  className='my-2 ms-2 d-block-inline'
+                                  onClick={() => {
+                                    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa tất cả các ảnh của sản phẩm?")
+                                    if(confirmDelete) {
+                                      setSelectedProduct(prev => ({...prev, images: []}))
+                                    }
+                                  }}
+                                >
+                                  Xóa tất cả ảnh 
+                                </Button>
+                              </div>
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Mô Tả</Form.Label>
@@ -1195,6 +1573,92 @@ const ProductList = ({ backendUrl }) => {
                                     required
                                 />
                             </Form.Group>
+                            <Form.Group>
+                              <Form.Label>Thông số kỹ thuật</Form.Label>
+                              {(Array.isArray(selectedProduct?.features) && selectedProduct.features.length > 0) &&
+                              (selectedProduct.features.map((item, index) => {
+                                const [label, ...rest] = item.split(":")
+                                const value = rest.join(":")
+                                const handleLabelChange = (e) => {
+                                  const newLabel = e.target.value;
+                                  const updatedFeatures = [...selectedProduct.features];
+                                  const [, value = ""] = updatedFeatures[index].split(":");
+
+                                  if (newLabel.trim() === "" && value.trim() === "") {
+                                    updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedFeatures[index] = `${newLabel}:${value.trim()}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                };
+                                const handleValueChange = (e) => {
+                                  const newValue = e.target.value;
+                                  const updatedFeatures = [...selectedProduct.features];
+                                  const [label = ""] = updatedFeatures[index].split(":");
+
+                                  if (label.trim() === "" && newValue.trim() === "") {
+                                    updatedFeatures.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedFeatures[index] = `${label.trim()}:${newValue}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                };
+                                return (
+                                <Row key={index} className='my-1'>
+                                  <Col md={3}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={label}
+                                      onChange={handleLabelChange}
+                                      placeholder='Tên thông số'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+      
+                                  <Col md={9}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={value}
+                                      onChange={handleValueChange}
+                                      placeholder='Chi tiết thông số kĩ thuật'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>  
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                    variant="secondary"
+                                    className="mt-2 d-block-inline"
+                                    onClick={() => {
+                                      const updatedFeatures = [...(selectedProduct?.features || [])];
+                                      updatedFeatures.push(":"); // Thêm dòng trống (label:value)
+                                      setSelectedProduct(prev => ({ ...prev, features: updatedFeatures }));
+                                    }}
+                                  >
+                                    Thêm thống số
+                                </Button>
+                                <Button
+                                variant="danger"
+                                className="mt-2 ms-2"
+                                onClick={() => {
+                                  const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả thông số kỹ thuật?")
+                                  if(confirmDelete) {
+                                    setSelectedProduct(prev => ({ ...prev, features: [] }));
+                                  }
+                                }}
+                              >
+                                Xoá tất cả thống số 
+                                </Button>
+                              </div>
+                            </Form.Group>
+                           
                             <div className="d-flex justify-content-end">
                                 <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
                                     Hủy
