@@ -304,7 +304,8 @@ const ProductDetail = () => {
                             <table className="table table-bordered">
                                 <tbody>
                                     {product.features.map((item, index) => {
-                                        const [label, value] = item.split(":");
+                                        const [label, ...rest] = item.split(":");
+                                        const value = rest.join(":")
                                         return (
                                             <tr key={index}>
                                                 <th style={{ width: '30%' }}>{label.trim()}</th>

@@ -751,7 +751,7 @@ const ProductList = ({ backendUrl }) => {
         return {
             ...product,
             category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
-            color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
+            // color: Array.isArray(product.color) ? product.color.join(', ') : product.color,
             // features: Array.isArray(product.features) ? product.features.join(', ') : product.features || ''
         };
     };
@@ -1030,7 +1030,7 @@ const ProductList = ({ backendUrl }) => {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group className="mb-3">
+                        {/* <Form.Group className="mb-3">
                             <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
                             <Form.Control
                                 type="text"
@@ -1038,7 +1038,92 @@ const ProductList = ({ backendUrl }) => {
                                 onChange={(e) => setNewProduct({ ...newProduct, color: e.target.value })}
                                 placeholder="Đỏ, Xanh, ..."
                             />
-                        </Form.Group>
+                        </Form.Group> */}
+                        <Form.Group className='mb-3'>
+                          <Form.Label>Màu sắc</Form.Label>
+                          {(Array.isArray(newProduct?.color) && newProduct.color.length > 0) &&
+                          (newProduct.color.map((item, index) => {
+                            const [label, ...rest] = item.split(":")
+                            const value = rest.join(":")
+                            const handleLabelChange = (e) => {
+                              const newLabel = e.target.value;
+                              const updatedColors = [...newProduct.color];
+                              const [, value = ""] = updatedColors[index].split(":");
+
+                              if (newLabel.trim() === "" && value.trim() === "") {
+                                updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedColors[index] = `${newLabel}:${value.trim()}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                            };
+                            const handleValueChange = (e) => {
+                              const newValue = e.target.value;
+                              const updatedColors = [...newProduct.color];
+                              const [label = ""] = updatedColors[index].split(":");
+
+                              if (label.trim() === "" && newValue.trim() === "") {
+                                updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                              } else {
+                                updatedColors[index] = `${label.trim()}:${newValue}`;
+                              }
+
+                              setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                            };
+                            return (
+                            <Row key={index} className='my-1'>
+                              <Col md={3}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={label}
+                                  onChange={handleLabelChange}
+                                  placeholder='Màu sắc'
+                                  />
+                                </Form.Group>
+                              </Col>
+  
+                              <Col md={9}>
+                                <Form.Group>
+                                  <Form.Control 
+                                  type='text'
+                                  value={value}
+                                  onChange={handleValueChange}
+                                  placeholder='Link ảnh'
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>  
+                            )
+                          }))
+                          }
+                          <div className='d-block'>
+                            <Button
+                                variant="secondary"
+                                className="mt-2 d-block-inline"
+                                onClick={() => {
+                                  const updatedColors = [...(newProduct?.color || [])];
+                                  updatedColors.push(":"); // Thêm dòng trống (label:value)
+                                  setNewProduct(prev => ({ ...prev, color: updatedColors }));
+                                }}
+                              >
+                                Thêm màu sắc
+                            </Button>
+                            <Button
+                            variant="danger"
+                            className="mt-2 ms-2"
+                            onClick={() => {
+                              const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả màu sắc ?")
+                              if(confirmDelete) {
+                                setNewProduct(prev => ({ ...prev, color: [] }));
+                              }
+                            }}
+                          >
+                            Xoá tất cả màu sắc
+                            </Button>
+                          </div>
+                        </Form.Group>    
                         <Form.Group className="mb-3">
                             <Form.Label>URL Hình Ảnh</Form.Label>
                             {(Array.isArray(newProduct?.images) && newProduct.images.length > 0) &&
@@ -1110,7 +1195,8 @@ const ProductList = ({ backendUrl }) => {
                           <Form.Label>Thông số kỹ thuật</Form.Label>
                           {(Array.isArray(newProduct?.features) && newProduct.features.length > 0) &&
                           (newProduct.features.map((item, index) => {
-                            const [label, value] = item.split(":")
+                            const [label, ...rest] = item.split(":")
+                            const value = rest.join(":")
                             const handleLabelChange = (e) => {
                               const newLabel = e.target.value;
                               const updatedFeatures = [...newProduct.features];
@@ -1298,14 +1384,99 @@ const ProductList = ({ backendUrl }) => {
                                     required
                                 />
                             </Form.Group>
-                            <Form.Group className="mb-3">
+                            {/* <Form.Group className="mb-3">
                                 <Form.Label>Màu Sắc (cách nhau bằng dấu phẩy)</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={selectedProduct.color}
                                     onChange={(e) => setSelectedProduct({ ...selectedProduct, color: e.target.value })}
                                 />
-                            </Form.Group>
+                            </Form.Group> */}
+                            <Form.Group className='mb-3'>
+                              <Form.Label>Màu sắc</Form.Label>
+                              {(Array.isArray(selectedProduct?.color) && selectedProduct.color.length > 0) &&
+                              (selectedProduct.color.map((item, index) => {
+                                const [label, ...rest] = item.split(":")
+                                const value = rest.join(":")
+                                const handleLabelChange = (e) => {
+                                  const newLabel = e.target.value;
+                                  const updatedColors = [...selectedProduct.color];
+                                  const [, value = ""] = updatedColors[index].split(":");
+
+                                  if (newLabel.trim() === "" && value.trim() === "") {
+                                    updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedColors[index] = `${newLabel}:${value.trim()}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                };
+                                const handleValueChange = (e) => {
+                                  const newValue = e.target.value;
+                                  const updatedColors = [...selectedProduct.color];
+                                  const [label = ""] = updatedColors[index].split(":");
+
+                                  if (label.trim() === "" && newValue.trim() === "") {
+                                    updatedColors.splice(index, 1); // Xoá dòng nếu cả label và value rỗng
+                                  } else {
+                                    updatedColors[index] = `${label.trim()}:${newValue}`;
+                                  }
+
+                                  setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                };
+                                return (
+                                <Row key={index} className='my-1'>
+                                  <Col md={3}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={label}
+                                      onChange={handleLabelChange}
+                                      placeholder='Màu sắc'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+      
+                                  <Col md={9}>
+                                    <Form.Group>
+                                      <Form.Control 
+                                      type='text'
+                                      value={value}
+                                      onChange={handleValueChange}
+                                      placeholder='Link ảnh'
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </Row>  
+                                )
+                              }))
+                              }
+                              <div className='d-block'>
+                                <Button
+                                    variant="secondary"
+                                    className="mt-2 d-block-inline"
+                                    onClick={() => {
+                                      const updatedColors = [...(selectedProduct?.color || [])];
+                                      updatedColors.push(":"); // Thêm dòng trống (label:value)
+                                      setSelectedProduct(prev => ({ ...prev, color: updatedColors }));
+                                    }}
+                                  >
+                                    Thêm màu sắc
+                                </Button>
+                                <Button
+                                    variant="danger"
+                                    className="mt-2 ms-2"
+                                    onClick={() => {
+                                      const confirmDelete = window. confirm("Bạn có chắc chắn xóa tất cả màu sắc ?")
+                                      if(confirmDelete) {
+                                        setSelectedProduct(prev => ({ ...prev, color: [] }));
+                                      }
+                                    }}
+                              >
+                                Xoá tất cả màu sắc
+                                </Button>
+                              </div>
+                            </Form.Group>    
                             {/* <Form.Group className="mb-3">
                                 <Form.Label>Tính năng (cách nhau bằng dấu phẩy)</Form.Label>
                                 <Form.Control
@@ -1386,7 +1557,8 @@ const ProductList = ({ backendUrl }) => {
                               <Form.Label>Thông số kỹ thuật</Form.Label>
                               {(Array.isArray(selectedProduct?.features) && selectedProduct.features.length > 0) &&
                               (selectedProduct.features.map((item, index) => {
-                                const [label, value] = item.split(":")
+                                const [label, ...rest] = item.split(":")
+                                const value = rest.join(":")
                                 const handleLabelChange = (e) => {
                                   const newLabel = e.target.value;
                                   const updatedFeatures = [...selectedProduct.features];
