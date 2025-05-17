@@ -1,6 +1,7 @@
 require('dotenv').config();
 const cartServices = require('../services/cartServices');
 const Product = require('../models/product');
+const productServices = require('../services/productServices');
 const Order = require('../models/order');
 
 async function cart(req, res) {
@@ -58,9 +59,9 @@ async function clear(req, res) {
 
 async function rollback(updatedProducts) {
     for (const product of updatedProducts) {
-        await Product.findByIdAndUpdate(
-            product.productId,
-            { $set: { stocks: product.originalStock } }
+        await productServices.updateProduct(
+            { _id: product.productId },
+            { stocks: product.originalStock }
         );
     }
 }
@@ -72,11 +73,14 @@ async function checkout(req, res) {
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Empty cart' });
         }
-        const orderItems = cart.items.map(item => ({
-            product: item.product._id,
-            quantity: item.quantity,
-            price: item.product.price,
-        }));
+        const orderItems = cart.items.map(async (item) => {
+            const prod = await productServices.findProduct({ _id: item.product._id });
+            return {
+                product: prod._id,
+                quantity: item.quantity,
+                price: prod.price * (1 - prod.discount / 100),
+            }
+        });
         const newOrder = new Order({
             user: cart.user,
             items: orderItems,
@@ -88,12 +92,11 @@ async function checkout(req, res) {
         });
         const updatedProducts = [];
         for (const item of cart.items) {
-            const product = await Product.findById(item.product._id);
+            const product = await productServices.findProduct({ _id: item.product._id });
             const originalStock = product.stocks;
-            const update = await Product.findOneAndUpdate(
-                { _id: item.product._id, stocks: { $gte: item.quantity } },
-                { $inc: { stocks: -item.quantity } },
-                { runValidators: true }
+            const update = await productServices.updateProduct(
+                { _id: item.product._id },
+                { stocks: originalStock - item.quantity }
             );
             if (!update) {
                 await rollback(updatedProducts);
