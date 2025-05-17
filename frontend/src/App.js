@@ -30,11 +30,11 @@ function App() {
           <Route path="/category/:categoryType" element={<Home />} />
           
           {/* Legacy routes - all handled by Home.js */}
-          <Route path='/phone' element={<Home />} />
+          {/* <Route path='/phone' element={<Home />} />
           <Route path='/laptop' element={<Home />} />
           <Route path='/tablet' element={<Home />} />
           <Route path='/watch' element={<Home />} />
-          <Route path='/smartwatch' element={<Home />} />
+          <Route path='/smartwatch' element={<Home />} /> */}
       </Routes>
     </div>
   );

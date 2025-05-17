@@ -17,18 +17,20 @@ import LaptopPage from '../components/LaptopPage.js'
 import WatchPage from '../components/WatchPage.js'
 import SmartwatchPage from '../components/SmartwatchPage.js'
 import TabletPage from '../components/TabletPage.js'
-import axios from 'axios'
-
+import KeyboardPage from '../components/KeyboardPage.js'
+import ScreenPage from '../components/ScreenPage.js'
+import MousePage from '../components/MousePage.js'
+import PrinterPage from '../components/PrinterPage.js'
 const Home = () => {
   const { userData, productItems, backendUrl } = useContext(AppContext);
   const isAdmin = userData?.role === 'admin';
   const { categoryType } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Create separate state for recommendations
   const [recommendationItems, setRecommendationItems] = useState([]);
-  
+
   // Extract category from URL if present
   const getCategoryFromPath = () => {
     const path = location.pathname;
@@ -41,6 +43,10 @@ const Home = () => {
     if (path === '/watch') return 'watch';
     if (path === '/smartwatch') return 'smartwatch';
     if (path === '/tablet') return 'tablet';
+    if (path === '/keyboard') return 'keyboard';
+    if (path === '/mouse') return 'mouse';
+    if (path === '/screen') return 'screen';
+    if (path === '/printer') return 'printer';
     return null;
   };
 
@@ -74,6 +80,14 @@ const Home = () => {
         return <SmartwatchPage />;
       case 'tablet':
         return <TabletPage />;
+      case 'keyboard':
+        return <KeyboardPage />;
+      case 'mouse':
+        return <MousePage />;
+      case 'printer':
+        return <PrinterPage />;
+      case 'screen':
+        return <ScreenPage />;
       default:
         return (
           <>
@@ -94,10 +108,10 @@ const Home = () => {
         {renderCategoryComponent()}
       </div>
       <Footer />
-      
+
       {isAdmin && (
         <Link to="/admin">
-          <Button 
+          <Button
             className="nav-button admin-button"
           >
             <i className="bi bi-gear"></i>

@@ -11,34 +11,16 @@ const NavbarComponent = ({ onCategoryChange, activeCategory }) => {
     { id: 1, name: 'Điện thoại', path: '/category/phone', value: 'phone' },
     { id: 2, name: 'Laptop', path: '/category/laptop', value: 'laptop' },
     { id: 3, name: 'Phụ kiện', value: 'accessories', isDropdown: true, items: [
-      { name: 'Tai nghe', path: '/category/headphones' , value: 'headphone'},
       { name: 'Chuột', path: '/category/mouse',value:'mouse' },
       { name: 'Bàn phím', path: '/category/keyboard' ,value:'keyboard'}
     ]},
     { id: 4, name: 'Smartwatch', path: '/category/smartwatch', value: 'smartwatch' },
     { id: 5, name: 'Đồng hồ', path: '/category/watch', value: 'watch' },
     { id: 6, name: 'Tablet', path: '/category/tablet', value: 'tablet' },
-    { id: 7, name: 'Máy cũ, Thủ cũ', value: 'old', isDropdown: true, items: [
-      { name: 'Điện thoại cũ', path: '/category/old/phones' },
-      { name: 'Laptop cũ', path: '/category/old/laptops' },
-      { name: 'Tablet cũ', path: '/category/old/tablets' },
-      { name: 'Phụ kiện cũ', path: '/category/old/accessories' }
+    { id: 7, name: 'Màn hình, Máy in', value: 'peripherals', isDropdown: true, items: [
+      { name: 'Màn hình', path: '/category/screen' },
+      { name: 'Máy in', path: '/category/printer' }
     ]},
-    { id: 8, name: 'Màn hình, Máy in', value: 'peripherals', isDropdown: true, items: [
-      { name: 'Màn hình', path: '/category/peripherals/monitors' },
-      { name: 'Máy in', path: '/category/peripherals/printers' },
-      { name: 'Máy quét', path: '/category/peripherals/scanners' }
-    ]},
-    { id: 9, name: 'Sim, Thẻ cào', value: 'sim', isDropdown: true, items: [
-      { name: 'Sim data', path: '/category/sim/data' },
-      { name: 'Sim thường', path: '/category/sim/regular' },
-      { name: 'Thẻ cào', path: '/category/sim/cards' }
-    ]},
-    { id: 10, name: 'Dịch vụ tiện ích', value: 'services', isDropdown: true, items: [
-      { name: 'Bảo hành', path: '/category/services/warranty' },
-      { name: 'Sửa chữa', path: '/category/services/repair' },
-      { name: 'Tư vấn', path: '/category/services/consulting' }
-    ]}
   ];
 
   // Handle category change without full page reload
