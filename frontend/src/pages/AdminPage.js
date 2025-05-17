@@ -1789,6 +1789,7 @@ const OrderList = ({ backendUrl }) => {
   const { ordersForAdmin } = useContext(AppContext);
   const [expandedRows, setExpandedRows] = useState([]);
   const [productData, setProductData] = useState({});
+  const [updateOrders, setUpdateOrders] = useState(false)
 
   const handleUpdateOrderDetail = async (status, orderId) => {
     const message =
@@ -1805,7 +1806,7 @@ const OrderList = ({ backendUrl }) => {
         { withCredentials: true }
       );
       toast.success("Cập nhật đơn hàng thành công");
-      setTimeout(() => window.location.reload(), 1000);
+      setUpdateOrders(!updateOrders)
     } catch (error) {
       toast.error("Lỗi cập nhật đơn hàng");
       console.log(error.message);
@@ -1969,7 +1970,7 @@ const OrderList = ({ backendUrl }) => {
         </tbody>
       </Table>
 
-      <Pagination pageName="ordersForAdmin" />
+      <Pagination pageName="ordersForAdmin" updateOrders={updateOrders}/>
     </div>
   );
 };
