@@ -198,7 +198,7 @@ const getProductComment = async (info) => {
     try {
         let {productId, userId, page = 1, limit= 5} = info
         const skip = (page - 1) * limit;
-        userId = userId ? userId.toString() : null;
+        // userId = userId ? userId.toString() : null;
 
         let userComment = null;
         let comments = [];

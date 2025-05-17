@@ -1,6 +1,7 @@
 require('dotenv').config();
 const cartServices = require('../services/cartServices');
 const Product = require('../models/product');
+const productServices = require('../services/productServices');
 const Order = require('../models/order');
 
 async function cart(req, res) {
@@ -58,24 +59,28 @@ async function clear(req, res) {
 
 async function rollback(updatedProducts) {
     for (const product of updatedProducts) {
-        await Product.findByIdAndUpdate(
-            product.productId,
-            { $set: { stocks: product.originalStock } }
+        await productServices.updateProduct(
+            { _id: product.productId },
+            { stocks: product.originalStock }
         );
     }
 }
 
 async function checkout(req, res) {
+        let itype;
     try {
         const { userId, payment, delivery, address } = req.body;
         const cart = await cartServices.getCart(userId);
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Empty cart' });
         }
-        const orderItems = cart.items.map(item => ({
-            product: item.product._id,
-            quantity: item.quantity,
-            price: item.product.price,
+        const orderItems = await Promise.all(cart.items.map(async (item) => {
+            const prod = await Product.findById(item.product._id);
+            return {
+                product: prod._id,
+                quantity: item.quantity,
+                price: prod.price * (1 - prod.discount / 100),
+            }
         }));
         const newOrder = new Order({
             user: cart.user,
@@ -90,9 +95,11 @@ async function checkout(req, res) {
         for (const item of cart.items) {
             const product = await Product.findById(item.product._id);
             const originalStock = product.stocks;
-            const update = await Product.findOneAndUpdate(
-                { _id: item.product._id, stocks: { $gte: item.quantity } },
-                { $inc: { stocks: -item.quantity } },
+            itype = product;
+            const updatedStock = originalStock - item.quantity;
+            const update = await productServices.updateProduct(
+                { _id: item.product._id },
+                { stocks: updatedStock },
                 { runValidators: true }
             );
             if (!update) {
@@ -105,7 +112,7 @@ async function checkout(req, res) {
         await cartServices.clearCart(userId);
         return res.status(200).json({ message: 'Order placed successfully!', orderId: newOrder._id });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message, add: `${itype}` });
     }
 }
 
