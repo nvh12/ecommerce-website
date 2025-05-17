@@ -31,10 +31,10 @@ const Rating = ({
                 withCredentials: true
             });
             
-            if (response.data && Array.isArray(response.data.ratings)) {
-                const userRating = response.data.ratings.find(r => r.fromUser);
+            if (response.data && response.data.ratings) {
+                const userRating = response.data.ratings.fromUser;
                 if (userRating) {
-                    setRating(userRating.rate);
+                    setRating(response.data.ratings.rate);
                     setUserHasRated(true);
                 } else {
                     setRating(0);
@@ -102,12 +102,12 @@ const Rating = ({
                                         <div
                                             className="progress-bar bg-warning"
                                             style={{
-                                                width: `${(ratingDistribution[index] || 0) / (ratingsCount?.total || 1) * 100}%`
+                                                width: `${(ratingsCount[star] || 0) / (ratingsCount?.total || 1) * 100}%`
                                             }}
                                         />
                                     </div>
                                     <div className="count ms-2">
-                                        {ratingDistribution[index] || 0}
+                                        {ratingsCount[star] || 0}
                                     </div>
                                 </div>
                             ))}
