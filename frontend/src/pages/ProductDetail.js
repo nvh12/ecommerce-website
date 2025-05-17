@@ -217,7 +217,8 @@ const ProductDetail = () => {
                                                         }`}
                                                     style={{ minWidth: '120px', position: 'relative', cursor: 'pointer' }}
                                                 >
-                                                    <img src={image.trim()} alt={name.trim()} width={32} height={32} className="me-2" />
+                                                    {image!=="" && (<img src={image.trim()} alt={name.trim()} width={32} height={32} className="me-2" />)}
+                                                    
                                                     <div>
                                                         <div style={{ fontWeight: '500' }}>{name.trim()}</div>
                                                         {/* <div>29.990.000₫</div> nếu cần giá thì thêm sau */}
