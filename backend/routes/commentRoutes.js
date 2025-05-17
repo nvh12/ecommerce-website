@@ -13,7 +13,7 @@ router.get("/page/:productId", commentController.findCommentPageControl)
 // Đang test nên đã cho tạm userIduserId
 //Intput: productId ở params
 //Done
-// router.get("/:productId", commentController.getCommentProductControl)
+router.get("/:productId", commentController.getCommentProductControl)
 
 //Update rating theo id
 // Yêu cầu đầu vào : productId ở params và newComment trong body
