@@ -467,16 +467,16 @@ const UserList = ({ backendUrl }) => {
 // ProductList Component
 const ProductList = ({ backendUrl }) => {
   const { productItems, setProductItems } = useContext(AppContext);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [newProduct, setNewProduct] = useState({
-        productName: '',
-        price: '',
-        description: '',
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [newProduct, setNewProduct] = useState({
+    productName: '',
+    price: '',
+    description: '',
     category: [],
-        brand: '',
-        stocks: '',
+    brand: '',
+    stocks: '',
     color: [],
     images: [],
     currency: 'VND',
@@ -505,7 +505,7 @@ const ProductList = ({ backendUrl }) => {
   const [isFiltering, setIsFiltering] = useState(false);
 
   // Fetch categories and brands for filters
-    useEffect(() => {
+  useEffect(() => {
     const fetchFilters = async () => {
       try {
         // Fetch brands
@@ -553,7 +553,7 @@ const ProductList = ({ backendUrl }) => {
         setProducts(response.data.product);
         // We don't update the context to avoid affecting pagination
       }
-        } catch (error) {
+    } catch (error) {
       console.error('Error applying filters:', error);
       toast.error('Lỗi khi lọc sản phẩm');
     } finally {
@@ -598,7 +598,7 @@ const ProductList = ({ backendUrl }) => {
         setProducts(response.data.product);
         setProductItems(response.data.product);
       }
-        } catch (error) {
+    } catch (error) {
       console.error('Error refreshing current page:', error);
     }
   };
@@ -624,9 +624,9 @@ const ProductList = ({ backendUrl }) => {
     setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
   };
 
-    const handleAddProduct = async (e) => {
-        e.preventDefault();
-        try {
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
       const formData = new FormData();
 
       // Add product data
@@ -666,14 +666,14 @@ const ProductList = ({ backendUrl }) => {
 
       await axiosInstance.post(`${backendUrl}/product/`, formData, config);
       toast.success('Thêm sản phẩm thành công');
-            setShowAddModal(false);
-            setNewProduct({
-                productName: '',
-                price: '',
-                description: '',
+      setShowAddModal(false);
+      setNewProduct({
+        productName: '',
+        price: '',
+        description: '',
         category: [],
-                brand: '',
-                stocks: '',
+        brand: '',
+        stocks: '',
         color: [],
         images: [],
         currency: 'VND',
@@ -683,60 +683,65 @@ const ProductList = ({ backendUrl }) => {
       setImageInputs([]);
 
       refreshCurrentPage();
-        } catch (error) {
-            console.error('Error adding product:', error);
+    } catch (error) {
+      console.error('Error adding product:', error);
       toast.error(`Lỗi khi thêm sản phẩm: ${error.response?.data?.message || error.message}`);
-        }
-    };
+    }
+  };
 
-    const handleEditProduct = async (e) => {
-        e.preventDefault();
-        try {
-      // Prepare the data
-      const productData = {
-        productName: selectedProduct.productName,
-        price: Number(selectedProduct.price),
-        description: selectedProduct.description,
-        category: typeof selectedProduct.category === 'string'
-          ? selectedProduct.category.split(',').map(cat => cat.trim())
-          : selectedProduct.category,
-        brand: selectedProduct.brand,
-        stocks: Number(selectedProduct.stocks),
-        color: typeof selectedProduct.color === 'string'
-          ? selectedProduct.color.split(',').map(col => col.trim())
-          : selectedProduct.color,
-        images: Array.isArray(selectedProduct.images)
-          ? selectedProduct.images
-          : [selectedProduct.images].filter(Boolean),
-        currency: selectedProduct.currency,
-        discount: Number(selectedProduct.discount),
-        features: typeof selectedProduct.features === 'string'
-          ? selectedProduct.features.split(',').map(feature => feature.trim())
-          : selectedProduct.features
-      };
-      console.log(productData.images)
+  const handleEditProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+
+      // Add product data
+      formData.append('productName', selectedProduct.productName);
+      formData.append('price', Number(selectedProduct.price));
+      formData.append('description', selectedProduct.description);
+      formData.append('category', typeof selectedProduct.category === 'string'
+        ? selectedProduct.category.split(',').map(cat => cat.trim())
+        : selectedProduct.category);
+      formData.append('brand', selectedProduct.brand);
+      formData.append('stocks', Number(selectedProduct.stocks));
+      formData.append('color', typeof selectedProduct.color === 'string'
+        ? selectedProduct.color.split(',').map(col => col.trim())
+        : selectedProduct.color);
+      formData.append('currency', selectedProduct.currency);
+      formData.append('discount', Number(selectedProduct.discount));
+      formData.append('features', typeof selectedProduct.features === 'string'
+        ? selectedProduct.features.split(',').map(feature => feature.trim())
+        : selectedProduct.features);
+
+      // Add images based on their type
+      imageInputs.forEach((input, index) => {
+        if (input.type === 'link' && input.value) {
+          formData.append('images', input.value);
+        } else if (input.type === 'file' && input.value) {
+          formData.append('images', input.value);
+        }
+      });
 
       const config = {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'multipart/form-data'
         },
         withCredentials: true
       };
 
-      await axios.put(`${backendUrl}/product/${selectedProduct._id}`, productData, config);
+      await axiosInstance.put(`${backendUrl}/product/${selectedProduct._id}`, formData, config);
       toast.success('Cập nhật sản phẩm thành công');
-            setShowEditModal(false);
+      setShowEditModal(false);
 
       // Also refresh the current pagination page to keep UI consistent
       refreshCurrentPage();
-        } catch (error) {
-            console.error('Error updating product:', error);
+    } catch (error) {
+      console.error('Error updating product:', error);
       toast.error(`Lỗi khi cập nhật sản phẩm: ${error.response?.data?.message || error.message}`);
-        }
-    };
+    }
+  };
 
-    const handleDeleteProduct = async (productId) => {
+  const handleDeleteProduct = async (productId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
       try {
         const config = {
@@ -750,8 +755,8 @@ const ProductList = ({ backendUrl }) => {
 
         // Also refresh the current pagination page to keep UI consistent
         refreshCurrentPage();
-            } catch (error) {
-                console.error('Error deleting product:', error);
+      } catch (error) {
+        console.error('Error deleting product:', error);
         toast.error(`Lỗi khi xóa sản phẩm: ${error.response?.data?.message || error.message}`);
       }
     }
@@ -774,9 +779,8 @@ const ProductList = ({ backendUrl }) => {
       category: Array.isArray(product.category) ? product.category.join(', ') : product.category,
     };
   };
-  console.log("product", products)
 
-    return (
+  return (
     <div className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản Lý Sản Phẩm</h2>
@@ -790,8 +794,8 @@ const ProductList = ({ backendUrl }) => {
         <Card.Body>
           <h5 className="mb-3">Lọc Sản Phẩm</h5>
           <Form>
-                        <Row>
-                            <Col md={3}>
+            <Row>
+              <Col md={3}>
                 <Form.Group className="mb-3">
                   <Form.Label>Tên Sản Phẩm</Form.Label>
                   <Form.Control
@@ -801,8 +805,8 @@ const ProductList = ({ backendUrl }) => {
                     onChange={(e) => setFilterName(e.target.value)}
                   />
                 </Form.Group>
-                            </Col>
-                            <Col md={3}>
+              </Col>
+              <Col md={3}>
                 <Form.Group className="mb-3">
                   <Form.Label>Danh Mục</Form.Label>
                   <Form.Select
@@ -815,8 +819,8 @@ const ProductList = ({ backendUrl }) => {
                     ))}
                   </Form.Select>
                 </Form.Group>
-                            </Col>
-                            <Col md={3}>
+              </Col>
+              <Col md={3}>
                 <Form.Group className="mb-3">
                   <Form.Label>Thương Hiệu</Form.Label>
                   <Form.Select
@@ -829,8 +833,8 @@ const ProductList = ({ backendUrl }) => {
                     ))}
                   </Form.Select>
                 </Form.Group>
-                            </Col>
-                            <Col md={3}>
+              </Col>
+              <Col md={3}>
                 <Form.Group className="mb-3">
                   <Form.Label>Khoảng Giá</Form.Label>
                   <div className="d-flex align-items-center">
@@ -851,8 +855,8 @@ const ProductList = ({ backendUrl }) => {
                     />
                   </div>
                 </Form.Group>
-                            </Col>
-                        </Row>
+              </Col>
+            </Row>
             <div className="d-flex justify-content-end">
               <Button
                 variant="outline-secondary"
@@ -867,8 +871,8 @@ const ProductList = ({ backendUrl }) => {
                 disabled={isFiltering}
               >
                 {isFiltering ? 'Đang Lọc...' : 'Áp Dụng Bộ Lọc'}
-                            </Button>
-                        </div>
+              </Button>
+            </div>
           </Form>
         </Card.Body>
       </Card>
@@ -887,16 +891,16 @@ const ProductList = ({ backendUrl }) => {
                 <th width="10%">Tồn Kho</th>
                 <th width="10%">Giảm Giá</th>
                 <th width="20%">Thao Tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+              </tr>
+            </thead>
+            <tbody>
               {products.length > 0 ? (
                 products.map((product) => (
-                                    <tr key={product._id}>
+                  <tr key={product._id}>
                     <td className="text-truncate" style={{ maxWidth: '100px' }}>
                       {product._id}
                     </td>
-                                        <td>{product.productName}</td>
+                    <td>{product.productName}</td>
                     <td>{product.brand}</td>
                     <td className="text-nowrap">{formatCurrency(product.price, product.currency || 'VND')}</td>
                     <td>
@@ -919,29 +923,29 @@ const ProductList = ({ backendUrl }) => {
                         <span className="text-muted">Không</span>
                       )}
                     </td>
-                                        <td>
-                                            <Button
-                                                variant="info"
-                                                size="sm"
-                                                className="me-2"
-                                                onClick={() => {
+                    <td>
+                      <Button
+                        variant="info"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => {
                           setSelectedProduct(prepareProductForEdit(product));
-                                                    setShowEditModal(true);
+                          setShowEditModal(true);
                           console.log("productselected:", product)
                           console.log("productselected1:", selectedProduct)
-                                                }}
-                                            >
+                        }}
+                      >
                         Chỉnh Sửa
-                                            </Button>
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => handleDeleteProduct(product._id)}
-                                            >
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(product._id)}
+                      >
                         Xóa
-                                            </Button>
-                                        </td>
-                                    </tr>
+                      </Button>
+                    </td>
+                  </tr>
                 ))
               ) : (
                 <tr>
@@ -950,50 +954,50 @@ const ProductList = ({ backendUrl }) => {
                   </td>
                 </tr>
               )}
-                            </tbody>
-                        </Table>
+            </tbody>
+          </Table>
         </Card.Body>
       </Card>
 
       <Pagination pageName="productsPage" />
 
-            {/* Add Product Modal */}
+      {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
-                <Modal.Header closeButton>
+        <Modal.Header closeButton>
           <Modal.Title>Thêm Sản Phẩm Mới</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleAddProduct}>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleAddProduct}>
             <Row>
               <Col md={6}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Tên Sản Phẩm</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.productName}
-                                onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
+                  <Form.Control
+                    type="text"
+                    value={newProduct.productName}
+                    onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
+                    required
+                  />
+                </Form.Group>
               </Col>
               <Col md={3}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Giá</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={newProduct.price}
-                                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
+                  <Form.Control
+                    type="number"
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                    required
+                  />
+                </Form.Group>
               </Col>
               <Col md={3}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Tiền tệ</Form.Label>
                   <Form.Select
                     value={newProduct.currency}
                     onChange={(e) => setNewProduct({ ...newProduct, currency: e.target.value })}
-                                required
+                    required
                   >
                     {currencies.map((currency) => (
                       <option key={currency} value={currency}>
@@ -1001,33 +1005,33 @@ const ProductList = ({ backendUrl }) => {
                       </option>
                     ))}
                   </Form.Select>
-                        </Form.Group>
+                </Form.Group>
               </Col>
             </Row>
             <Row>
               <Col md={6}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Thương Hiệu</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newProduct.brand}
-                                onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
-                            />
-                        </Form.Group>
+                  <Form.Control
+                    type="text"
+                    value={newProduct.brand}
+                    onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
+                  />
+                </Form.Group>
               </Col>
               <Col md={3}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Tồn Kho</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={newProduct.stocks}
-                                onChange={(e) => setNewProduct({ ...newProduct, stocks: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
+                  <Form.Control
+                    type="number"
+                    value={newProduct.stocks}
+                    onChange={(e) => setNewProduct({ ...newProduct, stocks: e.target.value })}
+                    required
+                  />
+                </Form.Group>
               </Col>
               <Col md={3}>
-                        <Form.Group className="mb-3">
+                <Form.Group className="mb-3">
                   <Form.Label>Giảm giá (%)</Form.Label>
                   <Form.Control
                     type="number"
@@ -1260,9 +1264,9 @@ const ProductList = ({ backendUrl }) => {
                 rows={3}
                 value={newProduct.description}
                 onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
+                required
+              />
+            </Form.Group>
             <Form.Group>
               <Form.Label>Thông số kỹ thuật</Form.Label>
               {(Array.isArray(newProduct?.features) && newProduct.features.length > 0) &&
@@ -1356,52 +1360,52 @@ const ProductList = ({ backendUrl }) => {
               }}>
                 Hủy
               </Button>
-                        <Button variant="primary" type="submit">
+              <Button variant="primary" type="submit">
                 Thêm Sản Phẩm
-                        </Button>
+              </Button>
             </div>
-                    </Form>
-                </Modal.Body>
-            </Modal>
+          </Form>
+        </Modal.Body>
+      </Modal>
 
-            {/* Edit Product Modal */}
+      {/* Edit Product Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
-                <Modal.Header closeButton>
+        <Modal.Header closeButton>
           <Modal.Title>Chỉnh Sửa Sản Phẩm</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {selectedProduct && (
-                        <Form onSubmit={handleEditProduct}>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedProduct && (
+            <Form onSubmit={handleEditProduct}>
               <Row>
                 <Col md={6}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Tên Sản Phẩm</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={selectedProduct.productName}
-                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, productName: e.target.value })}
-                                    required
-                                />
-                            </Form.Group>
+                    <Form.Control
+                      type="text"
+                      value={selectedProduct.productName}
+                      onChange={(e) => setSelectedProduct({ ...selectedProduct, productName: e.target.value })}
+                      required
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={3}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Giá</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    value={selectedProduct.price}
-                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
-                                    required
-                                />
-                            </Form.Group>
+                    <Form.Control
+                      type="number"
+                      value={selectedProduct.price}
+                      onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
+                      required
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={3}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Tiền tệ</Form.Label>
                     <Form.Select
                       value={selectedProduct.currency || 'VND'}
                       onChange={(e) => setSelectedProduct({ ...selectedProduct, currency: e.target.value })}
-                                    required
+                      required
                     >
                       {currencies.map((currency) => (
                         <option key={currency} value={currency}>
@@ -1409,33 +1413,33 @@ const ProductList = ({ backendUrl }) => {
                         </option>
                       ))}
                     </Form.Select>
-                            </Form.Group>
+                  </Form.Group>
                 </Col>
               </Row>
               <Row>
                 <Col md={6}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Thương Hiệu</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={selectedProduct.brand}
-                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, brand: e.target.value })}
-                                />
-                            </Form.Group>
+                    <Form.Control
+                      type="text"
+                      value={selectedProduct.brand}
+                      onChange={(e) => setSelectedProduct({ ...selectedProduct, brand: e.target.value })}
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={3}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Tồn Kho</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    value={selectedProduct.stocks}
-                                    onChange={(e) => setSelectedProduct({ ...selectedProduct, stocks: e.target.value })}
-                                    required
-                                />
-                            </Form.Group>
+                    <Form.Control
+                      type="number"
+                      value={selectedProduct.stocks}
+                      onChange={(e) => setSelectedProduct({ ...selectedProduct, stocks: e.target.value })}
+                      required
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={3}>
-                            <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label>Giảm giá (%)</Form.Label>
                     <Form.Control
                       type="number"
@@ -1675,9 +1679,9 @@ const ProductList = ({ backendUrl }) => {
                   rows={3}
                   value={selectedProduct.description}
                   onChange={(e) => setSelectedProduct({ ...selectedProduct, description: e.target.value })}
-                                    required
-                                />
-                            </Form.Group>
+                  required
+                />
+              </Form.Group>
               <Form.Group>
                 <Form.Label>Thông số kỹ thuật</Form.Label>
                 {(Array.isArray(selectedProduct?.features) && selectedProduct.features.length > 0) &&
@@ -1768,14 +1772,14 @@ const ProductList = ({ backendUrl }) => {
                 <Button variant="secondary" className="me-2" onClick={() => setShowEditModal(false)}>
                   Hủy
                 </Button>
-                            <Button variant="primary" type="submit">
+                <Button variant="primary" type="submit">
                   Lưu Thay Đổi
-                            </Button>
+                </Button>
               </div>
-                        </Form>
-                    )}
-                </Modal.Body>
-            </Modal>
+            </Form>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
@@ -2185,8 +2189,8 @@ const AdminPage = () => {
           Về Trang Chủ
         </Button>
       </Link>
-        </Container>
-    );
+    </Container>
+  );
 };
 
 export default AdminPage; 
