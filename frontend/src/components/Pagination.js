@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../utils/axiosInstance'
 import { Button } from 'react-bootstrap'
 const Pagination = ({ pageName, setItems, category, brand, 
-    activeSearchByName, filterUserName}) => {
+    activeSearchByName, filterUserName,
+    updateOrders}) => {
     const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
@@ -227,7 +228,7 @@ const Pagination = ({ pageName, setItems, category, brand,
     }, [])
     useEffect(() => {
         fetchDataByPage()
-    }, [currentPage, activeSearchByName])
+    }, [currentPage, activeSearchByName, updateOrders])
 
     return (
         <>
