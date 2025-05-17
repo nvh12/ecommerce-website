@@ -360,6 +360,7 @@ const UserList = ({ backendUrl }) => {
           </Button>
         </div>
       </Form>
+      {Array.isArray(usersForAdmin) && usersForAdmin.length > 0 ?
       <Table striped bordered hover responsive className="shadow-sm">
         <thead className="bg-light">
           <tr>
@@ -371,7 +372,7 @@ const UserList = ({ backendUrl }) => {
           </tr>
         </thead>
         <tbody>
-          {usersForAdmin?.map((user) => (
+          {(usersForAdmin?.map((user) => (
             <tr key={user._id}>
               <td>{user._id}</td>
               <td>{user.name}</td>
@@ -399,9 +400,14 @@ const UserList = ({ backendUrl }) => {
                 </Button>
               </td>
             </tr>
-          ))}
+          )))}
         </tbody>
       </Table>
+      :
+      <div className='text-center'>
+        <p>Không có người dùng nào</p>
+      </div>
+      }
       <Pagination pageName="usersForAdmin" activeSearchByName={activeSearchByName} filterUserName={filterUserName} />
 
       {/* Edit User Modal */}

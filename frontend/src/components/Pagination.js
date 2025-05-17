@@ -54,8 +54,18 @@ const Pagination = ({ pageName, setItems, category, brand,
                 break
             case "usersForAdmin":
                 try {
-                    const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, { withCredentials: true })
-                    setTotalPages(res1.data.totalPages)
+                    if(filterUserName === "") {
+                        const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, { withCredentials: true })
+                        setCurrentPage(1)
+                        setTotalPages(res1.data.totalPages)
+                    } else {
+                        const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
+                            params: {name: filterUserName},
+                            withCredentials: true
+                        })
+                        setCurrentPage(1)
+                        setTotalPages(res1.data.totalPages)
+                    }
                     // console.log("totalPages", res1.data.totalPages)                
                 } catch (error) {
                     console.log(error.message)
@@ -145,8 +155,7 @@ const Pagination = ({ pageName, setItems, category, brand,
                             withCredentials: true
                         })
                     setUsersForAdmin(res1.data.user)
-                    } 
-                    if(filterUserName === "") {
+                    } else {
                         const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
                             params: { page: currentPage},
                             withCredentials: true
@@ -225,7 +234,7 @@ const Pagination = ({ pageName, setItems, category, brand,
 
     useEffect(() => {
         fetchTotalPages()
-    }, [])
+    }, [activeSearchByName])
     useEffect(() => {
         fetchDataByPage()
     }, [currentPage, activeSearchByName, updateOrders])
