@@ -67,6 +67,7 @@ async function rollback(updatedProducts) {
 }
 
 async function checkout(req, res) {
+        let itype;
     try {
         const { userId, payment, delivery, address } = req.body;
         const cart = await cartServices.getCart(userId);
@@ -74,7 +75,7 @@ async function checkout(req, res) {
             return res.status(400).json({ message: 'Empty cart' });
         }
         const orderItems = await Promise.all(cart.items.map(async (item) => {
-            const prod = await productServices.findProduct({ _id: item.product._id });
+            const prod = await Product.findById(item.product._id);
             return {
                 product: prod._id,
                 quantity: item.quantity,
@@ -92,12 +93,14 @@ async function checkout(req, res) {
         });
         const updatedProducts = [];
         for (const item of cart.items) {
-            const product = await productServices.findProduct({ _id: item.product._id });
+            const product = await Product.findById(item.product._id);
             const originalStock = product.stocks;
+            itype = product;
             const updatedStock = originalStock - item.quantity;
             const update = await productServices.updateProduct(
                 { _id: item.product._id },
-                { stocks: updatedStock }
+                { stocks: updatedStock },
+                { runValidators: true }
             );
             if (!update) {
                 await rollback(updatedProducts);
@@ -109,7 +112,7 @@ async function checkout(req, res) {
         await cartServices.clearCart(userId);
         return res.status(200).json({ message: 'Order placed successfully!', orderId: newOrder._id });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message, add: `${itype}` });
     }
 }
 
