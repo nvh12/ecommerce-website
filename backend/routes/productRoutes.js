@@ -29,7 +29,7 @@ const router = express.Router();
 //     ratingsAvg
 //Done
 
-//router.post('/',upload.array('images'),uploadToCloud, createProductControl);//
+// router.post('/',upload.array('images'),uploadToCloud, createProductControl);//
 
 router.post('/', verifyUser, verifyRole('admin'),upload.array('images'),uploadToCloud, createProductControl); 
 

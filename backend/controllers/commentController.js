@@ -134,8 +134,9 @@ const getCommentByIdControl = async (req, res) => {
 }
 const findCommentPageControl = async(req, res) =>{
     try{
-        const limit = req.query
-        const productId = req.params
+        const {limit} = req.query
+        const {productId} = req.params
+        
 
         const page = await commentServices.getCommentTotalPages({productId, limit})
         if(!page){
