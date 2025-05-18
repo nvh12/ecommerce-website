@@ -5,7 +5,7 @@ import PlacedOrderCard from './PlacedOrderCard'
 import { toast } from 'react-toastify'
 import axiosInstance from '../utils/axiosInstance'
 
-const Order = ({indexOrder, dataOrder, page}) => {
+const Order = ({indexOrder, dataOrder, page, setUpdateUserOrder, updateUserOrder}) => {
     const {backendUrl} = useContext(AppContext)
     const [orderDetail, setOrderDetail] = useState([])
     const [quantityList, setQuantityList] = useState([])
@@ -44,7 +44,8 @@ const Order = ({indexOrder, dataOrder, page}) => {
       try {
         await axiosInstance.put(`${backendUrl}/user/order/${dataOrder._id}`, {updateData: {status: status}}, {withCredentials: true})
         toast.success("Cập nhật đơn hàng thành công")
-        window.location.reload();
+        // window.location.reload();
+        setUpdateUserOrder(!updateUserOrder)
       } catch (error) {
         toast.error("Lỗi cập nhật đơn hàng")
       }
@@ -104,8 +105,8 @@ const Order = ({indexOrder, dataOrder, page}) => {
               <div className='row'>
                 <div className='col-auto me-auto'>
                     {orderDetail.map((item, index) => 
-                        <div className='mb-3'>
-                          <p key={index} className='my-0'>{item.productName}</p>
+                        <div key={index} className='mb-3'>
+                          <p className='my-0'>{item.productName}</p>
                           <small className=''>Số lượng: {quantityList[index]}</small>
                         </div>
                     )}

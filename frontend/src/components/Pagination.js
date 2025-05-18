@@ -6,8 +6,9 @@ import axiosInstance from '../utils/axiosInstance'
 import { Button } from 'react-bootstrap'
 const Pagination = ({ pageName, setItems, category, brand, 
     activeSearchByName, filterUserName,
-    updateOrders}) => {
-    const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
+    updateOrders,
+    updateUserOrder, setPageUserOrder}) => {
+    const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin, userOrder, setUserOrders } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const navigate = useNavigate()
@@ -75,6 +76,17 @@ const Pagination = ({ pageName, setItems, category, brand,
                 try {
                     const res2 = await axiosInstance.get(`${backendUrl}/admin/order`, { withCredentials: true })
                     setTotalPages(res2.data.totalPages)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
+            case "ordersForUser": 
+                try {
+                    const res = await axiosInstance.get(`${backendUrl}/user/order`,
+                        {withCredentials: true}
+                    )
+                    // console.log(res.data.totalPages)
+                    setTotalPages(res.data.totalPages)
                 } catch (error) {
                     console.log(error.message)
                 }
@@ -195,6 +207,19 @@ const Pagination = ({ pageName, setItems, category, brand,
                     console.log(error.message)
                 }
                 break
+            case "ordersForUser" :
+                try {
+                    const res = await axiosInstance.get(`${backendUrl}/user/order`, {
+                        params: {page: currentPage},
+                        withCredentials: true
+                    })
+                    // console.log(res)
+                    setPageUserOrder(currentPage)
+                    setUserOrders(res.data.data)
+                } catch (error) {
+                    console.log(error.message)
+                }
+                break
             case "phonePage":
                 try {
                     const res = await axios.get(`${backendUrl}/product`, {
@@ -235,7 +260,7 @@ const Pagination = ({ pageName, setItems, category, brand,
     }, [activeSearchByName])
     useEffect(() => {
         fetchDataByPage()
-    }, [currentPage, activeSearchByName, updateOrders])
+    }, [currentPage, activeSearchByName, updateOrders, updateUserOrder])
 
     return (
         <>

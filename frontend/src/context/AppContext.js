@@ -21,6 +21,7 @@ const AppContextProvider = (props) => {
     const [productError, setProductError] = useState(null)
     const [usersForAdmin, setUsersForAdmin] = useState([])
     const [ordersForAdmin, setOrdersForAdmin] = useState([])
+    const [userOrders, setUserOrders] = useState([])
 
     const backendUrl = process.env.REACT_APP_BACKEND_URL;
     const fetchUserData = async () => {
@@ -146,7 +147,8 @@ const AppContextProvider = (props) => {
         fetchProduct,
         clearProduct,
         usersForAdmin, setUsersForAdmin,
-        ordersForAdmin, setOrdersForAdmin
+        ordersForAdmin, setOrdersForAdmin,
+        userOrders, setUserOrders
     }
 
     return (

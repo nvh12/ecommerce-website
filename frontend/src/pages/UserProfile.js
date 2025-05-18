@@ -7,14 +7,15 @@ import UserProfileComponent from '../components/UserProfileComponent'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 import axiosInstance from '../utils/axiosInstance'
+import Pagination from '../components/Pagination'
 
 const UserProfile = () => {
-  const {backendUrl, userData, setUserData, setIsLoggedIn, isLoggedIn } = useContext(AppContext)
+  const {backendUrl, userData, setUserData, setIsLoggedIn, isLoggedIn, userOrders, setUserOrders} = useContext(AppContext)
 
   const [activeSection, setActiveSection] = useState("orders")
-  const [userOrders, setUserOrders] = useState([])
   const [userCart, setUserCart] = useState([])
-  const [page, setPage] = useState(1)
+  const [updateUserOrder, setUpdateUserOrder] = useState(false)
+  const [pageUserOrder, setPageUserOrder] = useState(1)
 
   const navigate = useNavigate()
   
@@ -45,23 +46,6 @@ const UserProfile = () => {
     }
   }
 
-  const fetchUserOrders = async () => {
-    // console.log("page", page)
-    try {
-      const res = await axiosInstance.get(backendUrl + "/user/order", 
-        {
-          params: { page: page },
-          withCredentials: true
-        }
-      )
-      const temp = res.data.data
-      //console.log("don hang", temp.length) // nếu không có dòng này thì code của của tôi lỗi runtime
-      setUserOrders(temp)
-    } catch (error) {
-      // toast.error("Lỗi lấy đơn hàng")
-    }
-  }
-
   // const fetchUserCart = async () => {
   //   try {
   //     const res = await axios.get(backendUrl + "/cart", {withCredentials: true})
@@ -72,10 +56,10 @@ const UserProfile = () => {
   //     toast.error("Lỗi lấy giỏ hàng")
   //   }
   // }
-  useEffect(() => { 
-    fetchUserOrders()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, [page])
+  // useEffect(() => { 
+  //   fetchUserOrders()
+  //   window.scrollTo({ top: 0, behavior: 'smooth' })
+  //   }, [page])
   
   return (
     <div>
@@ -121,25 +105,26 @@ const UserProfile = () => {
                     </div>
                 </div>
                 <div className='col-12 col-md-9 d-flex flex-column  p-3 border rounded'>
-                      <UserProfileComponent activeSection={activeSection} userOrders={userOrders} userCart={userCart} page={page}/>
-                      {activeSection === "orders" && userData.role === "user" &&
-                      <>
-                        <div className='row'>
-                          <button className='col-auto me-auto btn rounded-pill border ms-2'
-                          onClick={() => {
-                            setPage(page => page - 1)
-                          }}
-                          disabled={page === 1}>
-                            Trang trước</button>
-                          <button className='col-auto btn rounded-pill border me-2'
-                          onClick={() => {
-                            setPage(page => page + 1)
-                          }}
-                          disabled={userOrders.length < 20}
-                          >
-                            Trang sau </button>
-                        </div>
-                      </>
+                      <UserProfileComponent activeSection={activeSection} userOrders={userOrders} userCart={userCart} setUpdateUserOrder={setUpdateUserOrder} updateUserOrder={updateUserOrder} page={pageUserOrder}/>
+                      {activeSection === "orders" &&
+                      // <>
+                      //   <div className='row'>
+                      //     <button className='col-auto me-auto btn rounded-pill border ms-2'
+                      //     onClick={() => {
+                      //       setPage(page => page - 1)
+                      //     }}
+                      //     disabled={page === 1}>
+                      //       Trang trước</button>
+                      //     <button className='col-auto btn rounded-pill border me-2'
+                      //     onClick={() => {
+                      //       setPage(page => page + 1)
+                      //     }}
+                      //     disabled={userOrders.length < 20}
+                      //     >
+                      //       Trang sau </button>
+                      //   </div>
+                      // </>
+                      <Pagination pageName="ordersForUser" updateUserOrder={updateUserOrder} setPageUserOrder={setPageUserOrder}/>
                       }
                 </div>
             </div>
