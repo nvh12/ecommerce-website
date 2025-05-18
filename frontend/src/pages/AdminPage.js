@@ -604,7 +604,7 @@ const ProductList = ({ backendUrl }) => {
       }
 
       const response = await axios.get(`${backendUrl}/product`, {
-        params: { page: pageNumber }
+        params: { page: pageNumber, limit:18 }
       });
 
       if (response.data && response.data.product) {
