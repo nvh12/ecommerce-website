@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const { deleteRating } = require('../services/ratingServices');
-const{deleteCommentUser}= require('../services/commentServices');
-const { clearCart } = require('../services/cartServices');
+const { deleteCommentUser } = require('../services/commentServices');
+const { clearCart, getCart } = require('../services/cartServices');
 
 async function getUsers(name = null, page = 1, limit = 20) {
     try {
@@ -48,7 +48,10 @@ async function deleteUser(id) {
         if (userFound) {
             await deleteRating(id, "user");
             await deleteCommentUser(id);
-            await clearCart(id);
+            const cart = await getCart(id);
+            if (cart) {
+                await clearCart(id);
+            }
         }
         else {
             throw new Error("Chua tim duoc user hoac khong the xoa user")
