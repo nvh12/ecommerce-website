@@ -146,7 +146,7 @@ const ProductDetail = () => {
                             </div>
                             {product.images?.length > 1 && (
                                 <div className="d-flex gap-2 flex-wrap">
-                                    {product.images.map((image, index) => (
+                                    {product.images.slice(1).map((image, index) => (
                                         <div
                                             key={index}
                                             onClick={() => setSelectedImage(image)}

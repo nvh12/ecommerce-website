@@ -510,6 +510,10 @@ const ProductList = ({ backendUrl }) => {
   const [brands, setBrands] = useState([]);
   const [isFiltering, setIsFiltering] = useState(false);
 
+  // Thêm state để theo dõi trạng thái filter
+  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [filterParams, setFilterParams] = useState({});
+
   // Fetch categories and brands for filters
     useEffect(() => {
     const fetchFilters = async () => {
@@ -551,15 +555,16 @@ const ProductList = ({ backendUrl }) => {
       if (filterBrand) params.brand = filterBrand;
       if (filterPriceMin) params.priceMin = filterPriceMin;
       if (filterPriceMax) params.priceMax = filterPriceMax;
-      console.log(params);
+
+      setFilterParams(params); // Lưu params để dùng cho pagination
+      setIsFilterActive(true);
+
       const response = await axios.get(`${backendUrl}/product`, { params });
-      console.log(response.data);
 
       if (response.data && response.data.product) {
         setProducts(response.data.product);
-        // We don't update the context to avoid affecting pagination
       }
-        } catch (error) {
+    } catch (error) {
       console.error('Error applying filters:', error);
       toast.error('Lỗi khi lọc sản phẩm');
     } finally {
@@ -574,6 +579,9 @@ const ProductList = ({ backendUrl }) => {
     setFilterBrand('');
     setFilterPriceMin('');
     setFilterPriceMax('');
+    setIsFilterActive(false);
+    setFilterParams({});
+    refreshCurrentPage(); // Refresh lại trang hiện tại
   };
 
   // Helper function to refresh the current pagination page
@@ -965,7 +973,11 @@ const ProductList = ({ backendUrl }) => {
         </Card.Body>
       </Card>
 
-      <Pagination pageName="productsPage" />
+      <Pagination 
+  pageName="productsPage" 
+  isFilterActive={isFilterActive}
+  filterParams={filterParams}
+/>
 
             {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
@@ -2200,4 +2212,4 @@ const AdminPage = () => {
     );
 };
 
-export default AdminPage; 
+export default AdminPage;

@@ -4,11 +4,13 @@ import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../utils/axiosInstance'
 import { Button } from 'react-bootstrap'
-const Pagination = ({ pageName, setItems, category, brand, 
+const Pagination = ({ pageName, setItems, category, brand,
     activeSearchByName, filterUserName,
     updateOrders,
     updateUserOrder, setPageUserOrder}) => {
     const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin, userOrder, setUserOrders } = useContext(AppContext)
+    updateOrders, isFilterActive, filterParams }) => {
+    const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const navigate = useNavigate()
@@ -17,23 +19,17 @@ const Pagination = ({ pageName, setItems, category, brand,
         switch (pageName) {
             case "productsPage":
                 try {
-                    const res = await axiosInstance.get(`${backendUrl}/product/page`,
-                        {
-                            params: {
-                                limit: 16,
-                                category,
-                                brand
-                            }
-                        },
-                        {
-                            withCredentials: true
-                        }
-                    )
-                    setTotalPages(res.data.page.totalPages)
-
-                    // console.log(res.data.page.totalPages)
+                    // Nếu đang filter, sử dụng filterParams
+                    const params = isFilterActive ? filterParams : { limit: 16, category, brand };
+                    const res = await axiosInstance.get(
+                        `${backendUrl}/product/page`,
+                        { params },
+                        { withCredentials: true }
+                    );
+                    setTotalPages(res.data.page.totalPages);
+                    setCurrentPage(1); // Reset về trang 1 khi áp dụng filter
                 } catch (error) {
-                    console.log(error.message)
+                    console.log(error.message);
                 }
                 break
             case "recommendationPage":
@@ -55,13 +51,13 @@ const Pagination = ({ pageName, setItems, category, brand,
                 break
             case "usersForAdmin":
                 try {
-                    if(filterUserName === "") {
+                    if (filterUserName === "") {
                         const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, { withCredentials: true })
                         setCurrentPage(1)
                         setTotalPages(res1.data.totalPages)
                     } else {
                         const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
-                            params: {name: filterUserName},
+                            params: { name: filterUserName },
                             withCredentials: true
                         })
                         setCurrentPage(1)
@@ -80,6 +76,7 @@ const Pagination = ({ pageName, setItems, category, brand,
                     console.log(error.message)
                 }
                 break
+
             case "ordersForUser": 
                 try {
                     const res = await axiosInstance.get(`${backendUrl}/user/order`,
@@ -125,18 +122,16 @@ const Pagination = ({ pageName, setItems, category, brand,
         switch (pageName) {
             case "productsPage":
                 try {
-                    const res = await axios.get(`${backendUrl}/product`, {
-                        params: {
-                            category,
-                            brand,
-                            page: currentPage,
-                            limit: 16
-                        }
-                    })
-                    setProductItems(res.data.product)
-                    setItems(res.data.product);
+                    // Nếu đang filter, sử dụng filterParams với trang hiện tại
+                    const params = isFilterActive
+                        ? { ...filterParams, page: currentPage }
+                        : { category, brand, page: currentPage, limit: 16 };
+
+                    const res = await axios.get(`${backendUrl}/product`, { params });
+                    setProductItems(res.data.product);
+                    if (setItems) setItems(res.data.product);
                 } catch (error) {
-                    console.log(error.message)
+                    console.log(error.message);
                 }
                 break
             case "recommendationPage":
@@ -159,18 +154,18 @@ const Pagination = ({ pageName, setItems, category, brand,
                 break
             case "usersForAdmin":
                 try {
-                    if(filterUserName !== "") {
+                    if (filterUserName !== "") {
                         const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
                             params: { page: currentPage, name: filterUserName },
                             withCredentials: true
                         })
-                    setUsersForAdmin(res1.data.user)
+                        setUsersForAdmin(res1.data.user)
                     } else {
                         const res1 = await axiosInstance.get(`${backendUrl}/admin/user`, {
-                            params: { page: currentPage},
+                            params: { page: currentPage },
                             withCredentials: true
                         })
-                    setUsersForAdmin(res1.data.user)
+                        setUsersForAdmin(res1.data.user)
                     }
                     // console.log(res1.data.user)
                 } catch (error) {
@@ -257,7 +252,7 @@ const Pagination = ({ pageName, setItems, category, brand,
 
     useEffect(() => {
         fetchTotalPages()
-    }, [activeSearchByName])
+    }, [activeSearchByName, isFilterActive, filterParams])
     useEffect(() => {
         fetchDataByPage()
     }, [currentPage, activeSearchByName, updateOrders, updateUserOrder])
