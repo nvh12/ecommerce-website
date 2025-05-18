@@ -144,7 +144,7 @@ const deleteProduct = async (info) => {
             await deleteComment(objectId, "product")
             const carts = await Cart.find({ 'items.product': objectId });
             for (const cart of carts) {
-                await cartServices.removeItem({ id: prod._id }, cart.user);
+                await cartServices.removeItem({ id: prod._id.toString() }, cart.user.toString());
             }
         }
         else {
