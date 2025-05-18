@@ -7,16 +7,16 @@ import axiosInstance from '../utils/axiosInstance';
 
 // Custom dropdown toggle without the default caret
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <div
-        ref={ref}
-        onClick={(e) => {
-            e.preventDefault();
-            onClick(e);
-        }}
-        style={{ cursor: 'pointer' }}
-    >
-        {children}
-    </div>
+  <div
+    ref={ref}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick(e);
+    }}
+    style={{ cursor: 'pointer' }}
+  >
+    {children}
+  </div>
 ));
 
 // Thêm component CommentItem để xử lý comment đệ quy
@@ -64,12 +64,12 @@ const CommentItem = ({
             if (response.data.message === 'Success') {
                 onEdit(commentId, editText);
                 toast.success('Đánh giá đã được cập nhật thành công');
+                setEditingComment(null);
+                setEditText('');
             }
         } catch (error) {
             console.error('Error updating comment:', error);
             toast.error(error.response?.data?.message || 'Không thể cập nhật đánh giá');
-        } finally {
-            setEditingComment(null);
         }
     };
 
@@ -365,7 +365,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                 params: { page: currentPage, limit: 5 },
                 withCredentials: true
             });
-
+            
             if (response.data.message === "Success" && Array.isArray(response.data.commentProduct)) {
                 setComments(response.data.commentProduct);
             } else {
@@ -387,9 +387,9 @@ const ProductComments = ({ productId, onCommentAdded }) => {
         try {
             const response = await axiosInstance.post(
                 `${backendUrl}/comment/create`,
-                {
+                { 
                     productId,
-                    comment: newComment
+                    comment: newComment 
                 },
                 { withCredentials: true }
             );
@@ -397,7 +397,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
             if (response.data.message === 'Success') {
                 toast.success('Đánh giá đã được thêm thành công');
                 setNewComment('');
-
+                
                 const newCommentObj = {
                     ...response.data.newComment,
                     user: {
@@ -407,7 +407,7 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                     fromUser: true,
                     context: response.data.newComment.context || newComment
                 };
-
+                
                 setComments(prevComments => [newCommentObj, ...prevComments]);
                 setHasUserCommented(true);
                 if (onCommentAdded) {
@@ -423,82 +423,226 @@ const ProductComments = ({ productId, onCommentAdded }) => {
     };
 
     const handleReply = async (parentCommentId) => {
-        // Fetch lại toàn bộ dữ liệu
-        await Promise.all([
-            fetchComments(),
-            fetchTotalPages()
-        ]);
+        try {
+            // Fetch lại toàn bộ dữ liệu
+            await Promise.all([
+                fetchComments(),
+                fetchTotalPages()
+            ]);
 
-        // Reset state để đảm bảo tải lại toàn bộ dữ liệu
-        setCommentReplies({});
-        setExpandedComments(new Set());
+            // Reset state để đảm bảo tải lại toàn bộ dữ liệu
+            setCommentReplies({});
+            setExpandedComments(new Set());
 
-        // Tải lại toàn bộ cấu trúc phản hồi
-        const loadCommentStructure = async (commentId) => {
-            try {
-                const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
-                    withCredentials: true
-                });
-                
-                if (response.data.message === "Success" && response.data.foundComment) {
-                    const comment = response.data.foundComment;
+            // Tải lại toàn bộ cấu trúc phản hồi
+            const loadCommentStructure = async (commentId) => {
+                try {
+                    const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
+                        withCredentials: true
+                    });
                     
-                    // Mở rộng comment hiện tại
-                    setExpandedComments(prev => new Set([...prev, commentId]));
-                    
-                    // Nếu comment có replies, tải tất cả replies
-                    if (comment.answer && comment.answer.length > 0) {
-                        const replies = [];
-                        for (const replyId of comment.answer) {
-                            const replyResponse = await axiosInstance.get(`${backendUrl}/comment/id/${replyId}`, {
-                                withCredentials: true
-                            });
-                            if (replyResponse.data.foundComment) {
-                                const reply = replyResponse.data.foundComment;
-                                replies.push(reply);
-                                // Mở rộng reply
-                                setExpandedComments(prev => new Set([...prev, replyId]));
-                                // Đệ quy tải replies của reply
-                                await loadCommentStructure(replyId);
+                    if (response.data.message === "Success" && response.data.foundComment) {
+                        const comment = response.data.foundComment;
+                        
+                        // Mở rộng comment hiện tại
+                        setExpandedComments(prev => new Set([...prev, commentId]));
+                        
+                        // Nếu comment có replies, tải tất cả replies
+                        if (comment.answer && comment.answer.length > 0) {
+                            const replies = [];
+                            for (const replyId of comment.answer) {
+                                const replyResponse = await axiosInstance.get(`${backendUrl}/comment/id/${replyId}`, {
+                                    withCredentials: true
+                                });
+                                if (replyResponse.data.foundComment) {
+                                    const reply = replyResponse.data.foundComment;
+                                    replies.push(reply);
+                                    // Mở rộng reply
+                                    setExpandedComments(prev => new Set([...prev, replyId]));
+                                    // Đệ quy tải replies của reply
+                                    await loadCommentStructure(replyId);
+                                }
                             }
+
+                            // Cập nhật state với replies
+                            setCommentReplies(prev => ({
+                                ...prev,
+                                [commentId]: replies
+                            }));
                         }
-
-                        // Cập nhật state với replies
-                        setCommentReplies(prev => ({
-                            ...prev,
-                            [commentId]: replies
-                        }));
                     }
+                } catch (error) {
+                    console.error('Error loading comment structure:', error);
                 }
-            } catch (error) {
-                console.error('Error loading comment structure:', error);
-            }
-        };
+            };
 
-        // Chỉ tải lại cấu trúc của comment gốc được reply
-        await loadCommentStructure(parentCommentId);
+            // Tìm comment gốc
+            const findRootComment = async (commentId) => {
+                try {
+                    const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
+                        withCredentials: true
+                    });
+                    
+                    if (response.data.message === "Success" && response.data.foundComment) {
+                        const comment = response.data.foundComment;
+                        if (comment.reply) {
+                            // Nếu comment có reply, đây là comment con, tìm comment gốc
+                            return await findRootComment(comment.reply);
+                        }
+                        // Nếu không có reply, đây là comment gốc
+                        return commentId;
+                    }
+                } catch (error) {
+                    console.error('Error finding root comment:', error);
+                }
+                return commentId;
+            };
+
+            // Tìm comment gốc và tải lại cấu trúc
+            const rootCommentId = await findRootComment(parentCommentId);
+            await loadCommentStructure(rootCommentId);
+        } catch (error) {
+            console.error('Error handling reply:', error);
+            toast.error('Không thể cập nhật phản hồi');
+        }
     };
 
-    const handleEdit = (commentId, newText) => {
-        setComments(prevComments =>
-            prevComments.map(comment =>
-                comment._id === commentId
-                    ? { ...comment, context: newText }
-                    : comment
-            )
-        );
+    const handleEdit = async (commentId, newText) => {
+        try {
+            // Cập nhật UI ngay lập tức
+                setComments(prevComments =>
+                    prevComments.map(comment =>
+                        comment._id === commentId
+                        ? { ...comment, context: newText }
+                            : comment
+                    )
+                );
+                
+            // Cập nhật commentReplies nếu comment đang được hiển thị
+            setCommentReplies(prev => {
+                const newReplies = { ...prev };
+                Object.keys(newReplies).forEach(key => {
+                    newReplies[key] = newReplies[key].map(reply =>
+                        reply._id === commentId
+                            ? { ...reply, context: newText }
+                            : reply
+                    );
+                });
+                return newReplies;
+            });
+
+            // Fetch lại dữ liệu để đảm bảo đồng bộ
+            await Promise.all([
+                fetchComments(),
+                fetchTotalPages()
+            ]);
+        } catch (error) {
+            console.error('Error handling edit:', error);
+            toast.error('Không thể cập nhật bình luận');
+        }
     };
 
     const handleDelete = async (commentId) => {
         try {
+            // Lấy thông tin comment trước khi xóa để có parent ID
+            const commentResponse = await axiosInstance.get(
+                `${backendUrl}/comment/id/${commentId}`,
+                { withCredentials: true }
+            );
+
+            if (commentResponse.data.message !== 'Success') {
+                toast.error('Không thể lấy thông tin bình luận');
+                return;
+            }
+
+            const commentToDelete = commentResponse.data.foundComment;
+            const parentId = commentToDelete.parent;
+
+            // Thực hiện xóa comment
             const response = await axiosInstance.delete(
                 `${backendUrl}/comment/delete/${commentId}`,
                 { withCredentials: true }
             );
 
             if (response.data.message === 'Success') {
-                // Remove the comment from the local state
-                setComments(prev => prev.filter(comment => comment._id !== commentId));
+                // Fetch lại toàn bộ dữ liệu
+                await Promise.all([
+                    fetchComments(),
+                    fetchTotalPages()
+                ]);
+
+                // Reset state để đảm bảo tải lại toàn bộ dữ liệu
+                setCommentReplies({});
+                setExpandedComments(new Set());
+
+                // Tải lại toàn bộ cấu trúc phản hồi
+                const loadCommentStructure = async (commentId) => {
+                    try {
+                        const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
+                            withCredentials: true
+                        });
+                        
+                        if (response.data.message === "Success" && response.data.foundComment) {
+                            const comment = response.data.foundComment;
+                            
+                            // Mở rộng comment hiện tại
+                            setExpandedComments(prev => new Set([...prev, commentId]));
+                            
+                            // Nếu comment có replies, tải tất cả replies
+                            if (comment.answer && comment.answer.length > 0) {
+                                const replies = [];
+                                for (const replyId of comment.answer) {
+                                    const replyResponse = await axiosInstance.get(`${backendUrl}/comment/id/${replyId}`, {
+                                        withCredentials: true
+                                    });
+                                    if (replyResponse.data.foundComment) {
+                                        const reply = replyResponse.data.foundComment;
+                                        replies.push(reply);
+                                        // Mở rộng reply
+                                        setExpandedComments(prev => new Set([...prev, replyId]));
+                                        // Đệ quy tải replies của reply
+                                        await loadCommentStructure(replyId);
+                                    }
+                                }
+
+                                // Cập nhật state với replies
+                                setCommentReplies(prev => ({
+                                    ...prev,
+                                    [commentId]: replies
+                                }));
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading comment structure:', error);
+                    }
+                };
+
+                // Tìm comment gốc
+                const findRootComment = async (commentId) => {
+                    try {
+                        const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
+                            withCredentials: true
+                        });
+                        
+                        if (response.data.message === "Success" && response.data.foundComment) {
+                            const comment = response.data.foundComment;
+                            if (comment.reply) {
+                                // Nếu comment có reply, đây là comment con, tìm comment gốc
+                                return await findRootComment(comment.reply);
+                            }
+                            // Nếu không có reply, đây là comment gốc
+                            return commentId;
+                        }
+                    } catch (error) {
+                        console.error('Error finding root comment:', error);
+                    }
+                    return commentId;
+                };
+
+                // Tìm comment gốc và tải lại cấu trúc
+                const rootCommentId = await findRootComment(parentId);
+                await loadCommentStructure(rootCommentId);
+
                 if (onCommentAdded) {
                     onCommentAdded(null, commentId);
                 }
@@ -536,26 +680,26 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                             Bạn đã có bình luận cho sản phẩm này. Bạn có thể chỉnh sửa bình luận của mình hoặc phản hồi các bình luận khác.
                         </Alert>
                     ) : (
-                        <Form onSubmit={handleSubmit} className="mb-4">
-                            <Form.Group>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={3}
-                                    placeholder="Viết bình luận của bạn..."
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    disabled={isSubmitting}
-                                />
-                            </Form.Group>
-                            <Button
-                                variant="primary"
-                                type="submit"
-                                className="mt-2"
-                                disabled={isSubmitting || !newComment.trim()}
-                            >
-                                {isSubmitting ? 'Đang gửi...' : 'Gửi Bình Luận'}
-                            </Button>
-                        </Form>
+                    <Form onSubmit={handleSubmit} className="mb-4">
+                        <Form.Group>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                placeholder="Viết bình luận của bạn..."
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                disabled={isSubmitting}
+                            />
+                        </Form.Group>
+                        <Button 
+                            variant="primary" 
+                            type="submit" 
+                            className="mt-2"
+                            disabled={isSubmitting || !newComment.trim()}
+                        >
+                            {isSubmitting ? 'Đang gửi...' : 'Gửi Bình Luận'}
+                        </Button>
+                    </Form>
                     )
                 ) : (
                     <div className="text-center p-3">
