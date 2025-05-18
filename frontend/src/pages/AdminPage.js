@@ -1903,8 +1903,8 @@ const OrderList = ({ backendUrl }) => {
                     </button>
                   </div>
                 </td>
-                <td>{order.user.user.name}</td>
-                <td>{order.user.user.email}</td>
+                <td>{order.user ? order.user.user.name : "Đã bị xóa"}</td>
+                <td>{order.user ? order.user.user.email : "Tài khoản đã bị xóa"}</td>
                 <td>{`${order.total_price.toLocaleString("vi-VN")} VND`}</td>
                 <td>{new Date(order.createdAt).toLocaleString("vi-VN")}</td>
                 <td>

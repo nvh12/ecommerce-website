@@ -182,12 +182,19 @@ const Pagination = ({ pageName, setItems, category, brand,
                         const fetchOrdersWithUser = async () => {
                             const ordersWithUser = await Promise.all(
                                 temp.map(async (order) => {
-                                    const userRes = await axiosInstance.get(`${backendUrl}/admin/user/${order.user}`, {
-                                        withCredentials: true
-                                    })
-                                    return {
-                                        ...order,
-                                        user: userRes.data
+                                    try {
+                                        const userRes = await axiosInstance.get(`${backendUrl}/admin/user/${order.user}`, {
+                                            withCredentials: true
+                                        })
+                                        return {
+                                            ...order,
+                                            user: userRes.data
+                                        }    
+                                    } catch (error) {
+                                        return {
+                                            ...order,
+                                            user: null
+                                        }
                                     }
                                 })
                             )
