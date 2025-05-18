@@ -2,7 +2,7 @@ import React from 'react';
 import AccountDetails from './AccountDetails';
 import Order from './Order';
 
-const UserProfileComponent = ({ activeSection, userOrders =[], userCart, page }) => {
+const UserProfileComponent = ({ activeSection, userOrders =[], userCart, page, setUpdateUserOrder, updateUserOrder }) => {
     switch (activeSection) {
         case "orders":
             return (
@@ -11,7 +11,7 @@ const UserProfileComponent = ({ activeSection, userOrders =[], userCart, page })
                 <hr />
                 {Array.isArray(userOrders) && userOrders.length > 0 ? (
                     userOrders.map((dataOrder, index) => (
-                        <Order key={index} indexOrder={index} dataOrder={dataOrder} page={page}/>
+                        <Order key={index} indexOrder={index} dataOrder={dataOrder} page={page} setUpdateUserOrder={setUpdateUserOrder} updateUserOrder={updateUserOrder}/>
                     ))
                 ) : (
                     <p>Không có đơn hàng nào</p>
