@@ -97,9 +97,9 @@ const Home = () => {
       default:
         return (
           <>
+            <AdvertisementCarousel />
             <Sale />
             <RecommendationGrid products={recommendationItems} />
-            <AdvertisementCarousel />
             <Pagination pageName="recommendationPage" setItems={setRecommendationItems} />
           </>
         );
@@ -110,7 +110,7 @@ const Home = () => {
     <div>
       <Header />
       <Navbar onCategoryChange={handleCategoryChange} activeCategory={activeCategory} />
-      <div className="container-fluid py-4">
+      <div className="container-fluid py-4" >
         {renderCategoryComponent()}
       </div>
       <Footer />

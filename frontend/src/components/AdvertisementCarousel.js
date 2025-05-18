@@ -6,27 +6,27 @@ const AdvertisementCarousel = () => {
     const advertisements = [
         {
             id: 1,
-            image: 'https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/3f/4f/3f4fdd417a1ccde2313e75d0724c7fc2.png',
-            title: 'Iphone 16 series',
-            link: '/product/67f63cab2c5de98b7b35c481'
+            image: 'https://th.bing.com/th/id/OIP.ynYm2G8wOXDoji82XyXzvgHaC0?w=2048&h=780&rs=1&pid=ImgDetMain',
+            title: 'Iphone 11',
+            link: '/product/6823580f538e2cf4f4555c77'
         },
         {
             id: 2,
-            image: 'https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/28/5a/285acf24bea6aadbcde301014fb1ce98.png',
-            title: 'Samsung S22',
-            link: '/product/680515042f5b77f60517ad47'
+            image: 'https://static.digit.in/default/all-new-acer-nitro-v-1280-3f9ed033db.jpeg',
+            title: 'Laptop Acer Nitro 5',
+            link: '/product/68294ffc945d84da573fe8ce'
         },
         {
             id: 3,
-            image: 'https://example.com/ad3.jpg',
-            title: 'Advertisement 3',
-            link: '/product/3'
+            image: 'https://i.ytimg.com/vi/yNX3E4qxWtc/maxresdefault.jpg',
+            title: 'Bàn phím cơ',
+            link: '/product/68236a72631e6e1bdec0c57b'
         },
         {
             id: 4,
-            image: 'https://example.com/ad4.jpg',
-            title: 'Advertisement 4',
-            link: '/product/4'
+            image: 'https://bizweb.dktcdn.net/100/329/122/files/banner-509df6e6-3bb1-4f27-ad35-fcfa1a8f6da7.png?v=1624422192810',
+            title: 'Chuột Gaming không dây Logitech',
+            link: '/product/682365ea631e6e1bdec0c4f0'
         }
     ];
 
@@ -57,7 +57,7 @@ const AdvertisementCarousel = () => {
                                     style={{
                                         width: '600px',
                                         height: '180px',
-                                        objectFit: 'cover',
+                                        objectFit: 'contain',
                                         borderRadius: '8px'
                                     }}
                                 />
