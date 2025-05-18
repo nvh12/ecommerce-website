@@ -55,16 +55,22 @@ const Home = () => {
   // Update active category when URL parameter changes
   useEffect(() => {
     const category = categoryType || getCategoryFromPath();
-    if (category) {
+    if (location.pathname === '/') {
+      setActiveCategory(null);
+    } else if (category) {
       setActiveCategory(category);
     }
   }, [categoryType, location.pathname]);
 
   // Handle category change
   const handleCategoryChange = (category) => {
+
     setActiveCategory(category);
-    // Update URL without page reload
+  if (category === null) {
+    navigate('/', {replace: true});
+  } else {
     navigate(`/category/${category}`, { replace: true });
+  }
   };
 
   // Render the appropriate category component based on the activeCategory
