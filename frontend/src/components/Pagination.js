@@ -7,10 +7,9 @@ import { Button } from 'react-bootstrap'
 const Pagination = ({ pageName, setItems, category, brand,
     activeSearchByName, filterUserName,
     updateOrders,
-    updateUserOrder, setPageUserOrder}) => {
+    updateUserOrder, setPageUserOrder,
+    isFilterActive, filterParams}) => {
     const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin, userOrder, setUserOrders } = useContext(AppContext)
-    updateOrders, isFilterActive, filterParams }) => {
-    const { backendUrl, productItems, setProductItems, setUsersForAdmin, setOrdersForAdmin } = useContext(AppContext)
     const [totalPages, setTotalPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const navigate = useNavigate()
