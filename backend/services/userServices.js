@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const { deleteRating } = require('../services/ratingServices');
 const{deleteCommentUser}= require('../services/commentServices');
-const { clearCart } = require('../services/cartServices');
+const { clearCart, getCart } = require('../services/cartServices');
 
 async function getUsers(name = null, page = 1, limit = 20) {
     try {
@@ -48,7 +48,7 @@ async function deleteUser(id) {
         if (userFound) {
             deleteRating(id, "user");
             deleteCommentUser(id);
-            await clearCart(id);
+            if(getCart(id)) await clearCart(id);
         }
         else {
             throw new Error("Chua tim duoc user hoac khong the xoa user")
