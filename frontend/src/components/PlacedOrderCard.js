@@ -12,17 +12,18 @@ const PlacedOrderCard = ({indexOrder, dataOrder, quantity}) => {
           </div>
           <hr />
           <div className='row mb-2'>
+            { dataOrder?.images[0] &&
             <img src={dataOrder.images[0]} alt="" 
             className='col-md-4 col-12'
-            style={{ objectFit: 'cover', borderRadius: '8px'}}/>
+            style={{ objectFit: 'cover', borderRadius: '8px'}}/>}
             <div className='col-md-8 col-12'>
               <div className='row'>
                 <div className='col-auto me-auto'>
-                  <p>{dataOrder.productName}</p>
+                  <p>{dataOrder ? dataOrder.productName : "Sản phẩm này không tồn tại"}</p>
                   <small>Số lượng: {quantity}</small>
                 </div>
                 <div className='col-auto'>
-                  <p>Giá sản phẩm: </p><span>{dataOrder.price.toLocaleString('vi-VN')} {dataOrder.currency}</span>
+                  <p>Giá sản phẩm: </p><span>{dataOrder ? dataOrder.price.toLocaleString('vi-VN') : "..."} {dataOrder?.currency}</span>
                 </div>
               </div>
             </div>

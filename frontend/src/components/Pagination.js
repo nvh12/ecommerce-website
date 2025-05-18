@@ -178,23 +178,24 @@ const Pagination = ({ pageName, setItems, category, brand,
                         withCredentials: true
                     })
                     const temp = res2.data.data
-                    const fetchOrdersWithUser = async () => {
-                        const ordersWithUser = await Promise.all(
-                            temp.map(async (order) => {
-                                const userRes = await axiosInstance.get(`${backendUrl}/admin/user/${order.user}`, {
-                                    withCredentials: true
+                    if(temp) {
+                        const fetchOrdersWithUser = async () => {
+                            const ordersWithUser = await Promise.all(
+                                temp.map(async (order) => {
+                                    const userRes = await axiosInstance.get(`${backendUrl}/admin/user/${order.user}`, {
+                                        withCredentials: true
+                                    })
+                                    return {
+                                        ...order,
+                                        user: userRes.data
+                                    }
                                 })
-                                return {
-                                    ...order,
-                                    user: userRes.data
-                                }
-                            })
-                        )
-                        //console.log("orderwithuser",ordersWithUser)
-                        setOrdersForAdmin(ordersWithUser)
+                            )
+                            //console.log("orderwithuser",ordersWithUser)
+                            setOrdersForAdmin(ordersWithUser)
+                        }
+                        fetchOrdersWithUser()
                     }
-                    fetchOrdersWithUser()
-
                     // setOrdersForAdmin(temp)
                     // console.log(temp)
                 } catch (error) {
