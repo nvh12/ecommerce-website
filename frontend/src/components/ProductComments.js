@@ -181,30 +181,26 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                     productId,
                     replyContent: replyText
                 },
-                { withCredentials: true }
+                { withCredentials: true }   
             );
-
-            if (response.data.message === 'Success') {
+            console.log(response.data)
+            if (response.data.message === 'Tạo phản hồi thành công') {
                 toast.success('Phản hồi đã được thêm thành công');
-                
-                // Fetch lại replies của comment được reply
-                const updatedComment = await fetchCommentReplies(parentCommentId);
-                if (updatedComment) {
-                    setCommentReplies(prev => ({
-                        ...prev,
-                        [parentCommentId]: updatedComment.answer || []
-                    }));
-                }
 
-                // Fetch lại comments để cập nhật mảng answer
-                await fetchComments();
+                // Reset form và ẩn phần nhập reply
+                setReplyText('');
+                setReplyingTo(null);
+                // Fetch lại toàn bộ dữ liệu
+                await Promise.all([
+                    fetchComments(),
+                    fetchTotalPages()
+                ]);
 
                 // Mở rộng comment để hiển thị reply mới
                 setExpandedComments(prev => new Set([...prev, parentCommentId]));
 
-                // Reset form
-                setReplyText('');
-                setReplyingTo(null);
+                // Reset state để render lại toàn bộ component
+                setCommentReplies({});
             }
         } catch (error) {
             console.error('Error adding reply:', error);
