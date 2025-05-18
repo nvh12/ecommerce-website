@@ -25,7 +25,7 @@ const Order = ({indexOrder, dataOrder, page, setUpdateUserOrder, updateUserOrder
                     .then(res => res.data.product[0])
             )
         )
-        console.log("dataList", dataList) //danh sách sản phẩm được mua của 1 đơn 
+        // console.log("dataList", dataList) //danh sách sản phẩm được mua của 1 đơn 
         setOrderDetail(dataList)
          //danh sách sản phẩm được mua của 1 đơn
     }

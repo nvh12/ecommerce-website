@@ -1870,7 +1870,7 @@ const OrderList = ({ backendUrl }) => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Quản Lý Đơn Hàng</h2>
       </div>
-
+      {ordersForAdmin.length > 0 ?
       <Table striped bordered hover responsive className="shadow-sm">
         <thead className="bg-light">
           <tr>
@@ -1987,7 +1987,11 @@ const OrderList = ({ backendUrl }) => {
           ))}
         </tbody>
       </Table>
-
+      :
+      <div className='text-center'>
+        <p>Không có đơn hàng nào</p>
+      </div>
+      }
       <Pagination pageName="ordersForAdmin" updateOrders={updateOrders}/>
     </div>
   );
