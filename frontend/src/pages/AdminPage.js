@@ -310,7 +310,7 @@ const UserList = ({ backendUrl }) => {
       await axiosInstance.put(`${backendUrl}/admin/user/${selectedUser._id}`, selectedUser, config);
       toast.success('Cập nhật thông tin người dùng thành công');
       setShowEditModal(false);
-      fetchUsers();
+      setActiceSearchByName(!activeSearchByName)
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error('Lỗi cập nhật thông tin người dùng');
@@ -328,7 +328,7 @@ const UserList = ({ backendUrl }) => {
         };
         await axiosInstance.delete(`${backendUrl}/admin/user/${userId}`, config);
         toast.success('Đã xóa người dùng thành công');
-        fetchUsers();
+        setActiceSearchByName(!activeSearchByName)
       } catch (error) {
         console.error('Error deleting user:', error);
         toast.error('Lỗi khi xóa người dùng');
