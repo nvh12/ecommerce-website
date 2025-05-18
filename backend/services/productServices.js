@@ -143,7 +143,7 @@ const deleteProduct = async (info) => {
             await deleteRating(objectId, "product")
             await deleteComment(objectId, "product")
             const carts = await Cart.find({ 'items.product': objectId });
-            for (const cart in carts) {
+            for (const cart of carts) {
                 await cartServices.removeItem({ id: prod._id }, cart.user);
             }
         }
