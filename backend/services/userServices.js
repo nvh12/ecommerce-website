@@ -46,8 +46,8 @@ async function deleteUser(id) {
         const objectId = new mongoose.Types.ObjectId(`${id}`);
         const userFound = await User.findByIdAndDelete(objectId);
         if (userFound) {
-            deleteRating(id, "user");
-            deleteCommentUser(id);
+            await deleteRating(id, "user");
+            await deleteCommentUser(id);
             await clearCart(id);
         }
         else {

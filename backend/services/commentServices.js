@@ -196,14 +196,14 @@ const getCommentById = async (commentId) => {
 
 const getProductComment = async (info) => {
     try {
-        let {productId, userId, page = 1, limit= 5} = info
+        let {productId, userId, page = 1, limit = 5} = info
         const skip = (page - 1) * limit;
-        // userId = userId ? userId.toString() : null;
+        userId = userId ? userId.toString() : null;
 
         let userComment = null;
         let comments = [];
 
-        if (page == 1 && userId) {
+        if (page === 1 && userId) {
             // 1. Lấy comment của người dùng (nếu có)
             userComment = await Comment.findOne({
                 product: new mongoose.Types.ObjectId(productId),
@@ -247,7 +247,7 @@ const getProductComment = async (info) => {
 
         const result = allComments.map(comment => ({
             ...comment.toObject(),
-            fromUser: userId ? userId === comment.user._id.toString() : false,
+            fromUser: (userId && comment.user) ? userId === comment.user._id.toString() : false,
         }));
 
         return result;
