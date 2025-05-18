@@ -46,11 +46,11 @@ async function getOrdersByUser(userId, page = 1, limit = 20, sortBy = null, orde
     }
 }
 
-async function getOrderNumber(userId='') {
+async function getOrderNumber(userId = '') {
     try {
         if (userId) {
             const id = new mongoose.Types.ObjectId(`${userId}`);
-            return await Order.countDocuments({user: id});
+            return await Order.countDocuments({ user: id });
         } else {
             return await Order.countDocuments({});
         }
@@ -69,12 +69,14 @@ async function updateOrder(id, updateData) {
         if (updateData.status === 'cancelled' && order.status !== 'cancelled') {
             for (const item of order.items) {
                 const product = await Product.findById(item.product);
-                product.stocks += item.quantity;
-                await product.save();
+                if (product) {
+                    product.stocks += item.quantity;
+                    await product.save();
+                }
             }
         }
         return await Order.findOneAndUpdate(
-            { _id: orderId },         
+            { _id: orderId },
             updateData,
             { new: true, runValidators: true }
         );

@@ -48,7 +48,7 @@ async function deleteUser(id) {
         if (userFound) {
             deleteRating(id, "user");
             deleteCommentUser(id);
-            clearCart(id);
+            await clearCart(id);
         }
         else {
             throw new Error("Chua tim duoc user hoac khong the xoa user")
