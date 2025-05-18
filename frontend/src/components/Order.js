@@ -25,7 +25,7 @@ const Order = ({indexOrder, dataOrder, page, setUpdateUserOrder, updateUserOrder
                     .then(res => res.data.product[0])
             )
         )
-        // console.log("dataList", dataList) //danh sách sản phẩm được mua của 1 đơn 
+        console.log("dataList", dataList) //danh sách sản phẩm được mua của 1 đơn 
         setOrderDetail(dataList)
          //danh sách sản phẩm được mua của 1 đơn
     }
@@ -104,11 +104,19 @@ const Order = ({indexOrder, dataOrder, page, setUpdateUserOrder, updateUserOrder
           <div className='row mb-2'>
               <div className='row'>
                 <div className='col-auto me-auto'>
-                    {orderDetail.map((item, index) => 
+                    {orderDetail.map((item, index) =>
+                      item ? (
                         <div key={index} className='mb-3'>
                           <p className='my-0'>{item.productName}</p>
                           <small className=''>Số lượng: {quantityList[index]}</small>
                         </div>
+                      ) :
+                      (
+                        <div key={index} className='mb-3'>
+                          <p className='my-0'>Sản phẩm này không còn tồn tại</p>
+                          <small className=''>Số lượng: {quantityList[index]}</small>
+                        </div>
+                      )
                     )}
                 </div>
                 <div className='col-auto'>

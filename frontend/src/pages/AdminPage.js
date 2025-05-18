@@ -1848,8 +1848,8 @@ const OrderList = ({ backendUrl }) => {
       setProductData((prev) => ({
         ...prev,
         [productId]: {
-          name: product.productName,
-          price: product.price,
+          name: product ? product.productName : "Sản phẩm này không tồn tại",
+          price: product ? product.price : "...",
         },
       }));
     } catch (err) {
