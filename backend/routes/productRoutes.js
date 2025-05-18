@@ -29,9 +29,9 @@ const router = express.Router();
 //     ratingsAvg
 //Done
 
-router.post('/',upload.array('images'),uploadToCloud, createProductControl);//
+// router.post('/',upload.array('images'),uploadToCloud, createProductControl);//
 
-// router.post('/', verifyUser, verifyRole('admin'),upload.array('images'),uploadToCloud, createProductControl); 
+router.post('/', verifyUser, verifyRole('admin'),upload.array('images'),uploadToCloud, createProductControl); 
 
 
 // Gọi ra brand và category
@@ -50,9 +50,9 @@ router.get('/', findProductControl);  // Tim  kiếm thông qua query, tìm các
 router.get("/:_id", findOneProductControl) // Tìm kiếm duy nhất 1 sản phẩm dựa theo id
 
 router.delete('/:_id', verifyUser, verifyRole('admin'), deleteProductControl);// Xóa sản phẩm theo id
-// router.put('/:_id', verifyUser, verifyRole('admin'), upload.array('images'), uploadToCloud, updateProductControl);// update sản phẩm theo id
+router.put('/:_id', verifyUser, verifyRole('admin'), upload.array('images'), uploadToCloud, updateProductControl);// update sản phẩm theo id
 
-router.put('/:_id',  upload.array('images'), uploadToCloud, updateProductControl);
+// router.put('/:_id',  upload.array('images'), uploadToCloud, updateProductControl);
 
 // Thay đổi các trường như trên get trong bodybody
 
