@@ -19,6 +19,259 @@ const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     </div>
 ));
 
+// Thêm component CommentItem để xử lý comment đệ quy
+const CommentItem = ({ 
+    comment, 
+    userData, 
+    isLoggedIn, 
+    onReply, 
+    onEdit, 
+    onDelete, 
+    onToggleReplies, 
+    expandedComments, 
+    commentReplies,
+    level = 0,
+    backendUrl
+}) => {
+    const [editingComment, setEditingComment] = useState(null);
+    const [editText, setEditText] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyText, setReplyText] = useState('');
+
+    const startEditing = (comment) => {
+        setEditingComment(comment._id);
+        setEditText(comment.context);
+    };
+
+    const cancelEditing = () => {
+        setEditingComment(null);
+        setEditText('');
+    };
+
+    const handleUpdate = async (commentId) => {
+        if (!editText.trim()) {
+            setEditingComment(null);
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.put(
+                `${backendUrl}/comment/update/${commentId}`,
+                { newComment: editText },
+                { withCredentials: true }
+            );
+
+            if (response.data.message === 'Success') {
+                onEdit(commentId, editText);
+                toast.success('Đánh giá đã được cập nhật thành công');
+            }
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            toast.error(error.response?.data?.message || 'Không thể cập nhật đánh giá');
+        } finally {
+            setEditingComment(null);
+        }
+    };
+
+    const handleReply = async (parentCommentId) => {
+        if (!replyText.trim()) {
+            setReplyingTo(null);
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.post(
+                `${backendUrl}/comment/reply`,
+                {
+                    parentCommentId,
+                    productId: comment.productId,
+                    replyContent: replyText
+                },
+                { withCredentials: true }   
+            );
+
+            if (response.data.message === 'Tạo phản hồi thành công') {
+                toast.success('Phản hồi đã được thêm thành công');
+                setReplyText('');
+                setReplyingTo(null);
+                onReply(parentCommentId);
+            }
+        } catch (error) {
+            console.error('Error adding reply:', error);
+            toast.error(error.response?.data?.message || 'Không thể thêm phản hồi');
+        }
+    };
+
+    return (
+        <div className={`comment-item ${level > 0 ? 'ms-4' : ''}`}>
+            {editingComment === comment._id ? (
+                <div>
+                    <Form.Control
+                        as="textarea"
+                        rows={3}
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="mb-2"
+                    />
+                    <div className="d-flex gap-2">
+                        <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => handleUpdate(comment._id)}
+                            disabled={!editText.trim()}
+                        >
+                            Lưu
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={cancelEditing}
+                        >
+                            Hủy
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div>
+                    <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="mb-0 me-2">{comment.user?.name || 'Người dùng ẩn danh'}</h6>
+                                {comment.fromUser && (
+                                    <Badge bg="primary" className="ms-2">Bạn</Badge>
+                                )}
+                            </div>
+                            <p className="mb-1">{comment.context}</p>
+                            <small className="text-muted">
+                                {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Vừa xong'}
+                            </small>
+                        </div>
+                        {(comment.fromUser || userData?._id === comment.user?._id) && (
+                            <div>
+                                <Dropdown align="end">
+                                    <Dropdown.Toggle as={CustomToggle}>
+                                        <Button
+                                            variant="link"
+                                            className="text-dark p-0"
+                                            style={{ backgroundColor: 'transparent', border: 'none' }}
+                                        >
+                                            <BsThreeDotsVertical />
+                                        </Button>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item
+                                            onClick={() => startEditing(comment)}
+                                            className="d-flex align-items-center"
+                                        >
+                                            <BsPencil className="me-2" /> <span className="text-primary">Sửa</span>
+                                        </Dropdown.Item>
+                                        <Dropdown.Item
+                                            onClick={() => onDelete(comment._id)}
+                                            className="d-flex align-items-center"
+                                        >
+                                            <BsTrash className="me-2" /> <span className="text-danger">Xóa</span>
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Replies section */}
+                    {comment.answer && comment.answer.length > 0 && (
+                        <div className="mt-2">
+                            <Button 
+                                variant="link" 
+                                size="sm" 
+                                className="text-muted p-0 d-flex align-items-center"
+                                onClick={() => onToggleReplies(comment._id)}
+                            >
+                                {expandedComments.has(comment._id) ? (
+                                    <>
+                                        <BsChevronUp className="me-1" /> Ẩn phản hồi
+                                    </>
+                                ) : (
+                                    <>
+                                        <BsChevronDown className="me-1" /> Xem {comment.answer.length} phản hồi
+                                    </>
+                                )}
+                            </Button>
+                            
+                            {expandedComments.has(comment._id) && (
+                                <div className="mt-2">
+                                    {commentReplies[comment._id]?.map((reply) => (
+                                        <CommentItem
+                                            key={reply._id}
+                                            comment={reply}
+                                            userData={userData}
+                                            isLoggedIn={isLoggedIn}
+                                            onReply={onReply}
+                                            onEdit={onEdit}
+                                            onDelete={onDelete}
+                                            onToggleReplies={onToggleReplies}
+                                            expandedComments={expandedComments}
+                                            commentReplies={commentReplies}
+                                            level={level + 1}
+                                            backendUrl={backendUrl}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Reply section */}
+                    {isLoggedIn && (
+                        <div className="mt-2">
+                            {replyingTo === comment._id ? (
+                                <div>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        placeholder="Viết phản hồi của bạn..."
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        className="mb-2"
+                                    />
+                                    <div className="d-flex gap-2">
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleReply(comment._id)}
+                                            disabled={!replyText.trim()}
+                                        >
+                                            Gửi phản hồi
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => {
+                                                setReplyingTo(null);
+                                                setReplyText('');
+                                            }}
+                                        >
+                                            Hủy
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    className="text-muted p-0"
+                                    onClick={() => setReplyingTo(comment._id)}
+                                >
+                                    <BsReply className="me-1" /> Phản hồi
+                                </Button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const ProductComments = ({ productId, onCommentAdded }) => {
     const { userData, backendUrl, isLoggedIn } = useContext(AppContext);
     const [comments, setComments] = useState([]);
@@ -47,32 +300,34 @@ const ProductComments = ({ productId, onCommentAdded }) => {
         }
     }, [comments, isLoggedIn, userData]);
 
-    const fetchCommentReplies = async (commentId) => {
+    const loadCommentReplies = async (commentId) => {
         try {
             const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
                 withCredentials: true
             });
+            
             if (response.data.message === "Success" && response.data.foundComment) {
-                return response.data.foundComment;
-            }
-            return null;
-        } catch (error) {
-            console.error('Error fetching comment replies:', error);
-            return null;
-        }
-    };
+                const comment = response.data.foundComment;
+                
+                // Nếu comment có replies, tải tất cả replies
+                if (comment.answer && comment.answer.length > 0) {
+                    const replies = await Promise.all(
+                        comment.answer.map(replyId =>
+                            axiosInstance.get(`${backendUrl}/comment/id/${replyId}`, {
+                                withCredentials: true
+                            }).then(res => res.data.foundComment)
+                        )
+                    );
 
-    const loadCommentReplies = async (commentId) => {
-        if (!commentReplies[commentId]) {
-            const replies = await Promise.all(
-                comments.find(c => c._id === commentId)?.answer.map(replyId =>
-                    fetchCommentReplies(replyId)
-                ) || []
-            );
-            setCommentReplies(prev => ({
-                ...prev,
-                [commentId]: replies.filter(reply => reply !== null)
-            }));
+                    setCommentReplies(prev => ({
+                        ...prev,
+                        [commentId]: replies.filter(reply => reply !== null)
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error('Error loading comment replies:', error);
+            toast.error('Không thể tải phản hồi');
         }
     };
 
@@ -168,82 +423,70 @@ const ProductComments = ({ productId, onCommentAdded }) => {
     };
 
     const handleReply = async (parentCommentId) => {
-        if (!replyText.trim()) {
-            setReplyingTo(null);
-            return;
-        }
+        // Fetch lại toàn bộ dữ liệu
+        await Promise.all([
+            fetchComments(),
+            fetchTotalPages()
+        ]);
 
-        try {
-            const response = await axiosInstance.post(
-                `${backendUrl}/comment/reply`,
-                {
-                    parentCommentId,
-                    productId,
-                    replyContent: replyText
-                },
-                { withCredentials: true }   
-            );
-            console.log(response.data)
-            if (response.data.message === 'Tạo phản hồi thành công') {
-                toast.success('Phản hồi đã được thêm thành công');
+        // Reset state để đảm bảo tải lại toàn bộ dữ liệu
+        setCommentReplies({});
+        setExpandedComments(new Set());
 
-                // Reset form và ẩn phần nhập reply
-                setReplyText('');
-                setReplyingTo(null);
-
-                // Fetch lại toàn bộ dữ liệu
-                await Promise.all([
-                    fetchComments(),
-                    fetchTotalPages()
-                ]);
-
-                // Đóng phần hiển thị replies
-                setExpandedComments(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(parentCommentId);
-                    return newSet;
+        // Tải lại toàn bộ cấu trúc phản hồi
+        const loadCommentStructure = async (commentId) => {
+            try {
+                const response = await axiosInstance.get(`${backendUrl}/comment/id/${commentId}`, {
+                    withCredentials: true
                 });
+                
+                if (response.data.message === "Success" && response.data.foundComment) {
+                    const comment = response.data.foundComment;
+                    
+                    // Mở rộng comment hiện tại
+                    setExpandedComments(prev => new Set([...prev, commentId]));
+                    
+                    // Nếu comment có replies, tải tất cả replies
+                    if (comment.answer && comment.answer.length > 0) {
+                        const replies = [];
+                        for (const replyId of comment.answer) {
+                            const replyResponse = await axiosInstance.get(`${backendUrl}/comment/id/${replyId}`, {
+                                withCredentials: true
+                            });
+                            if (replyResponse.data.foundComment) {
+                                const reply = replyResponse.data.foundComment;
+                                replies.push(reply);
+                                // Mở rộng reply
+                                setExpandedComments(prev => new Set([...prev, replyId]));
+                                // Đệ quy tải replies của reply
+                                await loadCommentStructure(replyId);
+                            }
+                        }
 
-                // Reset state để render lại toàn bộ component
-                setCommentReplies({});
+                        // Cập nhật state với replies
+                        setCommentReplies(prev => ({
+                            ...prev,
+                            [commentId]: replies
+                        }));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading comment structure:', error);
             }
-        } catch (error) {
-            console.error('Error adding reply:', error);
-            toast.error(error.response?.data?.message || 'Không thể thêm phản hồi');
-        }
+        };
+
+        // Chỉ tải lại cấu trúc của comment gốc được reply
+        await loadCommentStructure(parentCommentId);
     };
 
-    const handleUpdate = async (commentId) => {
-        if (!editText.trim()) {
-            setEditingComment(null);
-            return;
-        }
-
-        try {
-            const response = await axiosInstance.put(
-                `${backendUrl}/comment/update/${commentId}`,
-                { newComment: editText },
-                { withCredentials: true }
-            );
-
-            if (response.data.message === 'Success') {
-                // Update the comment in the local state
-                setComments(prevComments =>
-                    prevComments.map(comment =>
-                        comment._id === commentId
-                            ? { ...comment, context: editText }
-                            : comment
-                    )
-                );
-
-                toast.success('Đánh giá đã được cập nhật thành công');
-            }
-        } catch (error) {
-            console.error('Error updating comment:', error);
-            toast.error(error.response?.data?.message || 'Không thể cập nhật đánh giá');
-        } finally {
-            setEditingComment(null);
-        }
+    const handleEdit = (commentId, newText) => {
+        setComments(prevComments =>
+            prevComments.map(comment =>
+                comment._id === commentId
+                    ? { ...comment, context: newText }
+                    : comment
+            )
+        );
     };
 
     const handleDelete = async (commentId) => {
@@ -267,16 +510,6 @@ const ProductComments = ({ productId, onCommentAdded }) => {
             console.error('Error deleting comment:', error);
             toast.error(error.response?.data?.message || 'Không thể xóa đánh giá');
         }
-    };
-
-    const startEditing = (comment) => {
-        setEditingComment(comment._id);
-        setEditText(comment.context);
-    };
-
-    const cancelEditing = () => {
-        setEditingComment(null);
-        setEditText('');
     };
 
     if (isLoading) {
@@ -333,200 +566,18 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                 <ListGroup variant="flush">
                     {comments.filter(comment => !comment.reply).map((comment) => (
                         <ListGroup.Item key={comment._id}>
-                            {editingComment === comment._id ? (
-                                <div>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={editText}
-                                        onChange={(e) => setEditText(e.target.value)}
-                                        className="mb-2"
-                                    />
-                                    <div className="d-flex gap-2">
-                                        <Button
-                                            variant="success"
-                                            size="sm"
-                                            onClick={() => handleUpdate(comment._id)}
-                                            disabled={!editText.trim()}
-                                        >
-                                            Lưu
-                                        </Button>
-                                        <Button
-                                            variant="secondary"
-                                            size="sm"
-                                            onClick={cancelEditing}
-                                        >
-                                            Hủy
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div>
-                                    <div className="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div className="d-flex align-items-center mb-1">
-                                                <h6 className="mb-0 me-2">{comment.user?.name || 'Người dùng ẩn danh'}</h6>
-                                                {comment.fromUser && (
-                                                    <Badge bg="primary" className="ms-2">Bạn</Badge>
-                                                )}
-                                            </div>
-                                            <p className="mb-1">{comment.context}</p>
-                                            <small className="text-muted">
-                                                {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Vừa xong'}
-                                            </small>
-                                        </div>
-                                        {(comment.fromUser || userData?._id === comment.user?._id) && (
-                                            <div>
-                                                <Dropdown align="end">
-                                                    <Dropdown.Toggle as={CustomToggle}>
-                                                        <Button
-                                                            variant="link"
-                                                            className="text-dark p-0"
-                                                            style={{ backgroundColor: 'transparent', border: 'none' }}
-                                                        >
-                                                            <BsThreeDotsVertical />
-                                                        </Button>
-                                                    </Dropdown.Toggle>
-                                                    <Dropdown.Menu>
-                                                        <Dropdown.Item
-                                                            onClick={() => startEditing(comment)}
-                                                            className="d-flex align-items-center"
-                                                        >
-                                                            <BsPencil className="me-2" /> <span className="text-primary">Sửa</span>
-                                                        </Dropdown.Item>
-                                                        <Dropdown.Item
-                                                            onClick={() => handleDelete(comment._id)}
-                                                            className="d-flex align-items-center"
-                                                        >
-                                                            <BsTrash className="me-2" /> <span className="text-danger">Xóa</span>
-                                                        </Dropdown.Item>
-                                                    </Dropdown.Menu>
-                                                </Dropdown>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Replies section */}
-                                    {comment.answer && comment.answer.length > 0 && (
-                                        <div className="mt-2">
-                                            <Button 
-                                                variant="link" 
-                                                size="sm" 
-                                                className="text-muted p-0 d-flex align-items-center"
-                                                onClick={() => toggleReplies(comment._id)}
-                                            >
-                                                {expandedComments.has(comment._id) ? (
-                                                    <>
-                                                        <BsChevronUp className="me-1" /> Ẩn phản hồi
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <BsChevronDown className="me-1" /> Xem {comment.answer.length} phản hồi
-                                                    </>
-                                                )}
-                                            </Button>
-                                            
-                                            {expandedComments.has(comment._id) && (
-                                                <div className="ms-4 mt-2">
-                                                    {commentReplies[comment._id]?.map((reply) => (
-                                                        <div key={`${comment._id}-reply-${reply._id}`} className="border-start ps-3 mb-3 position-relative">
-                                                            <div className="d-flex justify-content-between align-items-start">
-                                                                <div className="flex-grow-1">
-                                                                    <div className="d-flex align-items-center mb-1">
-                                                                        <h6 className="mb-0 me-2">{reply.user?.name || 'Người dùng ẩn danh'}</h6>
-                                                                        {reply.user?._id === userData?._id && (
-                                                                            <Badge bg="primary" className="ms-2">Bạn</Badge>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="mb-1">{reply.context}</p>
-                                                                    <small className="text-muted">
-                                                                        {reply.createdAt ? new Date(reply.createdAt).toLocaleDateString() : 'Vừa xong'}
-                                                                    </small>
-                                                                </div>
-                                                                {(reply.fromUser || userData?._id === reply.user?._id) && (
-                                                                    <div className="ms-2">
-                                                                        <Dropdown align="end">
-                                                                            <Dropdown.Toggle as={CustomToggle}>
-                                                                                <Button 
-                                                                                    variant="link" 
-                                                                                    className="text-dark p-0" 
-                                                                                    style={{ backgroundColor: 'transparent', border: 'none' }}
-                                                                                >
-                                                                                    <BsThreeDotsVertical />
-                                                                                </Button>
-                                                                            </Dropdown.Toggle>
-                                                                            <Dropdown.Menu>
-                                                                                <Dropdown.Item 
-                                                                                    onClick={() => startEditing(reply)}
-                                                                                    className="d-flex align-items-center"
-                                                                                >
-                                                                                    <BsPencil className="me-2" /> <span className="text-primary">Sửa</span>
-                                                                                </Dropdown.Item>
-                                                                                <Dropdown.Item 
-                                                                                    onClick={() => handleDelete(reply._id)}
-                                                                                    className="d-flex align-items-center"
-                                                                                >
-                                                                                    <BsTrash className="me-2" /> <span className="text-danger">Xóa</span>
-                                                                                </Dropdown.Item>
-                                                                            </Dropdown.Menu>
-                                                                        </Dropdown>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {/* Reply section */}
-                                    {isLoggedIn && (
-                                        <div className="mt-2">
-                                            {replyingTo === comment._id ? (
-                                                <div className="ms-4">
-                                                    <Form.Control
-                                                        as="textarea"
-                                                        rows={2}
-                                                        placeholder="Viết phản hồi của bạn..."
-                                                        value={replyText}
-                                                        onChange={(e) => setReplyText(e.target.value)}
-                                                        className="mb-2"
-                                                    />
-                                                    <div className="d-flex gap-2">
-                                                        <Button
-                                                            variant="primary"
-                                                            size="sm"
-                                                            onClick={() => handleReply(comment._id)}
-                                                            disabled={!replyText.trim()}
-                                                        >
-                                                            Gửi phản hồi
-                                                        </Button>
-                                                        <Button
-                                                            variant="secondary"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                setReplyingTo(null);
-                                                                setReplyText('');
-                                                            }}
-                                                        >
-                                                            Hủy
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <Button
-                                                    variant="link"
-                                                    size="sm"
-                                                    className="text-muted p-0"
-                                                    onClick={() => setReplyingTo(comment._id)}
-                                                >
-                                                    <BsReply className="me-1" /> Phản hồi
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <CommentItem
+                                comment={comment}
+                                userData={userData}
+                                isLoggedIn={isLoggedIn}
+                                onReply={handleReply}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onToggleReplies={toggleReplies}
+                                expandedComments={expandedComments}
+                                commentReplies={commentReplies}
+                                backendUrl={backendUrl}
+                            />
                         </ListGroup.Item>
                     ))}
                     {comments.filter(comment => !comment.reply).length === 0 && (
