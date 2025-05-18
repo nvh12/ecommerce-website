@@ -16,7 +16,6 @@ const Sale = () => {
         // const url=${backendUrl}/product/?order=discount&dir=desc;
         const response = await fetch(`${backendUrl}/product/?order=discount&dir=desc&limit=24`);
         const data = await response.json();
-        console.log(data)
         setDiscountedProducts(data.product || []); // Giả sử response có key `products`
       } catch (error) {
         console.error("Lỗi khi tải sản phẩm giảm giá:", error);

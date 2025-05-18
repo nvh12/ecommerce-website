@@ -123,8 +123,6 @@ const Pagination = ({ pageName, setItems, category, brand,
                     })
                     setProductItems(res.data.product)
                     setItems(res.data.product);
-                    console.log(res.data.product)
-                    console.log(currentPage)
                 } catch (error) {
                     console.log(error.message)
                 }
