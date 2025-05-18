@@ -190,14 +190,19 @@ const ProductComments = ({ productId, onCommentAdded }) => {
                 // Reset form và ẩn phần nhập reply
                 setReplyText('');
                 setReplyingTo(null);
+
                 // Fetch lại toàn bộ dữ liệu
                 await Promise.all([
                     fetchComments(),
                     fetchTotalPages()
                 ]);
 
-                // Mở rộng comment để hiển thị reply mới
-                setExpandedComments(prev => new Set([...prev, parentCommentId]));
+                // Đóng phần hiển thị replies
+                setExpandedComments(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(parentCommentId);
+                    return newSet;
+                });
 
                 // Reset state để render lại toàn bộ component
                 setCommentReplies({});
