@@ -60,7 +60,12 @@ const   CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                                 >
                                     <FaMinus size={12} />
                                 </Button>
-                                <span className="mx-3">{item.quantity}</span>
+                                {
+                                    item.quantity > item.product.stocks ? 
+                                    <span className="mx-3">{item.product.stocks}</span>
+                                    :
+                                    <span className="mx-3">{item.quantity}</span>
+                                }
                                 <Button 
                                     variant="outline-secondary" 
                                     size="sm"

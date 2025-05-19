@@ -30,7 +30,7 @@ const ProductDetail = () => {
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const currentIdRef = useRef(id);
-
+    const [checkStock, setCheckStock] = useState(0)
     // Fetch product when component mounts or id changes
     useEffect(() => {
         if (id) {
@@ -112,12 +112,17 @@ const ProductDetail = () => {
         }
 
         try {
-            await axiosInstance.post(`${backendUrl}/cart/add`, {
-                id: product._id,
-                price: product.price
-            }, { withCredentials: true });
+            if(checkStock < product.stocks) {
+                const {data} = await axiosInstance.post(`${backendUrl}/cart/add`, {
+                    id: product._id,
+                    price: product.price
+                }, { withCredentials: true });
+                setCheckStock(prev => prev + 1)
 
-            toast.success("Đã thêm vào giỏ hàng");
+                toast.success("Đã thêm vào giỏ hàng");
+            } else {
+                toast.error("Không đủ số lượng")
+            }
         } catch (error) {
             toast.error("Không thể thêm vào giỏ hàng");
         }
@@ -278,7 +283,7 @@ const ProductDetail = () => {
                                 <Button
                                     variant="danger"
                                     size="lg"
-                                    disabled={product.stocks <= 0}
+                                    disabled={product.stocks <= 0 }
                                     onClick={handleAddToCart}
                                 >
                                     <FaShoppingCart className="me-2" />
