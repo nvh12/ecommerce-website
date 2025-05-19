@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 
-const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
+const   CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     return (
         <Card className="mb-3 cart-item">
             <Card.Body>
@@ -65,6 +65,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                                     variant="outline-secondary" 
                                     size="sm"
                                     onClick={onIncrease}
+                                    disabled={item.quantity === item.product.stocks}
                                 >
                                     <FaPlus size={12} />
                                 </Button>
